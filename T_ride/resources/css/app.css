@@ -59,6 +59,10 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    --color-tride-yellow: var(--tride-yellow);
+    --color-tride-dark: var(--tride-dark);
+    --color-tride-card: var(--tride-card);
 }
 
 :root {
@@ -95,6 +99,9 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+    --tride-yellow: #F8B803;
+    --tride-dark: #0F0F0F;
+    --tride-card: #1A1A1A;
 }
 
 .dark {
