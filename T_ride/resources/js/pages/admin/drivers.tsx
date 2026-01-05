@@ -1,0 +1,189 @@
+import { AdminLayout } from "@/layouts/admin-layout"
+import { Search, Filter, Plus, Eye, Edit, MoreVertical, Star, Car, Bike, Truck, FileText } from "lucide-react"
+
+export default function DriversPage() {
+  return (
+    <AdminLayout
+      title="Driver Management"
+      description="Manage drivers, couriers, and delivery partners"
+      actions={
+        <div className="flex items-center gap-3">
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                <input 
+                    type="text" 
+                    placeholder="Search..." 
+                    className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+                />
+            </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-colors">
+            <Filter size={18} />
+            Filter
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-sm font-medium transition-colors shadow-lg shadow-blue-600/20">
+            <Plus size={18} />
+            Add Driver
+          </button>
+        </div>
+      }
+    >
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatsCard label="Total Drivers" value="2,458" trend="+6.2%" trendUp={true} icon={<Car size={24} />} />
+        <StatsCard label="Online Now" value="856" trend="+12.5%" trendUp={true} icon={<div className="w-6 h-6 rounded-full border-2 border-green-500 relative flex items-center justify-center"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div></div>} />
+        <StatsCard label="Pending Docs" value="45" trend="-5.1%" trendUp={false} icon={<FileText size={24} />} />
+        <StatsCard label="Avg Rating" value="4.7" trend="+0.2" trendUp={true} icon={<Star size={24} />} />
+      </div>
+
+      {/* Main Content Area */}
+      <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+        {/* Tabs */}
+        <div className="flex items-center gap-1 p-2 border-b border-white/5 overflow-x-auto">
+          <TabButton label="All Drivers" active />
+          <TabButton label="Ride Drivers" />
+          <TabButton label="Couriers" />
+          <TabButton label="Delivery" />
+          <TabButton label="Pending Approval" />
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                <th className="px-6 py-4 font-medium">Driver</th>
+                <th className="px-6 py-4 font-medium">Type</th>
+                <th className="px-6 py-4 font-medium">Vehicle</th>
+                <th className="px-6 py-4 font-medium">Trips</th>
+                <th className="px-6 py-4 font-medium">Rating</th>
+                <th className="px-6 py-4 font-medium">Status</th>
+                <th className="px-6 py-4 font-medium">Documents</th>
+                <th className="px-6 py-4 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+                <DriverRow 
+                    name="Driver 1" 
+                    id="DRV-1001" 
+                    type="Courier" 
+                    vehicle="Toyota Camry" 
+                    trips="79" 
+                    rating="4.8" 
+                    status="Online" 
+                    docs="Valid" 
+                />
+                <DriverRow 
+                    name="Driver 2" 
+                    id="DRV-1002" 
+                    type="Delivery" 
+                    vehicle="Toyota Camry" 
+                    trips="132" 
+                    rating="5.0" 
+                    status="Online" 
+                    docs="Valid" 
+                />
+                 <DriverRow 
+                    name="Driver 3" 
+                    id="DRV-1003" 
+                    type="Ride" 
+                    vehicle="Toyota Camry" 
+                    trips="120" 
+                    rating="4.6" 
+                    status="Online" 
+                    docs="Expired" 
+                />
+                 <DriverRow 
+                    name="Driver 4" 
+                    id="DRV-1004" 
+                    type="Courier" 
+                    vehicle="Toyota Camry" 
+                    trips="393" 
+                    rating="4.8" 
+                    status="Offline" 
+                    docs="Valid" 
+                />
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </AdminLayout>
+  )
+}
+
+function StatsCard({ label, value, trend, trendUp, icon }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode }) {
+    return (
+        <div className="bg-white/5 border border-white/5 p-6 rounded-3xl flex items-start justify-between">
+            <div>
+                <p className="text-white/50 text-sm font-medium mb-1">{label}</p>
+                <div className="text-3xl font-bold mb-2">{value}</div>
+                <div className={`text-sm font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
+                    <span className="text-lg">{trendUp ? '↗' : '↘'}</span> {trend}
+                </div>
+            </div>
+            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white">
+                {icon}
+            </div>
+        </div>
+    )
+}
+
+function TabButton({ label, active }: { label: string, active?: boolean }) {
+    return (
+        <button className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${active ? 'bg-white text-black' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+            {label}
+        </button>
+    )
+}
+
+function DriverRow({ name, id, type, vehicle, trips, rating, status, docs }: any) {
+    return (
+        <tr className="hover:bg-white/5 transition-colors group">
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-lg font-bold">
+                        {name.charAt(0)}
+                    </div>
+                    <div>
+                        <div className="font-bold">{name}</div>
+                        <div className="text-xs text-white/50">{id}</div>
+                    </div>
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium">
+                    {type}
+                </span>
+            </td>
+            <td className="px-6 py-4 text-sm text-white/70">{vehicle}</td>
+            <td className="px-6 py-4 font-mono text-sm">{trips}</td>
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
+                    <Star size={14} fill="currentColor" /> {rating}
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${status === 'Online' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20' : 'bg-white/5 text-white/50 border border-white/10'}`}>
+                    {status}
+                </span>
+            </td>
+            <td className="px-6 py-4">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${docs === 'Valid' ? 'bg-green-500/20 text-green-400 border border-green-500/20' : 'bg-red-500/20 text-red-400 border border-red-500/20'}`}>
+                    {docs}
+                </span>
+            </td>
+            <td className="px-6 py-4 text-right">
+                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors">
+                        <Eye size={16} />
+                    </button>
+                    <button className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors">
+                        <Edit size={16} />
+                    </button>
+                    <button className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors">
+                        <MoreVertical size={16} />
+                    </button>
+                </div>
+            </td>
+        </tr>
+    )
+}
