@@ -1,5 +1,6 @@
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Search, Filter, Calendar, Eye, CarFront, CheckCircle, Activity, XCircle, DollarSign, MapPin } from "lucide-react"
+import { Button, IconButton } from "@/components/ui/button"
 
 export default function RidesPage() {
   return (
@@ -8,14 +9,14 @@ export default function RidesPage() {
       description="Monitor and manage all rides"
       actions={
         <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-colors">
+            <Button variant="secondary">
                 <Calendar size={18} />
                 Date Range
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-colors">
+            </Button>
+            <Button variant="secondary">
                 <Filter size={18} />
                 Filter
-            </button>
+            </Button>
         </div>
       }
     >
@@ -215,9 +216,9 @@ function RideRow({ id, rider, driver, from, to, fare, payment, status }: any) {
                 </span>
             </td>
             <td className="px-6 py-4 text-right">
-                <button className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors">
+                <IconButton tooltip="View">
                     <Eye size={16} />
-                </button>
+                </IconButton>
             </td>
         </tr>
     )

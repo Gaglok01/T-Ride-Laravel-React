@@ -15,6 +15,13 @@ export default function AdminOTP() {
   const [email, setEmail] = useState("")
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (authService.isAuthenticated()) {
+      router.visit("/admin")
+    }
+  }, [])
+
   // Get email from sessionStorage
   useEffect(() => {
     const storedEmail = sessionStorage.getItem("adminEmail")
@@ -123,10 +130,12 @@ export default function AdminOTP() {
     setError("")
 
     try {
+      const res=
       await authService.verifyOtp({
         identifier: email,
         otp: otpString
       })
+      console.log("res", res)
       
       sessionStorage.removeItem("adminEmail")
       

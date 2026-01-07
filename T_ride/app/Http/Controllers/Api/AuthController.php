@@ -22,7 +22,6 @@ class AuthController extends Controller
             'email'        => 'required|email|unique:users',
             'phone_number' => 'required|unique:users',
             'password'     => 'required|min:6',
-            'role_id'      => 'required|exists:roles,id'
         ]);
 
         $user = User::create([
@@ -32,7 +31,12 @@ class AuthController extends Controller
             'password'     => bcrypt($request->password),
         ]);
 
-        $role = Role::find($request->role_id);
+        $roleName = $request->input('role', 'admin');
+        $role = Role::where('name', $roleName)->first();
+        
+        if (!$role) {
+             $role = Role::create(['name' => $roleName]);
+        }
 
         $user->assignRole($role);
 

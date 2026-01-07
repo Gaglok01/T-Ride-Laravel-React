@@ -1,5 +1,6 @@
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Search, Filter, Plus, Eye, Edit, MoreVertical, Download, Users, UserCheck, UserX, TrendingUp } from "lucide-react"
+import { Button, IconButton } from "@/components/ui/button"
 
 export default function UsersPage() {
   return (
@@ -16,18 +17,18 @@ export default function UsersPage() {
                     className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
                 />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-colors">
+            <Button variant="secondary">
                 <Filter size={18} />
                 Filter
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-colors">
+            </Button>
+            <Button variant="secondary">
                 <Download size={18} />
                 Export
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-sm font-medium transition-colors shadow-lg shadow-blue-600/20">
+            </Button>
+            <Button>
                 <Plus size={18} />
                 Add User
-            </button>
+            </Button>
         </div>
       }
     >
@@ -172,15 +173,15 @@ function UserRow({ name, email, phone, rides, wallet, status, joined }: any) {
             <td className="px-6 py-4 text-sm text-white/70">{joined}</td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors">
+                    <IconButton tooltip="View">
                         <Eye size={16} />
-                    </button>
-                    <button className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors">
+                    </IconButton>
+                    <IconButton tooltip="Edit">
                         <Edit size={16} />
-                    </button>
-                    <button className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors">
+                    </IconButton>
+                    <IconButton tooltip="More">
                         <MoreVertical size={16} />
-                    </button>
+                    </IconButton>
                 </div>
             </td>
         </tr>

@@ -24,7 +24,32 @@ export interface OtpResponse {
     message: string;
 }
 
+export interface RegisterRequest {
+    name: string;
+    email: string;
+    phone_number: string;
+    password: string;
+    role?: string;
+}
+
 class AuthService {
+    /**
+     * Register a new user
+     */
+    async register(data: RegisterRequest): Promise<AuthResponse> {
+        const response = await axiosInstance.post<AuthResponse>('/register', data);
+        
+        // Store token and user data if registration is successful (auto-login usually)
+        if (response.data.token) {
+            localStorage.setItem('auth_token', response.data.token);
+        }
+        if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+        
+        return response.data;
+    }
+
     /**
      * Send OTP to user's email or phone
      */

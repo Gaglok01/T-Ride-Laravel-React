@@ -14,6 +14,10 @@ Route::get('/admin/login', function () {
     return Inertia::render('admin/login');
 })->name('admin.login');
 
+Route::get('/admin/register', function () {
+    return Inertia::render('admin/register');
+})->name('admin.register');
+
 Route::get('/admin/otp', function () {
     return Inertia::render('admin/otp');
 })->name('admin.otp');
@@ -33,6 +37,10 @@ Route::get('/admin/users', function () {
 Route::get('/admin/rides', function () {
     return Inertia::render('admin/rides');
 })->name('admin.rides');
+
+Route::get('/admin/roles', function () {
+    return Inertia::render('admin/roles');
+})->name('admin.roles');
 
 Route::get('/admin/vendors', function () {
     return Inertia::render('admin/vendors');
