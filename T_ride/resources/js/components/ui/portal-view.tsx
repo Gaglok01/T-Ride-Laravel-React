@@ -39,10 +39,6 @@ export function PortalView({ onSelectAdmin }: PortalViewProps) {
             isPrimary
           />
         </div>
-
-        <footer className="pt-12 text-sm font-semibold opacity-80">
-          T-RIDE System Wireframe v1.0 • Yellow/Black Theme
-        </footer>
       </div>
     </div>
   )

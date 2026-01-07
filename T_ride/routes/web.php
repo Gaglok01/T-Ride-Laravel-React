@@ -10,6 +10,14 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/admin/login', function () {
+    return Inertia::render('admin/login');
+})->name('admin.login');
+
+Route::get('/admin/otp', function () {
+    return Inertia::render('admin/otp');
+})->name('admin.otp');
+
 Route::get('/admin', function () {
     return Inertia::render('admin');
 })->name('admin');
