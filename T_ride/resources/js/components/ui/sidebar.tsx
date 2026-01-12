@@ -28,6 +28,7 @@ export function Sidebar({ onLogout }: { onLogout: () => void }) {
         <NavItem href="/admin/drivers" icon={<Users size={20} />} label="Drivers" active={isActive("/admin/drivers")} />
         <NavItem href="/admin/rides" icon={<Car size={20} />} label="Riders" active={isActive("/admin/rides")} />
         <NavItem href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
+        <NavItem href="/admin/types" icon={<Car size={20} />} label="Types" active={isActive("/admin/types")} />
         <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
       </nav>
 

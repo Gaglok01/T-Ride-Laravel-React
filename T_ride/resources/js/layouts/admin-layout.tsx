@@ -44,7 +44,7 @@ export function AdminLayout({ children, title, description, actions }: AdminLayo
 
   const handleLogout = () => {
     authService.logout()
-    router.visit("/")
+    router.visit("/admin/login")
   }
 
   const getInitials = (name: string) => {

@@ -50,6 +50,10 @@ Route::get('/admin/settings', function () {
     return Inertia::render('admin/settings');
 })->name('admin.settings');
 
+Route::get('/admin/types', function () {
+    return Inertia::render('admin/types');
+})->name('admin.types');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

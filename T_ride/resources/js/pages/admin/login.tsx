@@ -7,13 +7,6 @@ import authService from "@/services/authService"
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("")
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (authService.isAuthenticated()) {
-      router.visit("/admin")
-    }
-  }, [])
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)

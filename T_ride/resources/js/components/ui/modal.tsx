@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { X } from "lucide-react"
 
 export interface ModalProps {
@@ -209,6 +209,7 @@ interface ModalInputProps {
   placeholder?: string
   type?: string
   required?: boolean
+  icon?: React.ReactNode
 }
 
 export function ModalInput({
@@ -217,7 +218,8 @@ export function ModalInput({
   onChange,
   placeholder,
   type = "text",
-  required = false
+  required = false,
+  icon
 }: ModalInputProps) {
   return (
     <div className="space-y-2">
@@ -225,13 +227,120 @@ export function ModalInput({
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-4 py-3 bg-tride-dark border border-white/10 rounded-xl text-white focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-gray-600"
-      />
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+            {icon}
+          </div>
+        )}
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={`w-full bg-tride-dark border border-white/10 rounded-xl text-white focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-gray-600 ${
+            icon ? "pl-11 pr-4 py-3" : "px-4 py-3"
+          }`}
+        />
+      </div>
+    </div>
+  )
+}
+
+// Custom Select Field Component for Modals
+interface ModalSelectProps {
+  label: string
+  value: string | number
+  onChange: (value: string) => void
+  options: { label: string; value: string | number }[]
+  placeholder?: string
+  required?: boolean
+  icon?: React.ReactNode
+}
+
+export function ModalSelect({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder = "Select an option",
+  required = false,
+  icon
+}: ModalSelectProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const selectedOption = options.find(opt => opt.value.toString() === value.toString())
+
+  return (
+    <div className="space-y-2" ref={dropdownRef}>
+      <label className="text-sm font-medium text-gray-300">
+        {label}
+        {required && <span className="text-red-400 ml-1">*</span>}
+      </label>
+      <div className="relative">
+        {/* Trigger Button */}
+        <div 
+            onClick={() => setIsOpen(!isOpen)}
+            className={`w-full bg-tride-dark border ${isOpen ? 'border-tride-yellow ring-1 ring-tride-yellow' : 'border-white/10'} rounded-xl text-white cursor-pointer transition-all hover:border-white/30 flex items-center justify-between ${
+                icon ? "pl-11 pr-4 py-3" : "px-4 py-3"
+            }`}
+        >
+            {icon && (
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                    {icon}
+                </div>
+            )}
+            
+            <span className={selectedOption ? "text-white" : "text-gray-500"}>
+                {selectedOption ? selectedOption.label : placeholder}
+            </span>
+
+            <div className={`transition-transform duration-200 text-gray-500 ${isOpen ? 'rotate-180' : ''}`}>
+                 <svg className="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+        </div>
+
+        {/* Dropdown Menu */}
+        {isOpen && (
+            <div className="absolute z-50 w-full mt-2 bg-[#1C1C1E] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto custom-scrollbar">
+                {options.length > 0 ? (
+                    options.map((option) => (
+                        <div 
+                            key={option.value} 
+                            onClick={() => {
+                                onChange(option.value.toString())
+                                setIsOpen(false)
+                            }}
+                            className={`px-4 py-3 text-sm cursor-pointer transition-colors flex items-center justify-between group ${
+                                option.value.toString() === value.toString() 
+                                ? 'bg-tride-yellow/10 text-tride-yellow' 
+                                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                            }`}
+                        >
+                            <span>{option.label}</span>
+                            {option.value.toString() === value.toString() && (
+                                <div className="w-2 h-2 rounded-full bg-tride-yellow"></div>
+                            )}
+                        </div>
+                    ))
+                ) : (
+                    <div className="px-4 py-3 text-sm text-gray-500 text-center">No options available</div>
+                )}
+            </div>
+        )}
+      </div>
     </div>
   )
 }
