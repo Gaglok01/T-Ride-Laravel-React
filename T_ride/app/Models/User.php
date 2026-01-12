@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'phone_number',
         'photo',
+        'driver_id',
         'status'
     ];
 
