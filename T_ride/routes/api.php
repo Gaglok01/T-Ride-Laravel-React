@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\VendorController;
+use App\Http\Controllers\Api\RentController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -69,6 +70,14 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/vendors/{id}', [VendorController::class, 'update']);
         Route::patch('/vendors/{id}/status', [VendorController::class, 'toggleStatus']);
         Route::delete('/vendors/{id}', [VendorController::class, 'destroy']);
+
+        // Rent Management
+        Route::get('/fleet-vehicles', [RentController::class, 'vehicleIndex']);
+        Route::post('/fleet-vehicles', [RentController::class, 'vehicleStore']);
+        Route::get('/active-rentals', [RentController::class, 'activeRentals']); 
+        Route::get('/rent-payments', [RentController::class, 'payments']);
+        Route::get('/contracts', [RentController::class, 'allContracts']);
+        Route::get('/maintenance', [RentController::class, 'maintenanceIndex']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
