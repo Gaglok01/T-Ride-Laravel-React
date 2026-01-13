@@ -1,0 +1,18 @@
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Vendor extends Model
+{
+    protected $fillable = [
+        'name', 'address', 'logo', 'category_id',
+        'total_orders', 'total_revenue', 'rating', 
+        'commission_rate', 'status', 'is_open'
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+}

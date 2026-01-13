@@ -6,15 +6,16 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\TypeController;
 use App\Http\Controllers\Api\OrderController;
-
 use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\UserManagementController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\VendorController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
     Route::prefix('admin')->middleware('role:admin')->group(function () {
         // Role Management
         Route::get('/roles', [RoleController::class, 'index']);
@@ -44,5 +45,32 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::put('/orders/{id}', [OrderController::class, 'update']);
         Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+
+        // User Management
+        Route::get('/users', [UserManagementController::class, 'index']);
+        Route::post('/users', [UserManagementController::class, 'store']);
+        Route::get('/users/{id}', [UserManagementController::class, 'show']);
+        Route::post('/users/{id}', [UserManagementController::class, 'update']); 
+        Route::delete('/users/{id}', [UserManagementController::class, 'destroy']);
+        Route::patch('/users/{id}/status', [UserManagementController::class, 'toggleStatus']);
+
+        // Category Management
+        Route::get('/categories', [CategoryController::class, 'index']);
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::put('/categories/{id}', [CategoryController::class, 'update']);
+        Route::get('/categories/{id}', [CategoryController::class, 'show']);
+        Route::patch('/categories/{id}/status', [CategoryController::class, 'toggleStatus']);
+        Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+        // Vendor Management
+        Route::get('/vendors', [VendorController::class, 'index']);
+        Route::post('/vendors', [VendorController::class, 'store']);
+        Route::get('/vendors/{id}', [VendorController::class, 'show']);
+        Route::put('/vendors/{id}', [VendorController::class, 'update']);
+        Route::patch('/vendors/{id}/status', [VendorController::class, 'toggleStatus']);
+        Route::delete('/vendors/{id}', [VendorController::class, 'destroy']);
     });
+
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
+    
