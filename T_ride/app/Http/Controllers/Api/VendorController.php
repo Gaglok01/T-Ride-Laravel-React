@@ -38,7 +38,7 @@ class VendorController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'commission_rate' => 'required|numeric|min:0|max:100',
-            'logo' => 'nullable|string', 
+            'logo' => 'nullable|file|image|max:2048', 
         ]);
 
         if ($validator->fails()) {

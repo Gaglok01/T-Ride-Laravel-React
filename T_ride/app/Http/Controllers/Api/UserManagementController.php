@@ -27,7 +27,7 @@ class UserManagementController extends Controller
         ];
 
         // Table Query
-        $query = User::query()->withCount('rides');
+        $query = User::query();
 
         // Search Logic
         if ($request->has('search') && !empty($request->search)) {
@@ -42,6 +42,15 @@ class UserManagementController extends Controller
         // Filter Logic (Status)
         if ($request->has('status') && $request->status != 'All') {
             $query->where('status', $request->status);
+        }
+
+        // Check for export (all records)
+        if ($request->has('all')) {
+            $users = $query->orderBy('created_at', 'desc')->get();
+            return response()->json([
+                'status' => true,
+                'data' => $users
+            ]);
         }
 
         // Pagination

@@ -1,128 +1,309 @@
+import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Search, Plus, Eye, Edit, Store, CheckCircle, Clock, DollarSign, Star } from "lucide-react"
+import { Search, Plus, Eye, Edit, Store, CheckCircle, Clock, DollarSign, Star, Trash2 } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
+import { VendorModal } from "@/components/admin/VendorModal"
+import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
+import axios from "@/lib/axios"
+
+interface Category {
+    id: number
+    name: string
+}
+
+interface Vendor {
+    id: number
+    name: string
+    address: string
+    category_id: number
+    category?: Category
+    logo?: string
+    commission_rate: number
+    status: number // Assuming strictly 1 from controller, but maybe used later
+    is_open: boolean
+    total_orders: number
+    total_revenue: number
+    rating: number
+    created_at?: string
+}
 
 export default function VendorsPage() {
-  return (
-    <AdminLayout
-      title="Vendor Management"
-      description="Restaurants, shops, and stores"
-      actions={
-        <div className="flex items-center gap-3">
-            <Button>
-                <Plus size={18} />
-                Add Vendor
-            </Button>
-        </div>
-      }
-    >
-      {/* Tabs */}
-        <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-2">
-          <TabButton label="All Vendors" active />
-          <TabButton label="Restaurants" />
-          <TabButton label="Shops" />
-          <TabButton label="Grocery" />
-          <TabButton label="Pharmacy" />
-          <TabButton label="Pending" />
-        </div>
+    const [vendors, setVendors] = useState<Vendor[]>([])
+    const [categories, setCategories] = useState<Category[]>([])
+    const [loading, setLoading] = useState(true)
+    const [searchTerm, setSearchTerm] = useState("")
+    const [selectedCategory, setSelectedCategory] = useState<number | "All">("All")
+    
+    // Modal states
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editingVendor, setEditingVendor] = useState<Vendor | null>(null)
+    
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [vendorToDelete, setVendorToDelete] = useState<Vendor | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatsCard 
-            label="Total Vendors" 
-            value="1,234" 
-            trend="+8.2%" 
-            trendUp={true} 
-            icon={<Store size={24} className="text-blue-500" />} 
-            iconBg="bg-blue-500/10"
-        />
-        <StatsCard 
-            label="Active" 
-            value="1,089" 
-            trend="+5.1%" 
-            trendUp={true} 
-            icon={<CheckCircle size={24} className="text-blue-500" />} // Design uses Blue check
-            iconBg="bg-blue-500/10"
-        />
-        <StatsCard 
-            label="Pending" 
-            value="45" 
-            trend="+12.5%" 
-            trendUp={true} 
-            icon={<Clock size={24} className="text-blue-500" />} 
-            iconBg="bg-blue-500/10"
-        />
-        <StatsCard 
-            label="Total Revenue" 
-            value="$234,560" 
-            trend="+15.8%" 
-            trendUp={true} 
-            icon={<DollarSign size={24} className="text-blue-500" />} 
-            iconBg="bg-blue-500/10"
-        />
-      </div>
+    useEffect(() => {
+        fetchInitialData()
+    }, [])
 
-      {/* Main Content Area */}
-      <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+    const fetchInitialData = async () => {
+        setLoading(true)
+        try {
+            const [vendorsRes, categoriesRes] = await Promise.all([
+                axios.get("/admin/vendors"),
+                axios.get("/admin/categories")
+            ])
+
+            if (vendorsRes.data.status) {
+                setVendors(vendorsRes.data.data)
+            }
+            if (categoriesRes.data.status) {
+                setCategories(categoriesRes.data.data)
+            }
+        } catch (error) {
+            console.error("Failed to fetch data:", error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const fetchVendors = async () => {
+        try {
+            const response = await axios.get("/admin/vendors")
+            if (response.data.status) {
+                setVendors(response.data.data)
+            }
+        } catch (error) {
+            console.error("Failed to fetch vendors:", error)
+        }
+    }
+
+    const handleSaveVendor = async (formData: FormData) => {
+        try {
+            if (editingVendor) {
+                // Update
+                await axios.post(`/admin/vendors/${editingVendor.id}`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+            } else {
+                // Create
+                await axios.post("/admin/vendors", formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+            }
+            fetchVendors()
+            setIsModalOpen(false)
+            setEditingVendor(null)
+        } catch (error) {
+            console.error("Failed to save vendor:", error)
+            throw error 
+        }
+    }
+
+    const confirmDelete = (vendor: Vendor) => {
+        setVendorToDelete(vendor)
+        setIsDeleteModalOpen(true)
+    }
+
+    const handleDeleteVendor = async () => {
+        if (!vendorToDelete) return
         
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/5 text-left text-white/40 text-sm">
-                <th className="px-6 py-4 font-medium">Vendor</th>
-                <th className="px-6 py-4 font-medium">Category</th>
-                <th className="px-6 py-4 font-medium">Orders</th>
-                <th className="px-6 py-4 font-medium">Revenue</th>
-                <th className="px-6 py-4 font-medium">Rating</th>
-                <th className="px-6 py-4 font-medium">Commission</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-                <VendorRow 
-                    name="Vendor 1" 
-                    address="123 Main St"
-                    category="Grocery"
-                    orders="143"
-                    revenue="$6873.54"
-                    rating="4.5"
-                    commission="11%"
+        try {
+            setIsDeleting(true)
+            await axios.delete(`/admin/vendors/${vendorToDelete.id}`)
+            fetchVendors()
+            setIsDeleteModalOpen(false)
+            setVendorToDelete(null)
+        } catch (error) {
+            console.error("Failed to delete vendor:", error)
+            alert("Failed to delete vendor. Please try again.")
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
+    const handleToggleStatus = async (vendor: Vendor) => {
+        try {
+            await axios.patch(`/admin/vendors/${vendor.id}/status`)
+            fetchVendors()
+        } catch (error) {
+            console.error("Failed to toggle status:", error)
+        }
+    }
+
+    const openCreateModal = () => {
+        setEditingVendor(null)
+        setIsModalOpen(true)
+    }
+
+    const openEditModal = (vendor: Vendor) => {
+        setEditingVendor(vendor)
+        setIsModalOpen(true)
+    }
+
+    // filtering logic
+    const filteredVendors = vendors.filter(vendor => {
+        const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesCategory = selectedCategory === "All" || vendor.category_id === selectedCategory
+        return matchesSearch && matchesCategory
+    })
+
+    // Stats Calculation
+    const totalVendors = vendors.length
+    const activeVendors = vendors.filter(v => v.is_open).length
+    // Assuming 'status' isn't explicitly 'pending' in the current controller logic (it defaults to 1), 
+    // but maybe we can just show closed vendors or something else. 
+    // For now, let's just count 'closed' as 'inactive' or similar if we want.
+    // The mockup had "Pending", but controller sets is_open=true, status=1 on create.
+    // We'll calculate Total Orders and Revenue from the data.
+    const totalRevenue = vendors.reduce((acc, v) => acc + Number(v.total_revenue || 0), 0)
+    
+    return (
+        <AdminLayout
+            title="Vendor Management"
+            description="Restaurants, shops, and stores"
+            actions={
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <input 
+                            type="text" 
+                            placeholder="Search vendors..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+                        />
+                    </div>
+                    <Button onClick={openCreateModal}>
+                        <Plus size={18} />
+                        Add Vendor
+                    </Button>
+                </div>
+            }
+        >
+            {/* Tabs */}
+            <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                <TabButton 
+                    label="All Vendors" 
+                    active={selectedCategory === "All"} 
+                    onClick={() => setSelectedCategory("All")}
                 />
-                <VendorRow 
-                    name="Vendor 2" 
-                    address="123 Main St"
-                    category="Pharmacy"
-                    orders="743"
-                    revenue="$8637.31"
-                    rating="4.0"
-                    commission="12%"
+                {categories.map(category => (
+                    <TabButton 
+                        key={category.id} 
+                        label={category.name} 
+                        active={selectedCategory === category.id} 
+                        onClick={() => setSelectedCategory(category.id)}
+                    />
+                ))}
+            </div>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <StatsCard 
+                    label="Total Vendors" 
+                    value={totalVendors.toString()} 
+                    trend="-" 
+                    trendUp={true} 
+                    icon={<Store size={24} className="text-blue-500" />} 
+                    iconBg="bg-blue-500/10"
                 />
-                <VendorRow 
-                    name="Vendor 3" 
-                    address="123 Main St"
-                    category="Shop"
-                    orders="871"
-                    revenue="$7822.46"
-                    rating="4.3"
-                    commission="13%"
+                <StatsCard 
+                    label="Active" 
+                    value={activeVendors.toString()} 
+                    trend={`${totalVendors > 0 ? ((activeVendors / totalVendors) * 100).toFixed(1) : 0}%`}
+                    trendUp={true} 
+                    icon={<CheckCircle size={24} className="text-green-500" />} 
+                    iconBg="bg-green-500/10"
                 />
-                <VendorRow 
-                    name="Vendor 4" 
-                    address="123 Main St"
-                    category="Restaurant"
-                    orders="443"
-                    revenue="$7738.77"
-                    rating="4.1"
-                    commission="14%"
+                <StatsCard 
+                    label="Closed" 
+                    value={(totalVendors - activeVendors).toString()} 
+                    trend="-"
+                    trendUp={false} 
+                    icon={<Clock size={24} className="text-orange-500" />} 
+                    iconBg="bg-orange-500/10"
                 />
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </AdminLayout>
-  )
+                <StatsCard 
+                    label="Total Revenue" 
+                    value={`$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} 
+                    trend="-"
+                    trendUp={true} 
+                    icon={<DollarSign size={24} className="text-tride-yellow" />} 
+                    iconBg="bg-yellow-500/10"
+                />
+            </div>
+
+            {/* Main Content Area */}
+            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+                
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                <th className="px-6 py-4 font-medium">Vendor</th>
+                                <th className="px-6 py-4 font-medium">Category</th>
+                                <th className="px-6 py-4 font-medium">Orders</th>
+                                <th className="px-6 py-4 font-medium">Revenue</th>
+                                <th className="px-6 py-4 font-medium">Rating</th>
+                                <th className="px-6 py-4 font-medium">Commission</th>
+                                <th className="px-6 py-4 font-medium">Status</th>
+                                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={8} className="text-center py-8 text-white/50">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <div className="animate-spin h-5 w-5 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
+                                            Loading vendors...
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : filteredVendors.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="text-center py-8 text-white/50">
+                                        No vendors found.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredVendors.map(vendor => (
+                                    <VendorRow 
+                                        key={vendor.id} 
+                                        vendor={vendor}
+                                        onEdit={() => openEditModal(vendor)}
+                                        onDelete={() => confirmDelete(vendor)}
+                                        onToggleStatus={() => handleToggleStatus(vendor)}
+                                    />
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <VendorModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSaveVendor}
+                initialData={editingVendor}
+                categories={categories}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteVendor}
+                title="Delete Vendor"
+                description="Are you sure you want to permanently delete this vendor?"
+                itemName={vendorToDelete?.name}
+                isLoading={isDeleting}
+            />
+        </AdminLayout>
+    )
 }
 
 function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg: string }) {
@@ -142,46 +323,63 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
     )
 }
 
-function VendorRow({ name, address, category, orders, revenue, rating, commission }: any) {
+interface VendorRowProps {
+    vendor: Vendor
+    onEdit: () => void
+    onDelete: () => void
+    onToggleStatus: () => void
+}
+
+function VendorRow({ vendor, onEdit, onDelete, onToggleStatus }: VendorRowProps) {
     return (
         <tr className="hover:bg-white/5 transition-colors group">
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-lg font-bold">
-                        {/* Placeholder Icon or First Letter */}
-                        <Store size={18} className="text-white/50" />
+                    <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-lg font-bold overflow-hidden">
+                        {vendor.logo ? (
+                            <img src={`/storage/${vendor.logo}`} alt={vendor.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <Store size={18} className="text-white/50" />
+                        )}
                     </div>
                     <div>
-                        <div className="font-bold">{name}</div>
-                        <div className="text-xs text-white/50">{address}</div>
+                        <div className="font-bold">{vendor.name}</div>
+                        <div className="text-xs text-white/50">{vendor.address}</div>
                     </div>
                 </div>
             </td>
             <td className="px-6 py-4">
                 <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium text-white/70">
-                    {category}
+                    {vendor.category?.name || "Uncategorized"}
                 </span>
             </td>
-            <td className="px-6 py-4 font-mono text-sm">{orders}</td>
-            <td className="px-6 py-4 font-mono text-sm">{revenue}</td>
+            <td className="px-6 py-4 font-mono text-sm">{vendor.total_orders || 0}</td>
+            <td className="px-6 py-4 font-mono text-sm">${Number(vendor.total_revenue || 0).toFixed(2)}</td>
             <td className="px-6 py-4">
                 <div className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
-                    <Star size={14} fill="currentColor" /> {rating}
+                    <Star size={14} fill="currentColor" /> {Number(vendor.rating || 0).toFixed(1)}
                 </div>
             </td>
-            <td className="px-6 py-4 text-white/70">{commission}</td>
+            <td className="px-6 py-4 text-white/70">{vendor.commission_rate}%</td>
             <td className="px-6 py-4">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-lg shadow-blue-600/20">
-                    Open
-                </span>
+                <button
+                    onClick={onToggleStatus}
+                    className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg transition-all ${
+                        vendor.is_open 
+                            ? 'bg-blue-600 text-white shadow-blue-600/20 hover:bg-blue-500' 
+                            : 'bg-red-500/20 text-red-400 shadow-none border border-red-500/20 hover:bg-red-500/30'
+                    }`}
+                >
+                    {vendor.is_open ? 'Open' : 'Closed'}
+                </button>
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <IconButton tooltip="View">
-                        <Eye size={16} />
-                    </IconButton>
-                    <IconButton tooltip="Edit">
+                    <IconButton tooltip="Edit" onClick={onEdit}>
                         <Edit size={16} />
+                    </IconButton>
+                    <IconButton tooltip="Delete" variant="danger" onClick={onDelete}>
+                        <Trash2 size={16} />
                     </IconButton>
                 </div>
             </td>
@@ -189,9 +387,16 @@ function VendorRow({ name, address, category, orders, revenue, rating, commissio
     )
 }
 
-function TabButton({ label, active }: { label: string, active?: boolean }) {
+function TabButton({ label, active, onClick }: { label: string, active?: boolean, onClick?: () => void }) {
     return (
-        <button className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${active ? 'bg-white text-black' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+        <button 
+            onClick={onClick}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                active 
+                    ? 'bg-white text-black' 
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+            }`}
+        >
             {label}
         </button>
     )

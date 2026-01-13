@@ -58,6 +58,10 @@ Route::get('/admin/types', function () {
     return Inertia::render('admin/types');
 })->name('admin.types');
 
+Route::get('/admin/categories', function () {
+    return Inertia::render('admin/categories');
+})->name('admin.categories');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
