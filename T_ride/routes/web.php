@@ -46,6 +46,10 @@ Route::get('/admin/vendors', function () {
     return Inertia::render('admin/vendors');
 })->name('admin.vendors');
 
+Route::get('/admin/orders', function () {
+    return Inertia::render('admin/courier-orders');
+})->name('admin.orders');
+
 Route::get('/admin/settings', function () {
     return Inertia::render('admin/settings');
 })->name('admin.settings');

@@ -4,6 +4,7 @@ import { Search, Filter, Plus, Eye, Edit, MoreVertical, Star, Car, Bike, Truck, 
 import { Button, IconButton } from "@/components/ui/button"
 import { DriverModal } from "@/components/admin/DriverModal"
 import axios from "@/lib/axios"
+import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
 
 interface Driver {
   id: number
@@ -39,6 +40,11 @@ export default function DriversPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -94,15 +100,25 @@ export default function DriversPage() {
     }
   }
 
-  const handleDeleteDriver = async (id: number) => {
-      if (!window.confirm("Are you sure you want to delete this driver?")) return
+  const confirmDelete = (driver: Driver) => {
+    setDriverToDelete(driver)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteDriver = async () => {
+      if (!driverToDelete) return
       
       try {
-          await axios.delete(`/admin/drivers/${id}`)
+          setIsDeleting(true)
+          await axios.delete(`/admin/drivers/${driverToDelete.id}`)
           fetchData()
+          setIsDeleteModalOpen(false)
+          setDriverToDelete(null)
       } catch (error) {
           console.error("Failed to delete driver:", error)
           alert("Failed to delete driver. Please try again.")
+      } finally {
+          setIsDeleting(false)
       }
   }
 
@@ -198,7 +214,7 @@ export default function DriversPage() {
                             key={driver.id} 
                             driver={driver} 
                             onEdit={() => openEditModal(driver)} 
-                            onDelete={() => handleDeleteDriver(driver.id)}
+                            onDelete={() => confirmDelete(driver)}
                         />
                     ))
                 )}
@@ -213,6 +229,16 @@ export default function DriversPage() {
         onSave={handleSaveDriver}
         types={types}
         initialData={editingDriver}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteDriver}
+        title="Delete Driver"
+        description="Are you sure you want to permanently delete this driver account?"
+        itemName={driverToDelete?.name}
+        isLoading={isDeleting}
       />
     </AdminLayout>
   )

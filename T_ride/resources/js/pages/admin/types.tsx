@@ -4,6 +4,7 @@ import { Search, Plus, Edit2, Trash2, Car, Info } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import { TypeModal } from "@/components/admin/TypeModal"
 import axios from "@/lib/axios"
+import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
 
 interface Type {
   id: number
@@ -18,6 +19,11 @@ export default function TypesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingType, setEditingType] = useState<Type | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [typeToDelete, setTypeToDelete] = useState<Type | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchTypes()
@@ -41,8 +47,6 @@ export default function TypesPage() {
     try {
       if (editingType) {
         // Update
-        // Convert FormData to JSON object for PUT request if preferred, or use _method=PUT
-        // Simple approach: standard PUT with JSON usually
         await axios.put(`/admin/types/${editingType.id}`, {
             type_name: formData.get("type_name")
         })
@@ -51,21 +55,33 @@ export default function TypesPage() {
         await axios.post("/admin/types", formData)
       }
       fetchTypes()
+      setIsModalOpen(false)
+       setEditingType(null)
     } catch (error) {
       console.error("Failed to save type:", error)
       throw error // Re-throw to be caught by modal
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this type?")) return
+  const confirmDelete = (type: Type) => {
+    setTypeToDelete(type)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteType = async () => {
+    if (!typeToDelete) return
 
     try {
-      await axios.delete(`/admin/types/${id}`)
+      setIsDeleting(true)
+      await axios.delete(`/admin/types/${typeToDelete.id}`)
       fetchTypes()
+      setIsDeleteModalOpen(false)
+      setTypeToDelete(null)
     } catch (error) {
       console.error("Failed to delete type:", error)
       alert("Failed to delete type")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -120,7 +136,7 @@ export default function TypesPage() {
                     <IconButton tooltip="Edit Type" onClick={() => openEditModal(type)}>
                     <Edit2 size={16} />
                     </IconButton>
-                    <IconButton variant="danger" tooltip="Delete Type" onClick={() => handleDelete(type.id)}>
+                    <IconButton variant="danger" tooltip="Delete Type" onClick={() => confirmDelete(type)}>
                     <Trash2 size={16} />
                     </IconButton>
                 </div>
@@ -158,6 +174,16 @@ export default function TypesPage() {
         onClose={() => setIsModalOpen(false)} 
         onSave={handleSave}
         initialData={editingType}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteType}
+        title="Delete Vehicle Type"
+        description="Are you sure you want to permanently delete this vehicle type? This may affect drivers assigned to this type."
+        itemName={typeToDelete?.type_name}
+        isLoading={isDeleting}
       />
     </AdminLayout>
   )
