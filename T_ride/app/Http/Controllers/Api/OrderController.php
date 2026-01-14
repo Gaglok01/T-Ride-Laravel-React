@@ -10,10 +10,16 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $orders = Order::latest()->get();
+            $query = Order::query();
+
+            if ($request->has('status') && $request->status !== 'All Orders') {
+                $query->where('status', $request->status);
+            }
+
+            $orders = $query->latest()->get();
 
             return response()->json([
                 'success' => true,
@@ -72,7 +78,7 @@ class OrderController extends Controller
     public function show($id)
     {
         try {
-            $order = Order::with('type')->findOrFail($id);
+            $order = Order::findOrFail($id);
 
             return response()->json([
                 'success' => true,

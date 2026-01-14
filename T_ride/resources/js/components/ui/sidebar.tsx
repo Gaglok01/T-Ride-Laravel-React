@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket } from "lucide-react"
 
 export function Sidebar({ onLogout }: { onLogout: () => void }) {
   const { url } = usePage()
@@ -24,13 +24,16 @@ export function Sidebar({ onLogout }: { onLogout: () => void }) {
       <nav className="flex-1 space-y-2">
         <NavItem href="/admin" icon={<LayoutGrid size={20} />} label="Dashboard" active={isActive("/admin")} />
         <NavItem href="/admin/users" icon={<Users size={20} />} label="User Management" active={isActive("/admin/users")} />
-        <NavItem href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
         <NavItem href="/admin/drivers" icon={<Users size={20} />} label="Drivers" active={isActive("/admin/drivers")} />
-        <NavItem href="/admin/rides" icon={<Car size={20} />} label="Riders" active={isActive("/admin/rides")} />
-        <NavItem href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
-        <NavItem href="/admin/types" icon={<Car size={20} />} label="Types" active={isActive("/admin/types")} />
-        <NavItem href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
+        <NavItem href="/admin/rides" icon={<Car size={20} />} label="Rides" active={isActive("/admin/rides")} />
         <NavItem href="/admin/orders" icon={<Package size={20} />} label="Courier Orders" active={isActive("/admin/orders")} />
+        <NavItem href="/admin/delivery-orders" icon={<ShoppingBag size={20} />} label="Delivery Orders" active={isActive("/admin/delivery-orders")} />
+        <NavItem href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
+        <NavItem href="/admin/rents" icon={<Key size={20} />} label="Rent Management" active={isActive("/admin/rents")} />
+        <NavItem href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
+        <NavItem href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
+        <NavItem href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
+        <NavItem href="/admin/types" icon={<Car size={20} />} label="Types" active={isActive("/admin/types")} />
         <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
       </nav>
 

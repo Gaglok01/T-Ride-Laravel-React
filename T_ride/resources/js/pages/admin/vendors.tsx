@@ -183,19 +183,23 @@ export default function VendorsPage() {
             }
         >
             {/* Tabs */}
-            <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-                <TabButton 
-                    label="All Vendors" 
-                    active={selectedCategory === "All"} 
+            <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit overflow-x-auto scrollbar-hide max-w-full">
+                <Button 
+                    variant={selectedCategory === "All" ? "secondary" : "ghost"}
+                    className={selectedCategory === "All" ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
                     onClick={() => setSelectedCategory("All")}
-                />
+                >
+                    All Vendors
+                </Button>
                 {categories.map(category => (
-                    <TabButton 
+                    <Button 
                         key={category.id} 
-                        label={category.name} 
-                        active={selectedCategory === category.id} 
+                        variant={selectedCategory === category.id ? "secondary" : "ghost"}
+                        className={selectedCategory === category.id ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
                         onClick={() => setSelectedCategory(category.id)}
-                    />
+                    >
+                        {category.name}
+                    </Button>
                 ))}
             </div>
 
@@ -387,17 +391,4 @@ function VendorRow({ vendor, onEdit, onDelete, onToggleStatus }: VendorRowProps)
     )
 }
 
-function TabButton({ label, active, onClick }: { label: string, active?: boolean, onClick?: () => void }) {
-    return (
-        <button 
-            onClick={onClick}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-                active 
-                    ? 'bg-white text-black' 
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-            }`}
-        >
-            {label}
-        </button>
-    )
-}
+

@@ -109,7 +109,7 @@ class DriverController extends Controller
     public function show($id)
     {
         try {
-            $driver = Driver::with('type')->findOrFail($id);
+            $driver = Driver::with(['type', 'user'])->findOrFail($id);
 
             return response()->json([
                 'success' => true,

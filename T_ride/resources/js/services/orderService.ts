@@ -36,8 +36,8 @@ class OrderService {
     /**
      * Get all orders
      */
-    async getAll(): Promise<Order[]> {
-        const response = await axiosInstance.get('/admin/orders');
+    async getAll(params?: any): Promise<Order[]> {
+        const response = await axiosInstance.get('/admin/orders', { params });
         return response.data.data; 
     }
 

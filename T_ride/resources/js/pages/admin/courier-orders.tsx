@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Search, Filter, Plus, Package, CheckCircle, Activity, DollarSign, Eye, Edit, Trash2 } from "lucide-react"
+import { Link } from "@inertiajs/react"
 import { Button, IconButton } from "@/components/ui/button"
 import orderService, { Order, CreateOrderRequest } from "@/services/orderService"
 import { OrderModal } from "@/components/admin/OrderModal"
@@ -17,15 +18,21 @@ export default function CourierOrdersPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [activeTab, setActiveTab] = useState("All Orders")
 
     useEffect(() => {
         fetchOrders()
-    }, [])
+    }, [activeTab])
 
     const fetchOrders = async () => {
         try {
             setLoading(true)
-            const data = await orderService.getAll()
+            const params: any = {}
+            if (activeTab !== "All Orders") {
+                params.status = activeTab
+            }
+            
+            const data = await orderService.getAll(params)
             setOrders(data)
         } catch (error) {
             console.error("Failed to fetch orders", error)
@@ -160,12 +167,17 @@ export default function CourierOrdersPage() {
             {/* Main Content Area */}
             <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
                  {/* Tabs (Optional placeholder for consistency) */}
-                <div className="flex items-center gap-1 p-2 border-b border-white/5 overflow-x-auto">
-                    <TabButton label="All Orders" active />
-                    <TabButton label="Pending" />
-                    <TabButton label="In Transit" />
-                    <TabButton label="Delivered" />
-                    <TabButton label="Cancelled" />
+                <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit">
+                    {["All Orders", "Pending", "In Transit", "Delivered", "Cancelled"].map((tab) => (
+                        <Button
+                            key={tab}
+                            variant={activeTab === tab ? "secondary" : "ghost"}
+                            className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                            onClick={() => setActiveTab(tab)}
+                        >
+                            {tab}
+                        </Button>
+                    ))}
                 </div>
 
                 <div className="overflow-x-auto">
@@ -248,13 +260,7 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBaseColor }: { labe
     )
 }
 
-function TabButton({ label, active }: { label: string, active?: boolean }) {
-    return (
-        <button className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${active ? 'bg-white text-black' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-            {label}
-        </button>
-    )
-}
+
 
 function OrderRow({ order, onEdit, onDelete }: { order: Order, onEdit: () => void, onDelete: () => void }) {
     let statusStyles = ""
@@ -285,9 +291,11 @@ function OrderRow({ order, onEdit, onDelete }: { order: Order, onEdit: () => voi
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <IconButton tooltip="View">
-                        <Eye size={16} />
-                    </IconButton>
+                    <Link href={`/admin/orders/${order.id}`}>
+                        <IconButton tooltip="View">
+                            <Eye size={16} />
+                        </IconButton>
+                    </Link>
                     <IconButton tooltip="Edit" onClick={onEdit}>
                         <Edit size={16} />
                     </IconButton>

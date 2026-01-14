@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Search, Filter, Plus, Eye, Edit, MoreVertical, Star, Car, Bike, Truck, FileText, Router, Trash2 } from "lucide-react"
+import { Link } from "@inertiajs/react"
 import { Button, IconButton } from "@/components/ui/button"
 import { DriverModal } from "@/components/admin/DriverModal"
 import axios from "@/lib/axios"
@@ -45,6 +46,7 @@ export default function DriversPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [activeTab, setActiveTab] = useState("All Drivers")
 
   useEffect(() => {
     fetchData()
@@ -175,13 +177,17 @@ export default function DriversPage() {
       {/* Main Content Area */}
       <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
         {/* Tabs */}
-        <div className="flex items-center gap-1 p-2 border-b border-white/5 overflow-x-auto">
-          <TabButton label="All Drivers" active />
-          {/* We can implement filtering logic for tabs later */}
-          <TabButton label="Ride Drivers" />
-          <TabButton label="Couriers" />
-          <TabButton label="Delivery" />
-          <TabButton label="Pending Approval" />
+        <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit">
+            {["All Drivers", "Ride Drivers", "Couriers", "Delivery", "Pending Approval"].map((tab) => (
+                <Button
+                    key={tab}
+                    variant={activeTab === tab ? "secondary" : "ghost"}
+                    className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                    onClick={() => setActiveTab(tab)}
+                >
+                    {tab}
+                </Button>
+            ))}
         </div>
 
         {/* Table */}
@@ -261,13 +267,7 @@ function StatsCard({ label, value, trend, trendUp, icon }: { label: string, valu
     )
 }
 
-function TabButton({ label, active }: { label: string, active?: boolean }) {
-    return (
-        <button className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${active ? 'bg-white text-black' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-            {label}
-        </button>
-    )
-}
+
 
 function DriverRow({ driver, onEdit, onDelete }: { driver: Driver, onEdit: () => void, onDelete: () => void }) {
     return (
@@ -319,9 +319,11 @@ function DriverRow({ driver, onEdit, onDelete }: { driver: Driver, onEdit: () =>
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <IconButton tooltip="View">
-                        <Eye size={16} />
-                    </IconButton>
+                    <Link href={`/admin/drivers/${driver.id}`}>
+                        <IconButton tooltip="View">
+                            <Eye size={16} />
+                        </IconButton>
+                    </Link>
                     <IconButton tooltip="Edit" onClick={onEdit}>
                         <Edit size={16} />
                     </IconButton>

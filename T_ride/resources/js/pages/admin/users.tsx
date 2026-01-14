@@ -7,6 +7,7 @@ import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationMo
 import axios from "@/lib/axios"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import { Link } from "@inertiajs/react"
 
 interface User {
     id: number
@@ -604,9 +605,11 @@ function UserRow({ user, onEdit, onDelete, onToggleStatus, formatDate, formatWal
             <td className="px-6 py-4 text-sm text-white/70">{formatDate(user.created_at)}</td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <IconButton tooltip="View">
-                        <Eye size={16} />
-                    </IconButton>
+                    <Link href={`/admin/users/${user.id}`}>
+                        <IconButton tooltip="View">
+                            <Eye size={16} />
+                        </IconButton>
+                    </Link>
                     <IconButton tooltip="Edit" onClick={onEdit}>
                         <Edit size={16} />
                     </IconButton>

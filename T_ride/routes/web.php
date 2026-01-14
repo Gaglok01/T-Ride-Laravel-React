@@ -50,6 +50,10 @@ Route::get('/admin/orders', function () {
     return Inertia::render('admin/courier-orders');
 })->name('admin.orders');
 
+Route::get('/admin/orders/{id}', function ($id) {
+    return Inertia::render('admin/view-courier-order', ['id' => $id]);
+})->name('admin.view-courier-order');
+
 Route::get('/admin/settings', function () {
     return Inertia::render('admin/settings');
 })->name('admin.settings');
@@ -61,6 +65,26 @@ Route::get('/admin/types', function () {
 Route::get('/admin/categories', function () {
     return Inertia::render('admin/categories');
 })->name('admin.categories');
+
+Route::get('/admin/delivery-orders', function () {
+    return Inertia::render('admin/delivery-orders');
+})->name('admin.delivery-orders');
+
+Route::get('/admin/rents', function () {
+    return Inertia::render('admin/rents');
+})->name('admin.rents');
+
+Route::get('/admin/promotions', function () {
+    return Inertia::render('admin/promotions');
+})->name('admin.promotions');
+
+Route::get('/admin/users/{id}', function ($id) {
+    return Inertia::render('admin/view-user', ['id' => $id]);
+})->name('admin.view-user');
+
+Route::get('/admin/drivers/{id}', function ($id) {
+    return Inertia::render('admin/view-driver', ['id' => $id]);
+})->name('admin.view-driver');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
