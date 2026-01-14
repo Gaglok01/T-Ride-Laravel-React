@@ -12,4 +12,9 @@ class Category extends Model
     {
         return $this->hasMany(Vendor::class);
     }
+
+    public function deliveryOrders()
+    {
+        return $this->hasMany(DeliveryOrder::class, 'category_id');
+    }
 }

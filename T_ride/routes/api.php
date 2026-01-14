@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\RentController;
+use App\Http\Controllers\Api\RideController;
+use App\Http\Controllers\Api\PromotionController;
+use App\Http\Controllers\Api\DeliveryOrderController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -32,11 +35,11 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/types/{id}', [TypeController::class, 'show']);
         Route::put('/types/{id}', [TypeController::class, 'update']);
         Route::delete('/types/{id}', [TypeController::class, 'destroy']);
-    
+
         // Driver Management
         Route::get('/drivers', [DriverController::class, 'index']);
         Route::post('/drivers', [DriverController::class, 'store']);
-        Route::get('/drivers/{id}', [DriverController::class, 'show']);   
+        Route::get('/drivers/{id}', [DriverController::class, 'show']);
         Route::put('/drivers/{id}', [DriverController::class, 'update']);
         Route::delete('/drivers/{id}', [DriverController::class, 'destroy']);
 
@@ -51,7 +54,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/users', [UserManagementController::class, 'index']);
         Route::post('/users', [UserManagementController::class, 'store']);
         Route::get('/users/{id}', [UserManagementController::class, 'show']);
-        Route::put('/users/{id}', [UserManagementController::class, 'update']); 
+        Route::put('/users/{id}', [UserManagementController::class, 'update']);
         Route::delete('/users/{id}', [UserManagementController::class, 'destroy']);
         Route::patch('/users/{id}/status', [UserManagementController::class, 'toggleStatus']);
 
@@ -74,12 +77,30 @@ Route::middleware('auth:api')->group(function () {
         // Rent Management
         Route::get('/fleet-vehicles', [RentController::class, 'vehicleIndex']);
         Route::post('/fleet-vehicles', [RentController::class, 'vehicleStore']);
-        Route::get('/active-rentals', [RentController::class, 'activeRentals']); 
+        Route::get('/active-rentals', [RentController::class, 'activeRentals']);
         Route::get('/rent-payments', [RentController::class, 'payments']);
         Route::get('/contracts', [RentController::class, 'allContracts']);
         Route::get('/maintenance', [RentController::class, 'maintenanceIndex']);
+
+        // Promotion Management
+        Route::get('/promotions/stats', [PromotionController::class, 'getStats']);
+        Route::get('/promotions', [PromotionController::class, 'index']);
+        Route::post('/promotions', [PromotionController::class, 'store']);
+        Route::get('/promotions/{id}', [PromotionController::class, 'show']);
+        Route::put('/promotions/{id}', [PromotionController::class, 'update']);
+        Route::patch('/promotions/{id}/status', [PromotionController::class, 'toggleStatus']);
+        Route::delete('/promotions/{id}', [PromotionController::class, 'destroy']);
+
+        // Ride Management
+        Route::get('/rides/stats', [RideController::class, 'getStats']);
+        Route::get('/rides', [RideController::class, 'index']);
+        Route::put('/rides/{id}/status', [RideController::class, 'updateStatus']);
+
+        // Delivery Order Management
+        Route::get('/delivery-orders/stats', [DeliveryOrderController::class, 'getStats']);
+        Route::get('/delivery-orders', [DeliveryOrderController::class, 'index']);
+        Route::get('/delivery-orders/{id}', [DeliveryOrderController::class, 'show']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
-    

@@ -56,4 +56,19 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class, 'driver_id');
+    }
+
+    public function deliveryOrders()
+    {
+        return $this->hasMany(DeliveryOrder::class, 'customer_id');
+    }
+
+    public function rides()
+    {
+        return $this->hasMany(Ride::class, 'rider_id');
+    }
 }

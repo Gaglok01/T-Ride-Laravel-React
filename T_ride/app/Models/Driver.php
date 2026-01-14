@@ -51,4 +51,14 @@ class Driver extends Model
 
         return null;
     }
+
+    public function rides()
+    {
+        return $this->hasMany(Ride::class, 'driver_id');
+    }
+
+    public function deliveryOrders()
+    {
+        return $this->hasMany(DeliveryOrder::class, 'driver_id');
+    }
 }
