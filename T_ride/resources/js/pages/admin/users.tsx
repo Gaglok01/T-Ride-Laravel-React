@@ -4,6 +4,9 @@ import { Search, Filter, Plus, Eye, Edit, Trash2, Download, Users, UserCheck, Us
 import { Button, IconButton } from "@/components/ui/button"
 import { UserModal } from "@/components/admin/UserModal"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
+import { StatusUpdateModal } from "@/components/admin/StatusUpdateModal"
+import { ModalInput, ModalSelect } from "@/components/ui/modal"
+import { Check, X } from "lucide-react"
 import axios from "@/lib/axios"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
@@ -17,6 +20,7 @@ interface User {
     status: string
     wallet_balance?: number
     photo?: string
+    roles?: { name: string }[]
     rides_count?: number
     created_at?: string
 }
@@ -41,25 +45,37 @@ export default function UsersPage() {
     const [stats, setStats] = useState<Stats | null>(null)
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState("")
-    const [statusFilter, setStatusFilter] = useState("All")
+    
+    // Tabs & Filters
+    const [activeTab, setActiveTab] = useState("All Users")
+    const [showFilters, setShowFilters] = useState(false)
+    const [appliedFilters, setAppliedFilters] = useState({
+        status: "All"
+    })
+    const [tempFilters, setTempFilters] = useState({
+        status: "All"
+    })
     const [pagination, setPagination] = useState<Pagination | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
 
-    // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<User | null>(null)
+    
+    // Status Update Modal
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+    const [userToUpdateStatus, setUserToUpdateStatus] = useState<User | null>(null)
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
     
     // Delete Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [userToDelete, setUserToDelete] = useState<User | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
 
-    // Filter dropdown state
-    const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+    // Filter dropdown state replaced by new logic
 
     useEffect(() => {
         fetchUsers()
-    }, [currentPage, statusFilter])
+    }, [currentPage, activeTab, appliedFilters])
 
     const fetchUsers = async (search?: string) => {
         try {
@@ -68,8 +84,13 @@ export default function UsersPage() {
             if (search || searchTerm) {
                 params.search = search ?? searchTerm
             }
-            if (statusFilter !== "All") {
-                params.status = statusFilter.toLowerCase()
+            // Filter by Status (from Filter Panel)
+            if (appliedFilters.status !== "All") {
+                params.status = appliedFilters.status.toLowerCase()
+            }
+            // Filter by Role (from Tabs)
+            if (activeTab !== "All Users") {
+                params.role = activeTab.toLowerCase() // "rider" or "customer"
             }
 
             const response = await axios.get("/admin/users", { params })
@@ -146,13 +167,37 @@ export default function UsersPage() {
         }
     }
 
-    const handleToggleStatus = async (user: User) => {
+    const openStatusModal = (user: User) => {
+        setUserToUpdateStatus(user)
+        setIsStatusModalOpen(true)
+    }
+
+    const handleUpdateStatus = async (newStatus: string) => {
+        if (!userToUpdateStatus) return
         try {
-            await axios.patch(`/admin/users/${user.id}/status`)
+            setIsUpdatingStatus(true)
+            await axios.patch(`/admin/users/${userToUpdateStatus.id}/status`, {
+                status: newStatus
+            })
             fetchUsers()
+            setIsStatusModalOpen(false)
+            setUserToUpdateStatus(null)
         } catch (error) {
-            console.error("Failed to toggle status:", error)
+            console.error("Failed to update status:", error)
+        } finally {
+            setIsUpdatingStatus(false)
         }
+    }
+
+    const clearFilters = () => {
+        setAppliedFilters({ status: "All" })
+        setTempFilters({ status: "All" })
+        setShowFilters(false)
+    }
+
+    const applyFilters = () => {
+        setAppliedFilters(tempFilters)
+        setShowFilters(false)
     }
 
     const [isExporting, setIsExporting] = useState(false)
@@ -319,29 +364,63 @@ export default function UsersPage() {
                         />
                     </div>
                     <div className="relative">
-                        <Button variant="secondary" onClick={() => setShowFilterDropdown(!showFilterDropdown)}>
+                        <Button 
+                            variant={showFilters ? "primary" : "secondary"} 
+                            onClick={() => {
+                                if (!showFilters) setTempFilters(appliedFilters)
+                                setShowFilters(!showFilters)
+                            }}
+                        >
                             <Filter size={18} />
-                            Filter {statusFilter !== "All" && `(${statusFilter})`}
+                            Filter
                         </Button>
-                        {showFilterDropdown && (
-                            <div className="absolute right-0 mt-2 w-48 bg-[#1C1C1E] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95">
-                                {["All", "Active", "Suspended", "Inactive", "Pending"].map((status) => (
-                                    <button
-                                        key={status}
-                                        onClick={() => {
-                                            setStatusFilter(status)
-                                            setCurrentPage(1)
-                                            setShowFilterDropdown(false)
-                                        }}
-                                        className={`w-full px-4 py-3 text-left text-sm transition-colors ${
-                                            statusFilter === status 
-                                                ? "bg-tride-yellow/10 text-tride-yellow" 
-                                                : "text-gray-300 hover:bg-white/5 hover:text-white"
-                                        }`}
-                                    >
-                                        {status}
-                                    </button>
-                                ))}
+                        
+                        {/* Filter Dropdown Panel */}
+                        {showFilters && (
+                            <div className="absolute right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="space-y-5">
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                        <h3 className="font-semibold text-white">Filter Users</h3>
+                                        <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
+                                            <span className="sr-only">Close</span>
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <ModalSelect
+                                            label="Status"
+                                            value={tempFilters.status}
+                                            onChange={(val) => setTempFilters({...tempFilters, status: val})}
+                                            options={[
+                                                { label: "All Statuses", value: "All" },
+                                                { label: "Active", value: "Active" },
+                                                { label: "Suspended", value: "Suspended" },
+                                                { label: "Inactive", value: "Inactive" },
+                                                { label: "Pending", value: "Pending" }
+                                            ]}
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 grid grid-cols-2 gap-3">
+                                        <Button 
+                                            onClick={clearFilters}
+                                            variant="secondary"
+                                            className="w-full justify-center"
+                                        >
+                                            <X size={16} />
+                                            Clear
+                                        </Button>
+                                        <Button 
+                                            onClick={applyFilters} 
+                                            variant="default"
+                                            className="w-full justify-center"
+                                        >
+                                            <Check size={16} />
+                                            Apply
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -411,12 +490,30 @@ export default function UsersPage() {
 
             {/* Main Content Area */}
             <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+                {/* Tabs */}
+                <div className="flex gap-1 p-4 border-b border-white/5">
+                    {["All Users", "Rider", "Customer"].map((tab) => (
+                        <Button
+                            key={tab}
+                            variant={activeTab === tab ? "secondary" : "ghost"}
+                            className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                            onClick={() => {
+                                setActiveTab(tab)
+                                setCurrentPage(1)
+                            }}
+                        >
+                            {tab}
+                        </Button>
+                    ))}
+                </div>
+
                 {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-white/5 text-left text-white/40 text-sm">
                                 <th className="px-6 py-4 font-medium">User</th>
+                                <th className="px-6 py-4 font-medium">Role</th>
                                 <th className="px-6 py-4 font-medium">Phone</th>
                                 <th className="px-6 py-4 font-medium">Rides</th>
                                 <th className="px-6 py-4 font-medium">Wallet</th>
@@ -428,7 +525,7 @@ export default function UsersPage() {
                         <tbody className="divide-y divide-white/5">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="text-center py-8 text-white/50">
+                                    <td colSpan={8} className="text-center py-8 text-white/50">
                                         <div className="flex items-center justify-center gap-2">
                                             <div className="animate-spin h-5 w-5 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
                                             Loading users...
@@ -437,7 +534,7 @@ export default function UsersPage() {
                                 </tr>
                             ) : users.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="text-center py-8 text-white/50">
+                                    <td colSpan={8} className="text-center py-8 text-white/50">
                                         No users found.
                                     </td>
                                 </tr>
@@ -448,7 +545,7 @@ export default function UsersPage() {
                                         user={user}
                                         onEdit={() => openEditModal(user)}
                                         onDelete={() => confirmDelete(user)}
-                                        onToggleStatus={() => handleToggleStatus(user)}
+                                        onToggleStatus={() => openStatusModal(user)}
                                         formatDate={formatDate}
                                         formatWallet={formatWallet}
                                     />
@@ -527,6 +624,14 @@ export default function UsersPage() {
                 itemName={userToDelete?.name}
                 isLoading={isDeleting}
             />
+
+            <StatusUpdateModal
+                isOpen={isStatusModalOpen}
+                onClose={() => setIsStatusModalOpen(false)}
+                onConfirm={handleUpdateStatus}
+                currentStatus={userToUpdateStatus?.status || "active"}
+                isLoading={isUpdatingStatus}
+            />
         </AdminLayout>
     )
 }
@@ -589,6 +694,11 @@ function UserRow({ user, onEdit, onDelete, onToggleStatus, formatDate, formatWal
                         <div className="text-xs text-white/50">{user.email}</div>
                     </div>
                 </div>
+            </td>
+            <td className="px-6 py-4">
+                 <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium capitalize">
+                    {user.roles && user.roles.length > 0 ? user.roles[0].name : "User"}
+                </span>
             </td>
             <td className="px-6 py-4 text-sm text-white/70">{user.phone_number || "-"}</td>
             <td className="px-6 py-4 font-mono text-sm">{user.rides_count || 0}</td>

@@ -71,6 +71,14 @@ class OrderService {
     async delete(id: number): Promise<void> {
         await axiosInstance.delete(`/admin/orders/${id}`);
     }
+
+    /**
+     * Update order status
+     */
+    async updateStatus(id: number, status: string): Promise<Order> {
+        const response = await axiosInstance.patch(`/admin/orders/${id}/status`, { status });
+        return response.data.data;
+    }
 }
 
 export default new OrderService();

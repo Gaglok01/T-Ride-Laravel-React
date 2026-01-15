@@ -33,7 +33,7 @@ export function Sidebar({ onLogout }: { onLogout: () => void }) {
         <NavItem href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
         <NavItem href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
         <NavItem href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
-        <NavItem href="/admin/types" icon={<Car size={20} />} label="Types" active={isActive("/admin/types")} />
+        <NavItem href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
         <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
       </nav>
 

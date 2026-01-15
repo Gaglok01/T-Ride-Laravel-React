@@ -221,6 +221,11 @@ export function ModalInput({
   required = false,
   icon
 }: ModalInputProps) {
+  // Additional classes for date inputs to style the native calendar picker
+  const dateInputClasses = type === "date" 
+    ? "[&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
+    : ""
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-gray-300">
@@ -240,7 +245,7 @@ export function ModalInput({
           placeholder={placeholder}
           className={`w-full bg-tride-dark border border-white/10 rounded-xl text-white focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-gray-600 ${
             icon ? "pl-11 pr-4 py-3" : "px-4 py-3"
-          }`}
+          } ${dateInputClasses}`}
         />
       </div>
     </div>

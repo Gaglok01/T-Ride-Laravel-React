@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Tag, Ticket, DollarSign, TrendingDown, Plus, Edit2, Trash2, Search, Filter, RefreshCw, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react"
+import { Tag, Ticket, DollarSign, TrendingDown, Plus, Edit, Trash2, Search, Filter, RefreshCw, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import axios from "@/lib/axios"
 import { PromotionModal } from "@/components/admin/PromotionModal"
@@ -345,6 +345,13 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
     )
 }
 
+function formatDate(dateString: string): string {
+    if (!dateString) return "-"
+    const date = new Date(dateString)
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }
+    return date.toLocaleDateString('en-US', options)
+}
+
 function PromoRow({ promo, onEdit, onDelete, onToggleStatus }: { promo: Promotion, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void }) {
     const isPercentage = promo.type === "percentage"
     const isExpired = promo.status === "expired"
@@ -362,7 +369,9 @@ function PromoRow({ promo, onEdit, onDelete, onToggleStatus }: { promo: Promotio
             </td>
             <td className="px-6 py-4 text-white/70">{promo.current_uses?.toLocaleString() || 0}</td>
             <td className="px-6 py-4 text-white/70">{promo.max_uses.toLocaleString()}</td>
-            <td className="px-6 py-4 text-white/70">{promo.valid_until}</td>
+            <td className="px-6 py-4 text-white/70">
+                {formatDate(promo.valid_until)}
+            </td>
             <td className="px-6 py-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
                     promo.status === 'active' 
@@ -386,7 +395,7 @@ function PromoRow({ promo, onEdit, onDelete, onToggleStatus }: { promo: Promotio
                         </IconButton>
                     )}
                     <IconButton tooltip="Edit" onClick={onEdit}>
-                        <Edit2 size={16} />
+                        <Edit size={16} />
                     </IconButton>
                     <IconButton tooltip="Delete" variant="danger" onClick={onDelete}>
                         <Trash2 size={16} />

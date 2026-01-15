@@ -41,6 +41,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/drivers', [DriverController::class, 'store']);
         Route::get('/drivers/{id}', [DriverController::class, 'show']);
         Route::put('/drivers/{id}', [DriverController::class, 'update']);
+        Route::patch('/drivers/{id}/status', [DriverController::class, 'updateStatus']);
         Route::delete('/drivers/{id}', [DriverController::class, 'destroy']);
 
         // Order Management
@@ -48,6 +49,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/orders', [OrderController::class, 'create']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::put('/orders/{id}', [OrderController::class, 'update']);
+        Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus']);
         Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 
         // User Management

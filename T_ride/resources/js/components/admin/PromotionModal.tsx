@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Tag, Calendar, Hash, DollarSign, List, Percent, Plus } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
+import { ModalDatePicker } from "@/components/ui/date-picker"
 
 interface Promotion {
     id?: number
@@ -152,13 +153,12 @@ export function PromotionModal({ isOpen, onClose, onSave, initialData }: Promoti
                         onChange={setMaxUses}
                         required
                     />
-                    <ModalInput
+                    <ModalDatePicker
                         label="Valid Until"
-                        icon={<Calendar size={16} />}
-                        type="date"
                         value={validUntil}
                         onChange={setValidUntil}
                         required
+                        minDate={new Date()}
                     />
                 </div>
                 

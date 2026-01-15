@@ -14,6 +14,7 @@ interface UserData {
     wallet_balance: number
     photo?: string
     created_at: string
+    roles?: { name: string }[]
     // Mock additional data if API doesn't provide it yet
     rides_count?: number
     rating?: number
@@ -82,6 +83,11 @@ export default function ViewUser({ id }: { id: number }) {
                             )}
                         </div>
                         <h2 className="text-2xl font-bold text-white mb-1">{user.name}</h2>
+                        <div className="flex items-center gap-2 mb-2">
+                             <span className="px-3 py-0.5 rounded-full bg-tride-yellow/10 text-tride-yellow text-xs font-bold uppercase tracking-wider border border-tride-yellow/20">
+                                {user.roles && user.roles.length > 0 ? user.roles[0].name : "User"}
+                            </span>
+                        </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border capitalize ${
                             user.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/20' : 
                             user.status === 'suspended' ? 'bg-red-500/20 text-red-400 border-red-500/20' : 

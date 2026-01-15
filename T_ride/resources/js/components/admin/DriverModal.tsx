@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
-import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus } from "lucide-react"
+import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus, Users } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
 
 interface Type {
   id: number
   type_name: string
+  status?: string
 }
 
 interface DriverData {
@@ -194,13 +195,16 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ModalSelect
-            label="Vehicle Type"
-            placeholder="Select Vehicle Type"
+            label="Driver Type"
+            placeholder="Select Driver Type"
             value={typeId}
             onChange={setTypeId}
-            options={types.map(t => ({ label: t.type_name, value: t.id }))}
+            options={types
+                .filter(t => t.status === 'active' || (initialData?.type?.id === t.id)) // Show active only, but keep current if editing
+                .map(t => ({ label: t.type_name, value: t.id }))
+            }
             required
-            icon={<Car size={16} />}
+            icon={<Users size={16} />}
           />
 
            <ModalInput

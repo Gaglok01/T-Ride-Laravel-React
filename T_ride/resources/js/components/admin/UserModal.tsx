@@ -10,6 +10,7 @@ interface UserData {
     status: string
     wallet_balance?: number
     photo?: string
+    roles?: { name: string }[]
 }
 
 interface UserModalProps {
@@ -29,6 +30,7 @@ export function UserModal({ isOpen, onClose, onSave, initialData }: UserModalPro
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [status, setStatus] = useState("active")
+  const [role, setRole] = useState("rider")
   const [walletBalance, setWalletBalance] = useState("")
   const [photo, setPhoto] = useState<File | null>(null)
 
@@ -40,6 +42,9 @@ export function UserModal({ isOpen, onClose, onSave, initialData }: UserModalPro
         setEmail(initialData.email || "")
         setPhone(initialData.phone_number || "")
         setStatus(initialData.status || "active")
+        // Check roles if available, otherwise default to rider
+        const userRole = initialData.roles && initialData.roles.length > 0 ? initialData.roles[0].name : "rider"
+        setRole(userRole)
         setWalletBalance(initialData.wallet_balance?.toString() || "0")
         setPassword("")
         setPhoto(null)
@@ -49,6 +54,7 @@ export function UserModal({ isOpen, onClose, onSave, initialData }: UserModalPro
         setPhone("")
         setPassword("")
         setStatus("active")
+        setRole("rider")
         setWalletBalance("0")
         setPhoto(null)
       }
@@ -90,6 +96,7 @@ export function UserModal({ isOpen, onClose, onSave, initialData }: UserModalPro
       formData.append("email", email)
       formData.append("phone_number", phone)
       formData.append("status", status)
+      formData.append("role", role)
       formData.append("wallet_balance", walletBalance || "0")
       
       if (password) {
@@ -126,6 +133,11 @@ export function UserModal({ isOpen, onClose, onSave, initialData }: UserModalPro
     { label: "Active", value: "active" },
     { label: "Suspended", value: "suspended" },
     { label: "Inactive", value: "inactive" }
+  ]
+
+  const roleOptions = [
+    { label: "Rider", value: "rider" },
+    { label: "Customer", value: "customer" },
   ]
 
   return (
@@ -204,6 +216,15 @@ export function UserModal({ isOpen, onClose, onSave, initialData }: UserModalPro
             options={statusOptions}
             required
             icon={<User size={16} />}
+          />
+          <ModalSelect
+            label="Role"
+            placeholder="Select Role"
+            value={role}
+            onChange={setRole}
+            options={roleOptions}
+            required
+            icon={<UserCog size={16} />}
           />
           <ModalInput
             label="Wallet Balance"

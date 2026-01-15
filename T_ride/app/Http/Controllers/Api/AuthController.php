@@ -32,10 +32,10 @@ class AuthController extends Controller
         ]);
 
         $roleName = $request->input('role', 'admin');
-        $role = Role::where('name', $roleName)->first();
-        
+        $role = Role::where('name', $roleName)->where('guard_name', 'api')->first();
+
         if (!$role) {
-             $role = Role::create(['name' => $roleName]);
+            $role = Role::create(['name' => $roleName, 'guard_name' => 'api']);
         }
 
         $user->assignRole($role);
@@ -79,18 +79,18 @@ class AuthController extends Controller
 
         if (preg_match('/^\+?[1-9]\d{7,14}$/', $request->identifier)) {
 
-            $twilio = new Client(
-                config('services.twilio.sid'),
-                config('services.twilio.token')
-            );
+            // $twilio = new Client(
+            //     config('services.twilio.sid'),
+            //     config('services.twilio.token')
+            // );
 
-            $twilio->messages->create(
-                $request->identifier,
-                [
-                    'from' => config('services.twilio.from'),
-                    'body' => "Your login OTP is {$otpCode}"
-                ]
-            );
+            // $twilio->messages->create(
+            //     $request->identifier,
+            //     [
+            //         'from' => config('services.twilio.from'),
+            //         'body' => "Your login OTP is {$otpCode}"
+            //     ]
+            // );
         }
 
         return response()->json([

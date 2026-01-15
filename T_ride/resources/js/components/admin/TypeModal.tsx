@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Type as TypeIcon, Plus } from "lucide-react"
+import { Users, Plus } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput } from "@/components/ui/modal"
 
 interface Type {
@@ -70,8 +70,8 @@ export function TypeModal({ isOpen, onClose, onSave, initialData }: TypeModalPro
       isOpen={isOpen}
       onClose={onClose}
       title={initialData ? "Edit Type" : "Add New Type"}
-      description={initialData ? "Update the vehicle type details." : "Create a new vehicle type."}
-      icon={<TypeIcon size={20} />}
+      description={initialData ? "Update the driver type details." : "Create a new driver type."}
+      icon={<Users size={20} />}
       size="md"
       footer={
         <>
@@ -94,8 +94,8 @@ export function TypeModal({ isOpen, onClose, onSave, initialData }: TypeModalPro
 
         <ModalInput
           label="Type Name"
-          icon={<TypeIcon size={16} />}
-          placeholder="e.g. Car, Bike, Truck"
+          icon={<Users size={16} />}
+          placeholder="e.g. Ride Driver, Courier"
           value={typeName}
           onChange={setTypeName}
           required

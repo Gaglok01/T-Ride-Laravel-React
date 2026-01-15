@@ -4,6 +4,7 @@ import { Search, Plus, Eye, Edit, Store, CheckCircle, Clock, DollarSign, Star, T
 import { Button, IconButton } from "@/components/ui/button"
 import { VendorModal } from "@/components/admin/VendorModal"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
+import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationModal"
 import axios from "@/lib/axios"
 
 interface Category {
@@ -42,6 +43,11 @@ export default function VendorsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [vendorToDelete, setVendorToDelete] = useState<Vendor | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+
+    // Status Update Modal State
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+    const [vendorToUpdateStatus, setVendorToUpdateStatus] = useState<Vendor | null>(null)
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
 
     useEffect(() => {
         fetchInitialData()
@@ -123,12 +129,23 @@ export default function VendorsPage() {
         }
     }
 
-    const handleToggleStatus = async (vendor: Vendor) => {
+    const openStatusModal = (vendor: Vendor) => {
+        setVendorToUpdateStatus(vendor)
+        setIsStatusModalOpen(true)
+    }
+
+    const handleUpdateStatus = async () => {
+        if (!vendorToUpdateStatus) return
         try {
-            await axios.patch(`/admin/vendors/${vendor.id}/status`)
+            setIsUpdatingStatus(true)
+            await axios.patch(`/admin/vendors/${vendorToUpdateStatus.id}/status`)
             fetchVendors()
+            setIsStatusModalOpen(false)
+            setVendorToUpdateStatus(null)
         } catch (error) {
-            console.error("Failed to toggle status:", error)
+            console.error("Failed to update status:", error)
+        } finally {
+            setIsUpdatingStatus(false)
         }
     }
 
@@ -182,26 +199,7 @@ export default function VendorsPage() {
                 </div>
             }
         >
-            {/* Tabs */}
-            <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit overflow-x-auto scrollbar-hide max-w-full">
-                <Button 
-                    variant={selectedCategory === "All" ? "secondary" : "ghost"}
-                    className={selectedCategory === "All" ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
-                    onClick={() => setSelectedCategory("All")}
-                >
-                    All Vendors
-                </Button>
-                {categories.map(category => (
-                    <Button 
-                        key={category.id} 
-                        variant={selectedCategory === category.id ? "secondary" : "ghost"}
-                        className={selectedCategory === category.id ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
-                        onClick={() => setSelectedCategory(category.id)}
-                    >
-                        {category.name}
-                    </Button>
-                ))}
-            </div>
+
 
             {/* Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -239,9 +237,32 @@ export default function VendorsPage() {
                 />
             </div>
 
+
+
             {/* Main Content Area */}
             <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
                 
+                 {/* Tabs */}
+                 <div className="flex gap-1 p-4 border-b border-white/5 overflow-x-auto scrollbar-hide">
+                    <Button 
+                        variant={selectedCategory === "All" ? "secondary" : "ghost"}
+                        className={selectedCategory === "All" ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                        onClick={() => setSelectedCategory("All")}
+                    >
+                        All Vendors
+                    </Button>
+                    {categories.map(category => (
+                        <Button 
+                            key={category.id} 
+                            variant={selectedCategory === category.id ? "secondary" : "ghost"}
+                            className={selectedCategory === category.id ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                            onClick={() => setSelectedCategory(category.id)}
+                        >
+                            {category.name}
+                        </Button>
+                    ))}
+                </div>
+
                 {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -280,7 +301,7 @@ export default function VendorsPage() {
                                         vendor={vendor}
                                         onEdit={() => openEditModal(vendor)}
                                         onDelete={() => confirmDelete(vendor)}
-                                        onToggleStatus={() => handleToggleStatus(vendor)}
+                                        onToggleStatus={() => openStatusModal(vendor)}
                                     />
                                 ))
                             )}
@@ -305,6 +326,17 @@ export default function VendorsPage() {
                 description="Are you sure you want to permanently delete this vendor?"
                 itemName={vendorToDelete?.name}
                 isLoading={isDeleting}
+            />
+
+            <StatusConfirmationModal
+                isOpen={isStatusModalOpen}
+                onClose={() => setIsStatusModalOpen(false)}
+                onConfirm={handleUpdateStatus}
+                title="Update Status"
+                description={`Are you sure you want to change the status to ${vendorToUpdateStatus?.is_open ? 'Closed' : 'Open'}?`}
+                currentStatus={vendorToUpdateStatus?.is_open ? 'Open' : 'Closed'}
+                itemName={vendorToUpdateStatus?.name}
+                isLoading={isUpdatingStatus}
             />
         </AdminLayout>
     )
