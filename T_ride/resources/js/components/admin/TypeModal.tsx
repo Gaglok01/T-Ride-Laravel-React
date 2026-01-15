@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { Users, Plus } from "lucide-react"
-import { Modal, ModalButton, ModalError, ModalInput } from "@/components/ui/modal"
+import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
 
 interface Type {
   id: number
   type_name: string
+  service_type: string
   created_at?: string
   updated_at?: string
 }
@@ -24,14 +25,17 @@ export function TypeModal({ isOpen, onClose, onSave, initialData }: TypeModalPro
 
   // Form States
   const [typeName, setTypeName] = useState("")
+  const [serviceType, setServiceType] = useState("ride")
 
   // Reset or populate form when modal opens/initialData changes
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
         setTypeName(initialData.type_name)
+        setServiceType(initialData.service_type || "ride")
       } else {
         setTypeName("")
+        setServiceType("ride")
       }
       setError("")
       setLoading(false)
@@ -50,6 +54,7 @@ export function TypeModal({ isOpen, onClose, onSave, initialData }: TypeModalPro
     try {
       const formData = new FormData()
       formData.append("type_name", typeName)
+      formData.append("service_type", serviceType)
       
       // If editing, we might need to handle the update logic in the parent component
       // but usually for FormData updates we might just use PUT key-value pairs
@@ -95,9 +100,21 @@ export function TypeModal({ isOpen, onClose, onSave, initialData }: TypeModalPro
         <ModalInput
           label="Type Name"
           icon={<Users size={16} />}
-          placeholder="e.g. Ride Driver, Courier"
+          placeholder="e.g. Economy, Comfort, Courier"
           value={typeName}
           onChange={setTypeName}
+          required
+        />
+
+        <ModalSelect
+          label="Service Type"
+          value={serviceType}
+          onChange={setServiceType}
+          options={[
+            { label: "Ride", value: "ride" },
+            { label: "Delivery", value: "delivery" },
+            { label: "Courier", value: "courier" },
+          ]}
           required
         />
       </div>

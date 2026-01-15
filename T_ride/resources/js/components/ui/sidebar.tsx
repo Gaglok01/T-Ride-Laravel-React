@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio } from "lucide-react"
 
 export function Sidebar({ onLogout }: { onLogout: () => void }) {
   const { url } = usePage()
@@ -34,6 +34,8 @@ export function Sidebar({ onLogout }: { onLogout: () => void }) {
         <NavItem href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
         <NavItem href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
         <NavItem href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
+        <NavItem href="/admin/pricing" icon={<DollarSign size={20} />} label="Pricing" active={isActive("/admin/pricing")} />
+        <NavItem href="/admin/dispatch" icon={<Radio size={20} />} label="Dispatch" active={isActive("/admin/dispatch")} />
         <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
       </nav>
 

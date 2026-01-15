@@ -10,6 +10,7 @@ import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationMo
 interface Type {
   id: number
   type_name: string
+  service_type: 'ride' | 'delivery' | 'courier'
   type_custom_id?: string
   status: 'active' | 'inactive'
   created_at?: string
@@ -56,7 +57,8 @@ export default function TypesPage() {
       if (editingType) {
         // Update
         await axios.put(`/admin/types/${editingType.id}`, {
-            type_name: formData.get("type_name")
+            type_name: formData.get("type_name"),
+            service_type: formData.get("service_type"),
         })
       } else {
         // Create
@@ -176,6 +178,15 @@ export default function TypesPage() {
                 </div>
 
                 <h3 className="text-xl font-bold mb-2">{type.type_name}</h3>
+                <div className="flex gap-2 mb-2">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        type.service_type === 'ride' ? 'bg-blue-500/10 text-blue-400' :
+                        type.service_type === 'delivery' ? 'bg-green-500/10 text-green-400' :
+                        'bg-purple-500/10 text-purple-400'
+                    }`}>
+                        {type.service_type}
+                    </span>
+                </div>
                 <p className="text-white/50 text-sm mb-6">ID: {type.type_custom_id || type.id}</p>
 
                 <div className="flex items-center justify-between">

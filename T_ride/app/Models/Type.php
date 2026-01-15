@@ -12,6 +12,7 @@ class Type extends Model
     protected $fillable = [
         'type_custom_id',
         'type_name',
+        'service_type',
         'status',
     ];
 }

@@ -86,6 +86,14 @@ Route::get('/admin/drivers/{id}', function ($id) {
     return Inertia::render('admin/view-driver', ['id' => $id]);
 })->name('admin.view-driver');
 
+Route::get('/admin/pricing', function () {
+    return Inertia::render('admin/pricing');
+})->name('admin.pricing');
+
+Route::get('/admin/dispatch', function () {
+    return Inertia::render('admin/dispatch');
+})->name('admin.dispatch');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
