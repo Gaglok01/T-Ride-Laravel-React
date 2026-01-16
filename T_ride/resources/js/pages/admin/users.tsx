@@ -211,7 +211,8 @@ export default function UsersPage() {
                 params: { 
                     all: true,
                     search: searchTerm,
-                    status: statusFilter !== "All" ? statusFilter.toLowerCase() : undefined
+                    status: appliedFilters.status !== "All" ? appliedFilters.status.toLowerCase() : undefined,
+                    role: activeTab !== "All Users" ? activeTab.toLowerCase() : undefined
                 } 
             })
 
