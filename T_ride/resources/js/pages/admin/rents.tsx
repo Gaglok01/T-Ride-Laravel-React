@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { router } from "@inertiajs/react"
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Car, Key, CheckCircle, Settings, DollarSign, Download, Plus, Eye, Edit2, MoreVertical, Search } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
@@ -283,6 +284,7 @@ export default function RentPage() {
                                 {!loading && vehicles.map((vehicle) => (
                                     <VehicleRow
                                         key={vehicle.id}
+                                        id={vehicle.id}
                                         vehicleName={vehicle.name}
                                         vehicleSubtext={`VIN: ${vehicle.vin}`}
                                         plate={vehicle.plate_number}
@@ -409,7 +411,7 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
     )
 }
 
-function VehicleRow({ vehicleName, vehicleSubtext, plate, type, rentedTo, rate, due, status }: any) {
+function VehicleRow({ id, vehicleName, vehicleSubtext, plate, type, rentedTo, rate, due, status }: any) {
     let statusStyles = ""
     const normalizedStatus = status.toLowerCase()
 
@@ -447,7 +449,7 @@ function VehicleRow({ vehicleName, vehicleSubtext, plate, type, rentedTo, rate, 
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-1">
-                    <IconButton tooltip="View Details">
+                    <IconButton tooltip="View Details" onClick={() => router.visit(`/admin/rents/${id}`)}>
                         <Eye size={16} />
                     </IconButton>
                     <IconButton tooltip="Edit">

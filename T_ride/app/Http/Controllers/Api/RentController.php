@@ -58,6 +58,44 @@ class RentController extends Controller
         ]);
     }
 
+    public function vehicleShow($id)
+    {
+        $vehicle = Vehicle::with(['activeRental.driver', 'rentals.driver', 'maintenances'])->find($id);
+
+        if (!$vehicle) {
+            return response()->json(['status' => false, 'message' => 'Vehicle not found'], 404);
+        }
+
+        // Prepare history data
+        $rentalHistory = $vehicle->rentals->map(function($rental) {
+            return [
+                'id' => $rental->id,
+                'driver' => $rental->driver,
+                'start_date' => $rental->start_date,
+                'end_date' => $rental->end_date,
+                'status' => $rental->status,
+                'amount' => $rental->weekly_rate // using weekly rate as proxy for amount display
+            ];
+        });
+
+        // Prepare response
+        $data = $vehicle->toArray();
+        $data['rental_history'] = $rentalHistory;
+        $data['maintenance_history'] = $vehicle->maintenances;
+        
+        // Stats calculation
+        $data['stats'] = [
+            'total_earnings' => $vehicle->rentals->sum('weekly_rate'), // Approx
+            'total_maintenance_cost' => $vehicle->maintenances->sum('cost'),
+            'total_trips' => $vehicle->rentals->count()
+        ];
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
+    }
+
     public function maintenanceIndex(Request $request)
     {
         $query = VehicleMaintenance::with('vehicle');

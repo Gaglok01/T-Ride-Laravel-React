@@ -77,6 +77,7 @@ Route::middleware('auth:api')->group(function () {
         // Rent Management
         Route::get('/fleet-vehicles', [RentController::class, 'vehicleIndex']);
         Route::post('/fleet-vehicles', [RentController::class, 'vehicleStore']);
+        Route::get('/fleet-vehicles/{id}', [RentController::class, 'vehicleShow']);
         Route::get('/active-rentals', [RentController::class, 'activeRentals']);
         Route::get('/rent-payments', [RentController::class, 'payments']);
         Route::get('/contracts', [RentController::class, 'allContracts']);

@@ -74,6 +74,10 @@ Route::get('/admin/rents', function () {
     return Inertia::render('admin/rents');
 })->name('admin.rents');
 
+Route::get('/admin/rents/{id}', function ($id) {
+    return Inertia::render('admin/view-rent', ['id' => $id]);
+})->name('admin.view-rent');
+
 Route::get('/admin/promotions', function () {
     return Inertia::render('admin/promotions');
 })->name('admin.promotions');
