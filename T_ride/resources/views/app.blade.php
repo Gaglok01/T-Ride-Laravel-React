@@ -45,5 +45,6 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+        <div id="datepicker-portal"></div>
     </body>
 </html>

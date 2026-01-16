@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Search, Plus, Edit2, Trash2, Car, Info } from "lucide-react"
+import { Search, Plus, Edit2, Trash2, Car, Info, Users } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import { TypeModal } from "@/components/admin/TypeModal"
 import axios from "@/lib/axios"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
+import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationModal"
 
 interface Type {
   id: number
   type_name: string
+  service_type: 'ride' | 'delivery' | 'courier'
+  type_custom_id?: string
+  status: 'active' | 'inactive'
   created_at?: string
   updated_at?: string
 }
@@ -24,6 +28,11 @@ export default function TypesPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [typeToDelete, setTypeToDelete] = useState<Type | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Status Modal State
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [typeToToggle, setTypeToToggle] = useState<Type | null>(null)
+  const [isToggling, setIsToggling] = useState(false)
 
   useEffect(() => {
     fetchTypes()
@@ -48,7 +57,8 @@ export default function TypesPage() {
       if (editingType) {
         // Update
         await axios.put(`/admin/types/${editingType.id}`, {
-            type_name: formData.get("type_name")
+            type_name: formData.get("type_name"),
+            service_type: formData.get("service_type"),
         })
       } else {
         // Create
@@ -85,6 +95,31 @@ export default function TypesPage() {
     }
   }
 
+  const confirmToggleStatus = (type: Type) => {
+    setTypeToToggle(type)
+    setIsStatusModalOpen(true)
+  }
+
+  const handleToggleStatus = async () => {
+    if (!typeToToggle) return
+
+    try {
+      setIsToggling(true)
+      const newStatus = typeToToggle.status === 'active' ? 'inactive' : 'active'
+      await axios.put(`/admin/types/${typeToToggle.id}`, {
+          status: newStatus
+      })
+      fetchTypes()
+      setIsStatusModalOpen(false)
+      setTypeToToggle(null)
+    } catch (error) {
+       console.error("Failed to update type status:", error)
+       alert("Failed to update status")
+    } finally {
+      setIsToggling(false)
+    }
+  }
+
   const openCreateModal = () => {
     setEditingType(null)
     setIsModalOpen(true)
@@ -101,8 +136,8 @@ export default function TypesPage() {
 
   return (
     <AdminLayout
-      title="Vehicle Types"
-      description="Manage vehicle categories available on the platform"
+      title="Driver Types"
+      description="Manage driver categories available on the platform"
       actions={
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -117,7 +152,7 @@ export default function TypesPage() {
           </div>
           <Button onClick={openCreateModal}>
             <Plus size={18} />
-            Add Type
+            Add Driver Type
           </Button>
         </div>
       }
@@ -130,7 +165,7 @@ export default function TypesPage() {
             <div key={type.id} className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:border-tride-yellow/30 transition-all duration-300 group relative overflow-hidden">
                 <div className="flex justify-between items-start mb-6">
                 <div className={`w-14 h-14 rounded-2xl bg-blue-500 bg-opacity-20 flex items-center justify-center text-white ring-1 ring-white/10`}>
-                    <Car size={24} />
+                    <Users size={24} />
                 </div>
                 <div className="flex gap-2">
                     <IconButton tooltip="Edit Type" onClick={() => openEditModal(type)}>
@@ -143,12 +178,28 @@ export default function TypesPage() {
                 </div>
 
                 <h3 className="text-xl font-bold mb-2">{type.type_name}</h3>
-                <p className="text-white/50 text-sm mb-6">ID: {type.id}</p>
+                <div className="flex gap-2 mb-2">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        type.service_type === 'ride' ? 'bg-blue-500/10 text-blue-400' :
+                        type.service_type === 'delivery' ? 'bg-green-500/10 text-green-400' :
+                        'bg-purple-500/10 text-purple-400'
+                    }`}>
+                        {type.service_type}
+                    </span>
+                </div>
+                <p className="text-white/50 text-sm mb-6">ID: {type.type_custom_id || type.id}</p>
 
                 <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full text-xs font-bold border bg-green-500/10 text-green-400 border-green-500/20">
-                    Active
-                </span>
+                <button 
+                  onClick={() => confirmToggleStatus(type)}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+                    type.status === 'active' 
+                    ? 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20' 
+                    : 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'
+                  }`}
+                >
+                    {type.status === 'active' ? 'Active' : 'Inactive'}
+                </button>
                 <span className="text-xs text-white/30">
                     {type.created_at ? new Date(type.created_at).toLocaleDateString() : 'N/A'}
                 </span>
@@ -164,7 +215,7 @@ export default function TypesPage() {
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-tride-yellow/20">
                 <Plus size={32} />
             </div>
-            <span className="font-bold text-lg">Create New Type</span>
+            <span className="font-bold text-lg">Create New Driver Type</span>
             </button>
         </div>
       )}
@@ -180,10 +231,20 @@ export default function TypesPage() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteType}
-        title="Delete Vehicle Type"
-        description="Are you sure you want to permanently delete this vehicle type? This may affect drivers assigned to this type."
+
+        title="Delete Driver Type"
+        description="Are you sure you want to permanently delete this driver type? This may affect drivers assigned to this type."
         itemName={typeToDelete?.type_name}
         isLoading={isDeleting}
+      />
+
+      <StatusConfirmationModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        onConfirm={handleToggleStatus}
+        itemName={typeToToggle?.type_name}
+        currentStatus={typeToToggle?.status}
+        isLoading={isToggling}
       />
     </AdminLayout>
   )

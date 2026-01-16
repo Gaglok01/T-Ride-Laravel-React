@@ -6,6 +6,9 @@ import { Button, IconButton } from "@/components/ui/button"
 import { DriverModal } from "@/components/admin/DriverModal"
 import axios from "@/lib/axios"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
+import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationModal"
+import { ModalInput, ModalSelect } from "@/components/ui/modal"
+import { Check, X } from "lucide-react"
 
 interface Driver {
   id: number
@@ -32,6 +35,7 @@ interface Driver {
 interface Type {
   id: number
   type_name: string
+  status?: string
 }
 
 export default function DriversPage() {
@@ -46,6 +50,25 @@ export default function DriversPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  
+  // Filtering States
+  const [showFilters, setShowFilters] = useState(false)
+  // Applied filters
+  const [appliedFilters, setAppliedFilters] = useState({
+      status: "All",
+      driverId: ""
+  })
+  // Temporary filters (local state for dropdown)
+  const [tempFilters, setTempFilters] = useState({
+      status: "All",
+      driverId: ""
+  })
+  
+  // Status Modal State
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [driverToToggle, setDriverToToggle] = useState<Driver | null>(null)
+  const [isToggling, setIsToggling] = useState(false)
+
   const [activeTab, setActiveTab] = useState("All Drivers")
 
   useEffect(() => {
@@ -134,10 +157,63 @@ export default function DriversPage() {
       setIsModalOpen(true)
   }
 
-  const filteredDrivers = drivers.filter(driver => 
-    driver.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    driver.driver_id.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredDrivers = drivers.filter(driver => {
+    // 1. Global Search (Name or ID) - kept as generic
+    const matchesSearch = driver.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          driver.driver_id.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    // 2. Status Filter (Applied on 'Apply' click)
+    const matchesStatus = appliedFilters.status === "All" || driver.status === appliedFilters.status
+
+    // 3. Specific Driver ID Filter (Applied on 'Apply' click)
+    const matchesDriverId = appliedFilters.driverId === "" || driver.driver_id.toLowerCase().includes(appliedFilters.driverId.toLowerCase())
+
+    // 4. Type Filter (Controlled by Tabs)
+    const matchesType = activeTab === "All Drivers" || driver.type?.type_name === activeTab
+
+    return matchesSearch && matchesStatus && matchesType && matchesDriverId
+  })
+
+  // Clear all filters
+  const clearFilters = () => {
+    setAppliedFilters({ status: "All", driverId: "" })
+    setTempFilters({ status: "All", driverId: "" })
+    setShowFilters(false)
+  }
+
+  // Apply filters
+  const applyFilters = () => {
+    setAppliedFilters(tempFilters)
+    setShowFilters(false)
+  }
+
+  const confirmToggleStatus = (driver: Driver) => {
+    setDriverToToggle(driver)
+    setIsStatusModalOpen(true)
+  }
+
+  const handleToggleStatus = async () => {
+    if (!driverToToggle) return
+
+    try {
+      setIsToggling(true)
+      const newStatus = driverToToggle.status === 'Active' ? 'Inactive' : 'Active'
+      
+      // Use PATCH endpoint specific for status update
+      await axios.patch(`/admin/drivers/${driverToToggle.id}/status`, {
+          status: newStatus
+      })
+      
+      fetchData()
+      setIsStatusModalOpen(false)
+      setDriverToToggle(null)
+    } catch (error) {
+       console.error("Failed to update driver status:", error)
+       alert("Failed to update status")
+    } finally {
+      setIsToggling(false)
+    }
+  }
 
   return (
     <AdminLayout
@@ -155,10 +231,75 @@ export default function DriversPage() {
                     className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
                 />
             </div>
-          <Button variant="secondary">
-            <Filter size={18} />
-            Filter
-          </Button>
+          <div className="relative">
+              <Button 
+                variant={showFilters ? "primary" : "secondary"}
+                onClick={() => {
+                    // Reset temp filters to match current applied filters when opening
+                    if (!showFilters) {
+                        setTempFilters(appliedFilters)
+                    }
+                    setShowFilters(!showFilters)
+                }}
+              >
+                <Filter size={18} />
+                Filter
+              </Button>
+              
+              {/* Filter Dropdown Panel */}
+              {showFilters && (
+                <div className="absolute top-full right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="space-y-5">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                            <h3 className="font-semibold text-white">Filter Drivers</h3>
+                            <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
+                                <span className="sr-only">Close</span>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                             <ModalSelect
+                                label="Status"
+                                value={tempFilters.status}
+                                onChange={(val) => setTempFilters({...tempFilters, status: val})}
+                                options={[
+                                    { label: "All Statuses", value: "All" },
+                                    { label: "Active", value: "Active" },
+                                    { label: "Inactive", value: "Inactive" }
+                                ]}
+                            />
+                            
+                            <ModalInput
+                                label="Driver ID"
+                                placeholder="e.g. DRV-01"
+                                value={tempFilters.driverId}
+                                onChange={(val) => setTempFilters({...tempFilters, driverId: val})}
+                            />
+                        </div>
+
+                        <div className="pt-4 grid grid-cols-2 gap-3">
+                             <Button 
+                                onClick={clearFilters}
+                                variant="secondary"
+                                className="w-full justify-center"
+                             >
+                                <X size={16} />
+                                Clear
+                             </Button>
+                             <Button 
+                                onClick={applyFilters} 
+                                variant="default"
+                                className="w-full justify-center"
+                             >
+                                <Check size={16} />
+                                Apply
+                             </Button>
+                        </div>
+                    </div>
+                </div>
+              )}
+          </div>
           <Button onClick={openCreateModal}>
             <Plus size={18} />
             Add Driver
@@ -177,8 +318,9 @@ export default function DriversPage() {
       {/* Main Content Area */}
       <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit">
-            {["All Drivers", "Ride Drivers", "Couriers", "Delivery", "Pending Approval"].map((tab) => (
+        <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit flex-wrap">
+
+            {["All Drivers", ...types.map(t => t.type_name)].map((tab) => (
                 <Button
                     key={tab}
                     variant={activeTab === tab ? "secondary" : "ghost"}
@@ -221,6 +363,7 @@ export default function DriversPage() {
                             driver={driver} 
                             onEdit={() => openEditModal(driver)} 
                             onDelete={() => confirmDelete(driver)}
+                            onToggleStatus={() => confirmToggleStatus(driver)}
                         />
                     ))
                 )}
@@ -246,6 +389,15 @@ export default function DriversPage() {
         itemName={driverToDelete?.name}
         isLoading={isDeleting}
       />
+
+      <StatusConfirmationModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        onConfirm={handleToggleStatus}
+        itemName={driverToToggle?.name}
+        currentStatus={driverToToggle?.status?.toLowerCase()} // Modal expects lowercase usually for checking 'inactive'
+        isLoading={isToggling}
+      />
     </AdminLayout>
   )
 }
@@ -269,7 +421,7 @@ function StatsCard({ label, value, trend, trendUp, icon }: { label: string, valu
 
 
 
-function DriverRow({ driver, onEdit, onDelete }: { driver: Driver, onEdit: () => void, onDelete: () => void }) {
+function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Driver, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void }) {
     return (
         <tr className="hover:bg-white/5 transition-colors group">
             <td className="px-6 py-4">
@@ -300,14 +452,19 @@ function DriverRow({ driver, onEdit, onDelete }: { driver: Driver, onEdit: () =>
                 </div>
             </td>
             <td className="px-6 py-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    driver.status === 'Active' || driver.status === 'Online' 
-                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20' 
-                    : 'bg-white/5 text-white/50 border border-white/10'
-                }`}>
+
+                <button 
+                  onClick={onToggleStatus}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+                    driver.status === 'Active'
+                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/20 hover:bg-blue-500/30' 
+                    : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'
+                  }`}
+                >
                     {driver.status}
-                </span>
+                </button>
             </td>
+
             <td className="px-6 py-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                     driver.documents 

@@ -17,11 +17,14 @@ class RoleSeeder extends Seeder
             'vendor',
             'admin',
             'dispatcher',
-            'finance'
+            'finance',
+            'customer'
         ];
 
         foreach ($roles as $role) {
-            Role::firstOrCreate(['name' => $role]);
+            Role::firstOrCreate(
+                ['name' => $role, 'guard_name' => 'api']
+            );
         }
     }
 }

@@ -10,6 +10,9 @@ class Type extends Model
     use HasFactory;
 
     protected $fillable = [
+        'type_custom_id',
         'type_name',
+        'service_type',
+        'status',
     ];
 }

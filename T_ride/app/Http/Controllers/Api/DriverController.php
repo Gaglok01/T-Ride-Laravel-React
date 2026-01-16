@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 class DriverController extends Controller
 {
@@ -79,8 +80,10 @@ class DriverController extends Controller
                 'driver_id' => $driver->id,
             ]);
 
-            // Assign role using Spatie
-            $user->assignRole('driver');
+            // Assign role using Spatie with api guard
+            $role = Role::where('name', 'driver')->where('guard_name', 'api')->first();
+
+            $user->assignRole($role);
 
             DB::commit();
 
@@ -129,12 +132,13 @@ public function update(Request $request, $id)
     $user = User::where('driver_id', $id)->first();
 
     $request->validate([
-        'name' => 'required|string',
-        'type_id' => 'required|exists:types,id',
-        'email' => 'required|email|unique:users,email,' . ($user->id ?? 'NULL'),
-        'phone_number' => 'required|string',
+        'name' => 'sometimes|string',
+        'type_id' => 'sometimes|exists:types,id',
+        'email' => 'sometimes|email|unique:users,email,' . ($user->id ?? 'NULL'),
+        'phone_number' => 'sometimes|string',
         'password' => 'nullable|min:6',
-        'image' => 'nullable|image|max:2048'
+        'image' => 'nullable|image|max:2048',
+        'status' => 'sometimes|in:Active,Inactive'
     ]);
 
     DB::beginTransaction();
@@ -191,6 +195,33 @@ public function update(Request $request, $id)
         ], 500);
     }
 }
+
+    // 🔹 STATUS UPDATE (TOGGLE)
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:Active,Inactive'
+        ]);
+
+        try {
+            $driver = Driver::findOrFail($id);
+            $driver->update([
+                'status' => $request->status
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Driver status updated successfully',
+                'data' => $driver
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 
     // 🔹 DELETE

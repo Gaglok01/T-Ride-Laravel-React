@@ -15,8 +15,29 @@ class OrderController extends Controller
         try {
             $query = Order::query();
 
-            if ($request->has('status') && $request->status !== 'All Orders') {
+            // Search (Order ID, Sender, Recipient)
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('order_id', 'like', "%{$search}%")
+                      ->orWhere('sender', 'like', "%{$search}%")
+                      ->orWhere('recipient', 'like', "%{$search}%");
+                });
+            }
+
+            // Filter by Status
+            if ($request->has('status') && $request->status !== 'All Orders' && $request->status !== 'All') {
                 $query->where('status', $request->status);
+            }
+
+            // Filter by Package Type
+            if ($request->has('package_type') && $request->package_type !== 'All Package Types' && $request->package_type !== 'All') {
+                $query->where('package_type', $request->package_type);
+            }
+            
+            // Exact Order ID Filter (from Panel)
+            if ($request->has('order_id') && !empty($request->order_id)) {
+                 $query->where('order_id', 'like', "%{$request->order_id}%");
             }
 
             $orders = $query->latest()->get();
@@ -123,6 +144,33 @@ class OrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // 🔹 STATUS UPDATE (TOGGLE / MODAL)
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string'
+        ]);
+
+        try {
+            $order = Order::findOrFail($id);
+            $order->update([
+                'status' => $request->status
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order status updated successfully',
+                'data' => $order
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone_number')->unique()->after('email');
             $table->string('photo')->nullable()->after('phone_number');
-            $table->tinyInteger('status')->default(1)->after('photo');
+            $table->enum('status', ['active', 'suspended', 'inactive'])
+                  ->default('active')
+                  ->after('photo');
         });
     }
 
