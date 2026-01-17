@@ -366,7 +366,7 @@ export default function UsersPage() {
                     </div>
                     <div className="relative">
                         <Button 
-                            variant={showFilters ? "primary" : "secondary"} 
+                            variant={showFilters ? "default" : "secondary"} 
                             onClick={() => {
                                 if (!showFilters) setTempFilters(appliedFilters)
                                 setShowFilters(!showFilters)

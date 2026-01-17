@@ -80,6 +80,9 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/fleet-vehicles', [RentController::class, 'vehicleIndex']);
         Route::post('/fleet-vehicles', [RentController::class, 'vehicleStore']);
         Route::get('/fleet-vehicles/{id}', [RentController::class, 'vehicleShow']);
+        Route::put('/fleet-vehicles/{id}', [RentController::class, 'vehicleUpdate']);
+        Route::patch('/fleet-vehicles/{id}/status', [RentController::class, 'vehicleUpdateStatus']);
+        Route::delete('/fleet-vehicles/{id}', [RentController::class, 'vehicleDestroy']);
         Route::get('/active-rentals', [RentController::class, 'activeRentals']);
         Route::get('/rent-payments', [RentController::class, 'payments']);
         Route::get('/contracts', [RentController::class, 'allContracts']);

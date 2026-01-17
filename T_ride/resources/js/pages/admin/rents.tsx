@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react"
 import { router } from "@inertiajs/react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Car, Key, CheckCircle, Settings, DollarSign, Download, Plus, Eye, Edit2, MoreVertical, Search } from "lucide-react"
+import { Car, Key, CheckCircle, Settings, DollarSign, Download, Plus, Eye, Edit2, MoreVertical, Search, Trash2 } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import axios from "@/lib/axios"
 import { VehicleModal } from "@/components/admin/VehicleModal"
+import { StatusUpdateModal } from "@/components/admin/StatusUpdateModal"
+import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 interface FleetStats {
     total_fleet: number
@@ -81,6 +85,18 @@ export default function RentPage() {
     const [activeTab, setActiveTab] = useState("Fleet Vehicles")
     const [searchTerm, setSearchTerm] = useState("")
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
+    const [isExporting, setIsExporting] = useState(false)
+
+    // Status Update Modal
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+    const [vehicleToUpdateStatus, setVehicleToUpdateStatus] = useState<Vehicle | null>(null)
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+    
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
 
     useEffect(() => {
         fetchData()
@@ -127,13 +143,176 @@ export default function RentPage() {
 
     const handleSaveVehicle = async (data: any) => {
         try {
-            await axios.post('/admin/fleet-vehicles', data)
+            if (editingVehicle) {
+                await axios.put(`/admin/fleet-vehicles/${editingVehicle.id}`, data)
+            } else {
+                await axios.post('/admin/fleet-vehicles', data)
+            }
             setIsModalOpen(false)
+            setEditingVehicle(null)
             fetchData() 
         } catch (error) {
             console.error("Failed to save vehicle", error)
             throw error 
         }
+    }
+
+    const confirmDelete = (vehicle: Vehicle) => {
+        setVehicleToDelete(vehicle)
+        setIsDeleteModalOpen(true)
+    }
+
+    const handleDeleteVehicle = async () => {
+        if (!vehicleToDelete) return
+        
+        try {
+            setIsDeleting(true)
+            await axios.delete(`/admin/fleet-vehicles/${vehicleToDelete.id}`)
+            fetchData()
+            setIsDeleteModalOpen(false)
+            setVehicleToDelete(null)
+        } catch (error) {
+            console.error("Failed to delete vehicle:", error)
+            alert("Failed to delete vehicle. It may have active rentals.")
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
+    const openStatusModal = (vehicle: Vehicle) => {
+        setVehicleToUpdateStatus(vehicle)
+        setIsStatusModalOpen(true)
+    }
+
+    const handleUpdateStatus = async (newStatus: string) => {
+        if (!vehicleToUpdateStatus) return
+        try {
+            setIsUpdatingStatus(true)
+            await axios.patch(`/admin/fleet-vehicles/${vehicleToUpdateStatus.id}/status`, {
+                status: newStatus
+            })
+            fetchData()
+            setIsStatusModalOpen(false)
+            setVehicleToUpdateStatus(null)
+        } catch (error) {
+            console.error("Failed to update status:", error)
+        } finally {
+            setIsUpdatingStatus(false)
+        }
+    }
+
+    const handleExport = async () => {
+        if (activeTab !== "Fleet Vehicles") return
+
+        try {
+            setIsExporting(true)
+            
+            // Fetch all vehicles for export with current filters
+            const params: any = { all: true }
+            if (searchTerm) params.search = searchTerm
+
+            const res = await axios.get('/admin/fleet-vehicles', { params })
+            
+            if (!res.data.status) {
+                console.error("Failed to fetch export data")
+                return
+            }
+
+            const allVehicles: Vehicle[] = res.data.data
+
+            // Generate PDF
+            const doc = new jsPDF()
+            
+            // Add title and branding
+            doc.setFontSize(20)
+            doc.setTextColor(40, 40, 40)
+            doc.text("T-RIDE", 14, 20)
+            
+            doc.setFontSize(12)
+            doc.setTextColor(100, 100, 100)
+            doc.text("Fleet Management Report", 14, 28)
+            
+            // Add export date
+            doc.setFontSize(10)
+            doc.setTextColor(150, 150, 150)
+            doc.text(`Generated on: ${new Date().toLocaleDateString("en-US", { 
+                year: "numeric", 
+                month: "long", 
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            })}`, 14, 35)
+
+            // Add stats summary if available
+            if (fleetStats) {
+                doc.setFontSize(10)
+                doc.setTextColor(60, 60, 60)
+                doc.text(`Total Fleet: ${fleetStats.total_fleet} | Rented: ${fleetStats.rented_out} | Available: ${fleetStats.available}`, 14, 45)
+            }
+
+            // Prepare table data
+            const tableData = allVehicles.map(vehicle => [
+                vehicle.name,
+                vehicle.plate_number,
+                vehicle.type,
+                vehicle.vin,
+                `$${vehicle.daily_rate}`,
+                vehicle.status.charAt(0).toUpperCase() + vehicle.status.slice(1),
+                vehicle.active_rental?.driver?.name || '-'
+            ])
+
+            // Generate table
+            autoTable(doc, {
+                head: [["Vehicle", "Plate No", "Type", "VIN", "Rate", "Status", "Rented To"]],
+                body: tableData,
+                startY: 52,
+                theme: "grid",
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 3,
+                },
+                headStyles: {
+                    fillColor: [245, 197, 24], // T-RIDE yellow
+                    textColor: [0, 0, 0],
+                    fontStyle: "bold",
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245],
+                },
+            })
+
+            // Add footer
+            const pageCount = doc.getNumberOfPages()
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i)
+                doc.setFontSize(8)
+                doc.setTextColor(150, 150, 150)
+                doc.text(
+                    `Page ${i} of ${pageCount}`,
+                    doc.internal.pageSize.width / 2,
+                    doc.internal.pageSize.height - 10,
+                    { align: "center" }
+                )
+                doc.text(
+                    "T-RIDE Admin Panel - Confidential",
+                    14,
+                    doc.internal.pageSize.height - 10
+                )
+            }
+
+            doc.save(`fleet_export_${new Date().toISOString().split("T")[0]}.pdf`)
+
+        } catch (error) {
+            console.error("Export failed:", error)
+            alert("Failed to generate export. Please try again.")
+        } finally {
+            setIsExporting(false)
+        }
+    }
+
+    const openEditModal = (vehicle: Vehicle) => {
+        setEditingVehicle(vehicle)
+        setIsModalOpen(true)
     }
 
     return (
@@ -152,11 +331,20 @@ export default function RentPage() {
                             className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
                         />
                     </div>
-                    <Button variant="secondary">
-                        <Download size={18} className="mr-2" />
-                        Export
+                    <Button variant="secondary" onClick={handleExport} disabled={isExporting || activeTab !== "Fleet Vehicles"}>
+                        {isExporting ? (
+                             <>
+                                <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+                                Exporting...
+                            </>
+                        ) : (
+                            <>
+                                <Download size={18} className="mr-2" />
+                                Export
+                            </>
+                        )}
                     </Button>
-                    <Button variant="default" onClick={() => setIsModalOpen(true)}>
+                    <Button variant="default" onClick={() => { setEditingVehicle(null); setIsModalOpen(true); }}>
                         <Plus size={18} className="mr-2" />
                         Add Vehicle
                     </Button>
@@ -293,6 +481,9 @@ export default function RentPage() {
                                         rate={`$${vehicle.daily_rate}/day`}
                                         due={vehicle.active_rental?.outstanding_amount ? `$${vehicle.active_rental.outstanding_amount}` : '—'}
                                         status={vehicle.status}
+                                        onEdit={() => openEditModal(vehicle)}
+                                        onDelete={() => confirmDelete(vehicle)}
+                                        onToggleStatus={() => openStatusModal(vehicle)}
                                     />
                                 ))}
                                 {!loading && vehicles.length === 0 && <tr><td colSpan={8} className="px-6 py-4 text-center text-white/40">No vehicles found.</td></tr>}
@@ -389,6 +580,32 @@ export default function RentPage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSaveVehicle}
+                initialData={editingVehicle}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteVehicle}
+                title="Delete Vehicle"
+                description="Are you sure you want to permanently delete this vehicle? This action cannot be undone."
+                itemName={vehicleToDelete?.name}
+                isLoading={isDeleting}
+            />
+
+            <StatusUpdateModal
+                isOpen={isStatusModalOpen}
+                onClose={() => setIsStatusModalOpen(false)}
+                onConfirm={handleUpdateStatus}
+                currentStatus={vehicleToUpdateStatus?.status || "available"}
+                isLoading={isUpdatingStatus}
+                options={[
+                    { label: "Available", value: "available" },
+                    { label: "Rented", value: "rented" },
+                    { label: "Maintenance", value: "maintenance" }
+                ]}
+                title="Update Vehicle Status"
+                description="Select the new status for this vehicle."
             />
         </AdminLayout>
     )
@@ -411,7 +628,7 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
     )
 }
 
-function VehicleRow({ id, vehicleName, vehicleSubtext, plate, type, rentedTo, rate, due, status }: any) {
+function VehicleRow({ id, vehicleName, vehicleSubtext, plate, type, rentedTo, rate, due, status, onEdit, onDelete, onToggleStatus }: any) {
     let statusStyles = ""
     const normalizedStatus = status.toLowerCase()
 
@@ -443,20 +660,24 @@ function VehicleRow({ id, vehicleName, vehicleSubtext, plate, type, rentedTo, ra
             <td className="px-6 py-4 font-medium">{rate}</td>
             <td className="px-6 py-4 font-medium text-red-400">{due !== '—' ? due : <span className="text-white/20">—</span>}</td>
             <td className="px-6 py-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles} capitalize text-center min-w-[80px] inline-block`}>
+                <button 
+                    onClick={onToggleStatus}
+                    className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles} capitalize text-center min-w-[80px] inline-block cursor-pointer hover:opacity-80 transition-opacity`}
+                    title="Click to update status"
+                >
                     {status}
-                </span>
+                </button>
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-1">
                     <IconButton tooltip="View Details" onClick={() => router.visit(`/admin/rents/${id}`)}>
                         <Eye size={16} />
                     </IconButton>
-                    <IconButton tooltip="Edit">
+                    <IconButton tooltip="Edit" onClick={onEdit}>
                         <Edit2 size={16} />
                     </IconButton>
-                    <IconButton tooltip="More">
-                        <MoreVertical size={16} />
+                    <IconButton tooltip="Delete" variant="danger" onClick={onDelete}>
+                        <Trash2 size={16} />
                     </IconButton>
                 </div>
             </td>

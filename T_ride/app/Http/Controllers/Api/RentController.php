@@ -57,7 +57,71 @@ class RentController extends Controller
             'data' => $vehicle
         ]);
     }
+    public function vehicleUpdate(Request $request, $id)
+    {
+        $vehicle = Vehicle::find($id);
+        if (!$vehicle) {
+            return response()->json(['status' => false, 'message' => 'Vehicle not found'], 404);
+        }
 
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'year' => 'required|integer|min:1900|max:' . date('Y'),
+            'vin' => 'required|string|unique:vehicles,vin,' . $id,
+            'plate_number' => 'required|string|unique:vehicles,plate_number,' . $id,
+            'type' => 'required|string|max:100',
+            'daily_rate' => 'required|numeric|min:0',
+            'status' => 'required|in:available,rented,maintenance'
+        ]);
+
+        $vehicle->update($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Vehicle updated successfully',
+            'data' => $vehicle
+        ]);
+    }
+
+    public function vehicleUpdateStatus(Request $request, $id)
+    {
+        $vehicle = Vehicle::find($id);
+        if (!$vehicle) {
+            return response()->json(['status' => false, 'message' => 'Vehicle not found'], 404);
+        }
+
+        $request->validate([
+            'status' => 'required|in:available,rented,maintenance'
+        ]);
+
+        $vehicle->status = $request->status;
+        $vehicle->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Vehicle status updated successfully'
+        ]);
+    }
+
+    public function vehicleDestroy($id)
+    {
+        $vehicle = Vehicle::find($id);
+        if (!$vehicle) {
+            return response()->json(['status' => false, 'message' => 'Vehicle not found'], 404);
+        }
+
+        // Optional: Check if vehicle has active rentals or can be deleted safely
+        if ($vehicle->activeRental || $vehicle->rentals()->exists()) {
+             return response()->json(['status' => false, 'message' => 'Cannot delete vehicle with rental history.'], 400);
+        }
+
+        $vehicle->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Vehicle deleted successfully'
+        ]);
+    }
     public function vehicleShow($id)
     {
         $vehicle = Vehicle::with(['activeRental.driver', 'rentals.driver', 'maintenances'])->find($id);
