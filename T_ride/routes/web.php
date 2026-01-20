@@ -98,6 +98,10 @@ Route::get('/admin/dispatch', function () {
     return Inertia::render('admin/dispatch');
 })->name('admin.dispatch');
 
+Route::get('/admin/payment-gateway', function () {
+    return Inertia::render('admin/payment-gateway');
+})->name('admin.payment-gateway');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

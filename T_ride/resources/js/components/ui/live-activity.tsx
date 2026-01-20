@@ -1,12 +1,4 @@
-export function LiveActivity() {
-  const activities = [
-    { id: "2041", time: "5m ago", price: "12.00", status: "started" },
-    { id: "2042", time: "5m ago", price: "12.00", status: "started" },
-    { id: "2043", time: "5m ago", price: "12.00", status: "started" },
-    { id: "2044", time: "5m ago", price: "12.00", status: "started" },
-    { id: "2045", time: "5m ago", price: "12.00", status: "started" },
-  ]
-
+export function LiveActivity({ activities }: { activities: any[] }) {
   return (
     <div className="bg-tride-card border border-white/5 p-6 rounded-[32px] h-full flex flex-col">
       <h3 className="text-lg font-bold mb-6">Live Activity</h3>
@@ -18,13 +10,18 @@ export function LiveActivity() {
             className="bg-white/5 p-4 rounded-2xl flex items-center justify-between border border-white/5"
           >
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className={`w-2 h-2 rounded-full ${
+                item.status === 'completed' ? 'bg-green-500' : 
+                item.status === 'ongoing' ? 'bg-blue-500' : 'bg-tride-yellow'
+              }`}></div>
               <div>
-                <p className="text-sm font-bold">Ride #{item.id}</p>
-                <p className="text-[10px] text-white/40">Started {item.time}</p>
+                <p className="text-sm font-bold">{item.type}: {item.user}</p>
+                <p className="text-[10px] text-white/40">{item.status} • {item.time}</p>
               </div>
             </div>
-            <p className="text-sm font-bold text-tride-yellow">${item.price}</p>
+            <p className="text-[10px] font-bold text-tride-yellow bg-tride-yellow/10 px-2 py-1 rounded-lg uppercase">
+               {item.status}
+            </p>
           </div>
         ))}
       </div>

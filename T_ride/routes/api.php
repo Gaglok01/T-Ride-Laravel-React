@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\RideController;
 use App\Http\Controllers\Api\PromotionController;
 use App\Http\Controllers\Api\DeliveryOrderController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\PaymentGatewayController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -21,6 +23,9 @@ Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
 
 Route::middleware('auth:api')->group(function () {
     Route::prefix('admin')->middleware('role:admin')->group(function () {
+        // Dashboard Stats
+        Route::get('/dashboard/stats', [DashboardController::class, 'getStats']);
+
         // Role Management
         Route::get('/roles', [RoleController::class, 'index']);
         Route::post('/roles', [RoleController::class, 'store']);
@@ -135,6 +140,41 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/dispatch/assign-driver', [\App\Http\Controllers\Api\DispatchController::class, 'assignDriver']);
         Route::post('/dispatch/manual-booking', [\App\Http\Controllers\Api\DispatchController::class, 'createManualBooking']);
         Route::get('/dispatch/manual-bookings', [\App\Http\Controllers\Api\DispatchController::class, 'getManualBookings']);
+
+        // Payment Gateway Management
+        Route::get('/payment-gateway/dashboard', [PaymentGatewayController::class, 'getDashboardStats']);
+        
+        // Payment Providers
+        Route::get('/payment-gateway/providers', [PaymentGatewayController::class, 'getProviders']);
+        Route::post('/payment-gateway/providers', [PaymentGatewayController::class, 'storeProvider']);
+        Route::put('/payment-gateway/providers/{id}', [PaymentGatewayController::class, 'updateProvider']);
+        Route::patch('/payment-gateway/providers/{id}/configure', [PaymentGatewayController::class, 'configureProvider']);
+        
+        // Mobile Money Providers
+        Route::get('/payment-gateway/mobile-money', [PaymentGatewayController::class, 'getMobileMoneyProviders']);
+        Route::post('/payment-gateway/mobile-money', [PaymentGatewayController::class, 'storeMobileMoneyProvider']);
+        
+        // Transaction Limits
+        Route::get('/payment-gateway/transaction-limits', [PaymentGatewayController::class, 'getTransactionLimits']);
+        Route::put('/payment-gateway/transaction-limits/{id}', [PaymentGatewayController::class, 'updateTransactionLimit']);
+        
+        // Card Processing Settings
+        Route::get('/payment-gateway/card-settings', [PaymentGatewayController::class, 'getCardSettings']);
+        Route::put('/payment-gateway/card-settings', [PaymentGatewayController::class, 'updateCardSettings']);
+        
+        // Fraud Prevention Settings
+        Route::get('/payment-gateway/fraud-settings', [PaymentGatewayController::class, 'getFraudSettings']);
+        Route::put('/payment-gateway/fraud-settings', [PaymentGatewayController::class, 'updateFraudSettings']);
+        
+        // Webhooks
+        Route::get('/payment-gateway/webhooks', [PaymentGatewayController::class, 'getWebhooks']);
+        Route::post('/payment-gateway/webhooks', [PaymentGatewayController::class, 'storeWebhook']);
+        Route::put('/payment-gateway/webhooks/{id}', [PaymentGatewayController::class, 'updateWebhook']);
+        Route::delete('/payment-gateway/webhooks/{id}', [PaymentGatewayController::class, 'deleteWebhook']);
+        
+        // Transactions
+        Route::get('/payment-gateway/transactions', [PaymentGatewayController::class, 'getTransactions']);
+        Route::post('/payment-gateway/transactions', [PaymentGatewayController::class, 'processTransaction']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);

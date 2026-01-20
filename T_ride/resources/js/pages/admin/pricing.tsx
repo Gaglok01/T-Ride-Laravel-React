@@ -54,6 +54,9 @@ interface SurgeRule {
     end_time: string | null
     days: string[] | null
     trigger_type: string
+    weather_condition: string | null
+    event_name: string | null
+    custom_config: any | null
     status: string
 }
 
@@ -460,8 +463,14 @@ function SurgeRulesTab({ rules, onEdit, onRefresh }: { rules: SurgeRule[], onEdi
                                 </td>
                                 <td className="px-6 py-4 capitalize text-white/70">{rule.trigger_type}</td>
                                 <td className="px-6 py-4 text-white/70">
-                                    {rule.start_time && rule.end_time 
+                                    {rule.trigger_type === 'time' && rule.start_time && rule.end_time 
                                         ? `${rule.start_time} - ${rule.end_time}` 
+                                        : rule.trigger_type === 'weather' && rule.weather_condition
+                                        ? `Condition: ${rule.weather_condition}`
+                                        : rule.trigger_type === 'event' && rule.event_name
+                                        ? `Event: ${rule.event_name}`
+                                        : rule.trigger_type === 'custom'
+                                        ? 'Custom Config'
                                         : '-'}
                                 </td>
                                 <td className="px-6 py-4">
@@ -847,6 +856,9 @@ function SurgeRuleModal({ isOpen, onClose, initialData, onSave }: { isOpen: bool
     const [triggerType, setTriggerType] = useState("time")
     const [startTime, setStartTime] = useState("")
     const [endTime, setEndTime] = useState("")
+    const [weatherCondition, setWeatherCondition] = useState("")
+    const [eventName, setEventName] = useState("")
+    const [customConfig, setCustomConfig] = useState("")
 
     useEffect(() => {
         if (isOpen) {
@@ -857,6 +869,9 @@ function SurgeRuleModal({ isOpen, onClose, initialData, onSave }: { isOpen: bool
                 setTriggerType(initialData.trigger_type)
                 setStartTime(initialData.start_time || "")
                 setEndTime(initialData.end_time || "")
+                setWeatherCondition(initialData.weather_condition || "")
+                setEventName(initialData.event_name || "")
+                setCustomConfig(initialData.custom_config ? JSON.stringify(initialData.custom_config, null, 2) : "")
             } else {
                 setName("")
                 setDescription("")
@@ -864,6 +879,9 @@ function SurgeRuleModal({ isOpen, onClose, initialData, onSave }: { isOpen: bool
                 setTriggerType("time")
                 setStartTime("")
                 setEndTime("")
+                setWeatherCondition("")
+                setEventName("")
+                setCustomConfig("")
             }
             setError("")
         }
@@ -873,6 +891,16 @@ function SurgeRuleModal({ isOpen, onClose, initialData, onSave }: { isOpen: bool
         if (!name || !multiplier || !triggerType) {
             setError("Please fill in all required fields.")
             return
+        }
+
+        let parsedConfig = null
+        if (triggerType === 'custom' && customConfig) {
+            try {
+                parsedConfig = JSON.parse(customConfig)
+            } catch (e) {
+                setError("Invalid JSON format in Custom Configuration.")
+                return
+            }
         }
 
         setLoading(true)
@@ -885,7 +913,10 @@ function SurgeRuleModal({ isOpen, onClose, initialData, onSave }: { isOpen: bool
                 multiplier: parseFloat(multiplier),
                 trigger_type: triggerType,
                 start_time: startTime || null,
-                end_time: endTime || null
+                end_time: endTime || null,
+                weather_condition: weatherCondition || null,
+                event_name: eventName || null,
+                custom_config: parsedConfig
             }
 
             if (initialData) {
@@ -937,6 +968,7 @@ function SurgeRuleModal({ isOpen, onClose, initialData, onSave }: { isOpen: bool
                             { label: "Demand Based", value: "demand" },
                             { label: "Weather Based", value: "weather" },
                             { label: "Event Based", value: "event" },
+                            { label: "Custom Rule", value: "custom" },
                         ]}
                         required
                     />
@@ -946,6 +978,43 @@ function SurgeRuleModal({ isOpen, onClose, initialData, onSave }: { isOpen: bool
                     <div className="grid grid-cols-2 gap-4">
                         <ModalInput label="Start Time" value={startTime} onChange={setStartTime} type="time" />
                         <ModalInput label="End Time" value={endTime} onChange={setEndTime} type="time" />
+                    </div>
+                )}
+
+                {triggerType === "weather" && (
+                    <ModalSelect
+                        label="Weather Condition"
+                        value={weatherCondition}
+                        onChange={setWeatherCondition}
+                        options={[
+                            { label: "Cloudy", value: "cloudy" },
+                            { label: "Rainy", value: "rainy" },
+                            { label: "Storm", value: "storm" },
+                            { label: "Snow", value: "snow" },
+                            { label: "Heat Wave", value: "heatwave" },
+                        ]}
+                    />
+                )}
+
+                {triggerType === "event" && (
+                    <ModalInput 
+                        label="Event Name" 
+                        value={eventName} 
+                        onChange={setEventName} 
+                        placeholder="e.g. Football Match, President Meeting" 
+                    />
+                )}
+
+                {triggerType === "custom" && (
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-gray-300">Custom Configuration (JSON)</label>
+                        <textarea
+                            value={customConfig}
+                            onChange={(e) => setCustomConfig(e.target.value)}
+                            rows={4}
+                            className="w-full bg-tride-dark border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-tride-yellow/50 transition-all font-mono text-xs"
+                            placeholder='{ "key": "value" }'
+                        />
                     </div>
                 )}
             </div>

@@ -1,0 +1,2909 @@
+{
+  "info": {
+    "name": "T-Ride API Collection",
+    "description": "Automatically generated Postman collection from Laravel routes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "api",
+      "item": [
+        {
+          "name": "admin",
+          "item": [
+            {
+              "name": "GET|HEAD api/admin/active-rentals",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/active-rentals",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "active-rentals"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RentController@activeRentals\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "GET|HEAD api/admin/categories",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/categories",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\CategoryController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/categories",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/categories",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\CategoryController@store\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "categories",
+              "item": [
+                {
+                  "name": "PUT api/admin/categories/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/categories/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "categories",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\CategoryController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "GET|HEAD api/admin/categories/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/categories/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "categories",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\CategoryController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/categories/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/categories/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "categories",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\CategoryController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/categories/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/categories/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "categories",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\CategoryController@toggleStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/contracts",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/contracts",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "contracts"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RentController@allContracts\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "GET|HEAD api/admin/delivery-fees",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/delivery-fees",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "delivery-fees"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@getDeliveryFees\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/delivery-fees",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/delivery-fees",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "delivery-fees"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@storeDeliveryFee\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "delivery-fees",
+              "item": [
+                {
+                  "name": "PUT api/admin/delivery-fees/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/delivery-fees/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "delivery-fees",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PricingController@updateDeliveryFee\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/delivery-fees/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/delivery-fees/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "delivery-fees",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PricingController@deleteDeliveryFee\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/delivery-orders",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/delivery-orders",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "delivery-orders"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\DeliveryOrderController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "delivery-orders",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/delivery-orders/stats",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/delivery-orders/stats",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "delivery-orders",
+                        "stats"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DeliveryOrderController@getStats\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "GET|HEAD api/admin/delivery-orders/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/delivery-orders/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "delivery-orders",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DeliveryOrderController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "dispatch",
+              "item": [
+                {
+                  "name": "POST api/admin/dispatch/assign-driver",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/dispatch/assign-driver",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "dispatch",
+                        "assign-driver"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DispatchController@assignDriver\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "GET|HEAD api/admin/dispatch/available-drivers",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/dispatch/available-drivers",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "dispatch",
+                        "available-drivers"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DispatchController@getAvailableDrivers\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "POST api/admin/dispatch/manual-booking",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/dispatch/manual-booking",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "dispatch",
+                        "manual-booking"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DispatchController@createManualBooking\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "GET|HEAD api/admin/dispatch/manual-bookings",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/dispatch/manual-bookings",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "dispatch",
+                        "manual-bookings"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DispatchController@getManualBookings\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "GET|HEAD api/admin/dispatch/pending-orders",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/dispatch/pending-orders",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "dispatch",
+                        "pending-orders"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DispatchController@getPendingOrders\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "GET|HEAD api/admin/dispatch/stats",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/dispatch/stats",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "dispatch",
+                        "stats"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DispatchController@getStats\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/drivers",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/drivers",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "drivers"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\DriverController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/drivers",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/drivers",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "drivers"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\DriverController@store\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "drivers",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/drivers/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/drivers/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "drivers",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DriverController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/drivers/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/drivers/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "drivers",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DriverController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/drivers/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/drivers/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "drivers",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\DriverController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/drivers/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/drivers/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "drivers",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\DriverController@updateStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/fleet-vehicles",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/fleet-vehicles",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "fleet-vehicles"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RentController@vehicleIndex\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/fleet-vehicles",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/fleet-vehicles",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "fleet-vehicles"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RentController@vehicleStore\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "fleet-vehicles",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/fleet-vehicles/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/fleet-vehicles/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "fleet-vehicles",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\RentController@vehicleShow\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/fleet-vehicles/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/fleet-vehicles/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "fleet-vehicles",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\RentController@vehicleUpdate\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/fleet-vehicles/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/fleet-vehicles/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "fleet-vehicles",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\RentController@vehicleDestroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/fleet-vehicles/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/fleet-vehicles/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "fleet-vehicles",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\RentController@vehicleUpdateStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/maintenance",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/maintenance",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "maintenance"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RentController@maintenanceIndex\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "GET|HEAD api/admin/orders",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/orders",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "orders"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\OrderController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/orders",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/orders",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "orders"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\OrderController@create\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "orders",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/orders/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/orders/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "orders",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\OrderController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/orders/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/orders/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "orders",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\OrderController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/orders/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/orders/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "orders",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\OrderController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/orders/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/orders/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "orders",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\OrderController@updateStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/package-pricing",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/package-pricing",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "package-pricing"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@getPackagePricing\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/package-pricing",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/package-pricing",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "package-pricing"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@storePackagePricing\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "package-pricing",
+              "item": [
+                {
+                  "name": "PUT api/admin/package-pricing/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/package-pricing/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "package-pricing",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PricingController@updatePackagePricing\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/permissions",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/permissions",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "permissions"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RoleController@getAllPermissions\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "GET|HEAD api/admin/pricing-zones",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/pricing-zones",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "pricing-zones"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@getPricingZones\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/pricing-zones",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/pricing-zones",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "pricing-zones"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@storePricingZone\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "pricing-zones",
+              "item": [
+                {
+                  "name": "PUT api/admin/pricing-zones/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/pricing-zones/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "pricing-zones",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PricingController@updatePricingZone\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/pricing-zones/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/pricing-zones/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "pricing-zones",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PricingController@deletePricingZone\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/promotions",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/promotions",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "promotions"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PromotionController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/promotions",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/promotions",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "promotions"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PromotionController@store\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "promotions",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/promotions/stats",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/promotions/stats",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "promotions",
+                        "stats"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PromotionController@getStats\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "GET|HEAD api/admin/promotions/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/promotions/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "promotions",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PromotionController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/promotions/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/promotions/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "promotions",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PromotionController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/promotions/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/promotions/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "promotions",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PromotionController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/promotions/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/promotions/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "promotions",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\PromotionController@toggleStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/rent-payments",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/rent-payments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "rent-payments"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RentController@payments\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "GET|HEAD api/admin/rides",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/rides",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "rides"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RideController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "rides",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/rides/stats",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/rides/stats",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "rides",
+                        "stats"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\RideController@getStats\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PUT api/admin/rides/{id}/status",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/rides/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "rides",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\RideController@updateStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/roles",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/roles",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "roles"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RoleController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/roles",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/roles",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "roles"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\RoleController@store\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "roles",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/roles/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/roles/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "roles",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\RoleController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/roles/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/roles/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "roles",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\RoleController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/roles/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/roles/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "roles",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\RoleController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/surge-rules",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/surge-rules",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "surge-rules"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@getSurgeRules\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/surge-rules",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/surge-rules",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "surge-rules"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\PricingController@storeSurgeRule\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "surge-rules",
+              "item": [
+                {
+                  "name": "PUT api/admin/surge-rules/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/surge-rules/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "surge-rules",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PricingController@updateSurgeRule\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/surge-rules/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/surge-rules/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "surge-rules",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\PricingController@deleteSurgeRule\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/surge-rules/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/surge-rules/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "surge-rules",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\PricingController@toggleSurgeRuleStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/types",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/types",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "types"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\TypeController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/types",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/types",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "types"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\TypeController@store\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "types",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/types/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/types/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "types",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\TypeController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/types/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/types/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "types",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\TypeController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/types/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/types/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "types",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\TypeController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\UserManagementController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/users",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/users",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\UserManagementController@store\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "users",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/users/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/users/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "users",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\UserManagementController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/users/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/users/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "users",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\UserManagementController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/users/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/users/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "users",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\UserManagementController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/users/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/users/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "users",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\UserManagementController@toggleStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GET|HEAD api/admin/vendors",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/vendors",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "vendors"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\VendorController@index\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "POST api/admin/vendors",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/vendors",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "vendors"
+                  ]
+                },
+                "description": "Action: App\\Http\\Controllers\\Api\\VendorController@store\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+              }
+            },
+            {
+              "name": "vendors",
+              "item": [
+                {
+                  "name": "GET|HEAD api/admin/vendors/{id}",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/vendors/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "vendors",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\VendorController@show\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "PUT api/admin/vendors/{id}",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/vendors/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "vendors",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\VendorController@update\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "DELETE api/admin/vendors/{id}",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/admin/vendors/{id}",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "api",
+                        "admin",
+                        "vendors",
+                        "{id}"
+                      ]
+                    },
+                    "description": "Action: App\\Http\\Controllers\\Api\\VendorController@destroy\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                  }
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "PATCH api/admin/vendors/{id}/status",
+                      "request": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/admin/vendors/{id}/status",
+                          "host": [
+                            "{{base_url}}"
+                          ],
+                          "path": [
+                            "api",
+                            "admin",
+                            "vendors",
+                            "{id}",
+                            "status"
+                          ]
+                        },
+                        "description": "Action: App\\Http\\Controllers\\Api\\VendorController@toggleStatus\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api, Spatie\\Permission\\Middleware\\RoleMiddleware:admin"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "POST api/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "description": "Action: App\\Http\\Controllers\\Api\\AuthController@login\nMiddleware: api"
+          }
+        },
+        {
+          "name": "POST api/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Action: App\\Http\\Controllers\\Api\\AuthController@logout\nMiddleware: api, Illuminate\\Auth\\Middleware\\Authenticate:api"
+          }
+        },
+        {
+          "name": "POST api/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "Action: App\\Http\\Controllers\\Api\\AuthController@register\nMiddleware: api"
+          }
+        },
+        {
+          "name": "POST api/verify-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/verify-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "verify-otp"
+              ]
+            },
+            "description": "Action: App\\Http\\Controllers\\Api\\AuthController@verifyOtp\nMiddleware: api"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ]
+}

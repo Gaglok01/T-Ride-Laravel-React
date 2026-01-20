@@ -14,11 +14,15 @@ class SurgeRule extends Model
         'end_time',
         'days',
         'trigger_type',
+        'weather_condition',
+        'event_name',
+        'custom_config',
         'status'
     ];
 
     protected $casts = [
         'multiplier' => 'decimal:2',
         'days' => 'array',
+        'custom_config' => 'array',
     ];
 }

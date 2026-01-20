@@ -372,7 +372,10 @@ class PricingController extends Controller
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'days' => 'nullable|array',
-            'trigger_type' => 'required|in:time,demand,weather,event',
+            'trigger_type' => 'required|string|in:time,demand,weather,event,custom',
+            'weather_condition' => 'nullable|string',
+            'event_name' => 'nullable|string',
+            'custom_config' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -401,6 +404,27 @@ class PricingController extends Controller
 
         if (!$rule) {
             return response()->json(['status' => false, 'message' => 'Surge rule not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'multiplier' => 'sometimes|numeric|min:1',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
+            'days' => 'nullable|array',
+            'trigger_type' => 'sometimes|string|in:time,demand,weather,event,custom',
+            'weather_condition' => 'nullable|string',
+            'event_name' => 'nullable|string',
+            'custom_config' => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $rule->update($request->all());
