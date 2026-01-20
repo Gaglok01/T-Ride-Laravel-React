@@ -72,10 +72,12 @@ export default function RolesPage() {
       title="Roles & Permissions" 
       description="Manage user roles and access controls"
       actions={
-        <Button onClick={() => handleOpenModal()}>
-          <Plus size={20} />
-          Add Role
-        </Button>
+        <div className="w-full sm:w-auto">
+            <Button onClick={() => handleOpenModal()} className="w-full sm:w-auto justify-center">
+              <Plus size={20} className="mr-2" />
+              Add Role
+            </Button>
+        </div>
       }
     >
       <Head title="Roles & Permissions - T-RIDE Admin" />
@@ -93,7 +95,7 @@ export default function RolesPage() {
                   <p className="text-sm text-gray-400">{role.permissions.length} Permissions</p>
                 </div>
               </div>
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex gap-2">
                 <IconButton 
                   onClick={() => handleOpenModal(role)} 
                   tooltip="Edit Role"

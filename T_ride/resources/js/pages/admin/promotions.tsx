@@ -175,25 +175,27 @@ export default function PromotionsPage() {
             title="Promotions & Vouchers"
             description="Manage discount codes and campaigns"
             actions={
-                <div className="flex items-center gap-3">
-                     <div className="relative">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                     <div className="relative w-full sm:w-auto">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search code..." 
                             value={searchTerm}
                             onChange={handleSearch}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
-                     <Button onClick={handleRefresh} variant="secondary">
-                        <RefreshCw size={18} className="mr-2" />
-                        Refresh
-                    </Button>
-                    <Button onClick={openCreateModal}>
-                        <Plus size={18} className="mr-2" />
-                        Create Promo
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button onClick={handleRefresh} variant="secondary" className="flex-1 sm:flex-none justify-center">
+                            <RefreshCw size={18} className="mr-2" />
+                            Refresh
+                        </Button>
+                        <Button onClick={openCreateModal} className="flex-1 sm:flex-none justify-center">
+                            <Plus size={18} className="mr-2" />
+                            Create Promo
+                        </Button>
+                    </div>
                 </div>
             }
         >

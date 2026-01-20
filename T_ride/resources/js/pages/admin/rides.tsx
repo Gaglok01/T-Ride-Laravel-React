@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Filter, Calendar, Eye, CarFront, CheckCircle, Activity, XCircle, DollarSign, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Filter, Calendar, Eye, CarFront, CheckCircle, Activity, XCircle, DollarSign, Search, ChevronLeft, ChevronRight, Download } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import axios from "@/lib/axios"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 interface RideStats {
     total_rides: number
@@ -46,6 +48,7 @@ export default function RidesPage() {
     const [searchTerm, setSearchTerm] = useState("")
     const [pagination, setPagination] = useState<Pagination | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
+    const [isExporting, setIsExporting] = useState(false)
 
     useEffect(() => {
         fetchStats()
@@ -101,6 +104,70 @@ export default function RidesPage() {
         }
     }
 
+    const handleExport = async () => {
+        try {
+            setIsExporting(true)
+            const params: any = { 
+                all: true,
+                search: searchTerm
+            }
+            if (activeTab === "Completed") params.status = "completed"
+            else if (activeTab === "In Progress") params.status = "in_progress"
+            else if (activeTab === "Cancelled") params.status = "cancelled"
+
+            const response = await axios.get("/api/admin/rides", { params })
+            
+            let exportData: Ride[] = []
+            if (response.data.status && Array.isArray(response.data.data)) {
+                 exportData = response.data.data
+            } else if (response.data.data && Array.isArray(response.data.data.data)) {
+                 exportData = response.data.data.data
+            } else if (Array.isArray(response.data)) {
+                 exportData = response.data
+            }
+
+            const doc = new jsPDF()
+            doc.setFontSize(20)
+            doc.setTextColor(40, 40, 40)
+            doc.text("T-RIDE", 14, 20)
+            
+            doc.setFontSize(12)
+            doc.setTextColor(100, 100, 100)
+            doc.text("Rides Report", 14, 28)
+            
+            doc.setFontSize(10)
+            doc.setTextColor(150, 150, 150)
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 35)
+
+            const tableData = exportData.map(r => [
+                r.ride_custom_id,
+                r.rider?.name || '-',
+                r.driver?.name || '-',
+                r.pickup_address,
+                r.dropoff_address,
+                `$${r.fare}`,
+                r.payment_method,
+                r.status,
+            ])
+
+            autoTable(doc, {
+                head: [["ID", "Rider", "Driver", "Pickup", "Dropoff", "Fare", "Payment", "Status"]],
+                body: tableData,
+                startY: 40,
+                theme: 'grid',
+                headStyles: { fillColor: [245, 197, 24], textColor: [0, 0, 0] }
+            })
+            
+            doc.save(`rides_export_${Date.now()}.pdf`)
+
+        } catch (e) {
+            console.error("Export failed:", e)
+            alert("Failed to export rides.")
+        } finally {
+            setIsExporting(false)
+        }
+    }
+
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value)
         setCurrentPage(1) // Reset to page 1 on search
@@ -116,18 +183,22 @@ export default function RidesPage() {
             title="Ride Management"
             description="Monitor and manage all rides"
             actions={
-                <div className="flex items-center gap-3">
-                     <div className="relative">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                     <div className="relative w-full sm:w-auto">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search rides..." 
                             value={searchTerm}
                             onChange={handleSearch}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
-                    <Button variant="secondary">
+                    <Button variant="secondary" className="flex-1 sm:flex-none justify-center gap-2" disabled={isExporting} onClick={handleExport}>
+                        <Download size={18} className={isExporting ? "animate-bounce" : ""} />
+                        {isExporting ? "Exporting..." : "Export"}
+                    </Button>
+                    <Button variant="secondary" className="flex-1 sm:flex-none justify-center gap-2">
                         <Calendar size={18} />
                         Date Range
                     </Button>

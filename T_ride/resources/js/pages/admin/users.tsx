@@ -353,95 +353,97 @@ export default function UsersPage() {
             title="User Management"
             description="Manage riders and customers"
             actions={
-                <div className="flex items-center gap-3">
-                    <div className="relative">
+                <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 w-full xl:w-auto">
+                    <div className="relative w-full xl:w-auto">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search users..." 
                             value={searchTerm}
                             onChange={(e) => handleSearch(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full xl:w-64"
                         />
                     </div>
-                    <div className="relative">
-                        <Button 
-                            variant={showFilters ? "default" : "secondary"} 
-                            onClick={() => {
-                                if (!showFilters) setTempFilters(appliedFilters)
-                                setShowFilters(!showFilters)
-                            }}
-                        >
-                            <Filter size={18} />
-                            Filter
-                        </Button>
-                        
-                        {/* Filter Dropdown Panel */}
-                        {showFilters && (
-                            <div className="absolute right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
-                                <div className="space-y-5">
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                                        <h3 className="font-semibold text-white">Filter Users</h3>
-                                        <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
-                                            <span className="sr-only">Close</span>
-                                            <X size={18} />
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="space-y-4">
-                                        <ModalSelect
-                                            label="Status"
-                                            value={tempFilters.status}
-                                            onChange={(val) => setTempFilters({...tempFilters, status: val})}
-                                            options={[
-                                                { label: "All Statuses", value: "All" },
-                                                { label: "Active", value: "Active" },
-                                                { label: "Suspended", value: "Suspended" },
-                                                { label: "Inactive", value: "Inactive" },
-                                                { label: "Pending", value: "Pending" }
-                                            ]}
-                                        />
-                                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                        <div className="relative">
+                            <Button 
+                                variant={showFilters ? "default" : "secondary"} 
+                                onClick={() => {
+                                    if (!showFilters) setTempFilters(appliedFilters)
+                                    setShowFilters(!showFilters)
+                                }}
+                            >
+                                <Filter size={18} />
+                                Filter
+                            </Button>
+                            
+                            {/* Filter Dropdown Panel */}
+                            {showFilters && (
+                                <div className="absolute right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="space-y-5">
+                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                            <h3 className="font-semibold text-white">Filter Users</h3>
+                                            <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
+                                                <span className="sr-only">Close</span>
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            <ModalSelect
+                                                label="Status"
+                                                value={tempFilters.status}
+                                                onChange={(val) => setTempFilters({...tempFilters, status: val})}
+                                                options={[
+                                                    { label: "All Statuses", value: "All" },
+                                                    { label: "Active", value: "Active" },
+                                                    { label: "Suspended", value: "Suspended" },
+                                                    { label: "Inactive", value: "Inactive" },
+                                                    { label: "Pending", value: "Pending" }
+                                                ]}
+                                            />
+                                        </div>
 
-                                    <div className="pt-4 grid grid-cols-2 gap-3">
-                                        <Button 
-                                            onClick={clearFilters}
-                                            variant="secondary"
-                                            className="w-full justify-center"
-                                        >
-                                            <X size={16} />
-                                            Clear
-                                        </Button>
-                                        <Button 
-                                            onClick={applyFilters} 
-                                            variant="default"
-                                            className="w-full justify-center"
-                                        >
-                                            <Check size={16} />
-                                            Apply
-                                        </Button>
+                                        <div className="pt-4 grid grid-cols-2 gap-3">
+                                            <Button 
+                                                onClick={clearFilters}
+                                                variant="secondary"
+                                                className="w-full justify-center"
+                                            >
+                                                <X size={16} />
+                                                Clear
+                                            </Button>
+                                            <Button 
+                                                onClick={applyFilters} 
+                                                variant="default"
+                                                className="w-full justify-center"
+                                            >
+                                                <Check size={16} />
+                                                Apply
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        <Button variant="secondary" onClick={handleExport} disabled={isExporting}>
+                            {isExporting ? (
+                                <>
+                                    <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                                    Exporting...
+                                </>
+                            ) : (
+                                <>
+                                    <Download size={18} />
+                                    Export
+                                </>
+                            )}
+                        </Button>
+                        <Button onClick={openCreateModal}>
+                            <Plus size={18} />
+                            Add User
+                        </Button>
                     </div>
-                    <Button variant="secondary" onClick={handleExport} disabled={isExporting}>
-                        {isExporting ? (
-                            <>
-                                <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                                Exporting...
-                            </>
-                        ) : (
-                            <>
-                                <Download size={18} />
-                                Export
-                            </>
-                        )}
-                    </Button>
-                    <Button onClick={openCreateModal}>
-                        <Plus size={18} />
-                        Add User
-                    </Button>
                 </div>
             }
         >
@@ -715,7 +717,7 @@ function UserRow({ user, onEdit, onDelete, onToggleStatus, formatDate, formatWal
             </td>
             <td className="px-6 py-4 text-sm text-white/70">{formatDate(user.created_at)}</td>
             <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center justify-end gap-2">
                     <Link href={`/admin/users/${user.id}`}>
                         <IconButton tooltip="View">
                             <Eye size={16} />

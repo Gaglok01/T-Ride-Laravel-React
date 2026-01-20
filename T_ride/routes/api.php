@@ -146,6 +146,7 @@ Route::middleware('auth:api')->group(function () {
         
         // Payment Providers
         Route::get('/payment-gateway/providers', [PaymentGatewayController::class, 'getProviders']);
+        Route::get('/payment-gateway/providers/{id}', [PaymentGatewayController::class, 'getProvider']);
         Route::post('/payment-gateway/providers', [PaymentGatewayController::class, 'storeProvider']);
         Route::put('/payment-gateway/providers/{id}', [PaymentGatewayController::class, 'updateProvider']);
         Route::patch('/payment-gateway/providers/{id}/configure', [PaymentGatewayController::class, 'configureProvider']);

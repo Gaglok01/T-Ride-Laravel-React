@@ -92,12 +92,14 @@ export default function ViewRent({ id }: { id: number }) {
             title="Vehicle Details"
             description={`View details for ${vehicle.name} (${vehicle.plate_number})`}
             actions={
-                <Link href="/admin/rents">
-                    <Button variant="secondary">
-                        <ArrowLeft size={16} className="mr-2" />
-                        Back to Fleet
-                    </Button>
-                </Link>
+                <div className="w-full sm:w-auto">
+                    <Link href="/admin/rents" className="w-full sm:w-auto">
+                        <Button variant="secondary" className="w-full sm:w-auto justify-center">
+                            <ArrowLeft size={16} className="mr-2" />
+                            Back to Fleet
+                        </Button>
+                    </Link>
+                </div>
             }
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

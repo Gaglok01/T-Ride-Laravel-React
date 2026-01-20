@@ -2,9 +2,17 @@
 
 import type React from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export function Sidebar({ onLogout }: { onLogout: () => void }) {
+interface SidebarProps {
+  onLogout: () => void
+  isOpen?: boolean
+  onClose?: () => void
+  className?: string
+}
+
+export function Sidebar({ onLogout, isOpen, onClose, className }: SidebarProps) {
   const { url } = usePage()
 
   const isActive = (path: string) => {
@@ -13,30 +21,49 @@ export function Sidebar({ onLogout }: { onLogout: () => void }) {
     return false
   }
 
+  const handleNavClick = () => {
+    if (onClose) onClose()
+  }
+
   return (
-    <aside className="w-64 border-r border-white/5 flex flex-col p-6 bg-tride-dark shrink-0">
-      <div className="mb-12">
-        <h2 className="text-2xl font-black tracking-tighter">
+    <aside 
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 w-64 bg-tride-dark border-r border-white/5 flex flex-col p-6 transition-transform duration-300 lg:translate-x-0 lg:static lg:shrink-0",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        className
+      )}
+    >
+      <div className="mb-12 flex justify-between items-center">
+        <h2 className="text-2xl font-black tracking-tighter text-white">
           T-RIDE <span className="inline-block w-2 h-2 bg-tride-yellow rounded-full ml-0.5"></span>
         </h2>
+        
+        {/* Mobile Close Button */}
+        <button 
+          onClick={onClose}
+          className="lg:hidden p-2 text-white/50 hover:text-white transition-colors"
+        >
+          <X size={24} />
+        </button>
       </div>
 
-      <nav className="flex-1 space-y-2">
-        <NavItem href="/admin" icon={<LayoutGrid size={20} />} label="Dashboard" active={isActive("/admin")} />
-        <NavItem href="/admin/users" icon={<Users size={20} />} label="User Management" active={isActive("/admin/users")} />
-        <NavItem href="/admin/drivers" icon={<Users size={20} />} label="Drivers" active={isActive("/admin/drivers")} />
-        <NavItem href="/admin/rides" icon={<Car size={20} />} label="Rides" active={isActive("/admin/rides")} />
-        <NavItem href="/admin/orders" icon={<Package size={20} />} label="Courier Orders" active={isActive("/admin/orders")} />
-        <NavItem href="/admin/delivery-orders" icon={<ShoppingBag size={20} />} label="Delivery Orders" active={isActive("/admin/delivery-orders")} />
-        <NavItem href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
-        <NavItem href="/admin/rents" icon={<Key size={20} />} label="Rent Management" active={isActive("/admin/rents")} />
-        <NavItem href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
-        <NavItem href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
-        <NavItem href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
-        <NavItem href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
-        <NavItem href="/admin/pricing" icon={<DollarSign size={20} />} label="Pricing" active={isActive("/admin/pricing")} />
-        <NavItem href="/admin/dispatch" icon={<Radio size={20} />} label="Dispatch" active={isActive("/admin/dispatch")} />
-        <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
+      <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+        <NavItem onClick={handleNavClick} href="/admin" icon={<LayoutGrid size={20} />} label="Dashboard" active={isActive("/admin")} />
+        <NavItem onClick={handleNavClick} href="/admin/users" icon={<Users size={20} />} label="User Management" active={isActive("/admin/users")} />
+        <NavItem onClick={handleNavClick} href="/admin/drivers" icon={<Users size={20} />} label="Drivers" active={isActive("/admin/drivers")} />
+        <NavItem onClick={handleNavClick} href="/admin/rides" icon={<Car size={20} />} label="Rides" active={isActive("/admin/rides")} />
+        <NavItem onClick={handleNavClick} href="/admin/orders" icon={<Package size={20} />} label="Courier Orders" active={isActive("/admin/orders")} />
+        <NavItem onClick={handleNavClick} href="/admin/delivery-orders" icon={<ShoppingBag size={20} />} label="Delivery Orders" active={isActive("/admin/delivery-orders")} />
+        <NavItem onClick={handleNavClick} href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
+        <NavItem onClick={handleNavClick} href="/admin/rents" icon={<Key size={20} />} label="Rent Management" active={isActive("/admin/rents")} />
+        <NavItem onClick={handleNavClick} href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
+        <NavItem onClick={handleNavClick} href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
+        <NavItem onClick={handleNavClick} href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
+        <NavItem onClick={handleNavClick} href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
+        <NavItem onClick={handleNavClick} href="/admin/payment-gateway" icon={<CreditCard size={20} />} label="Payment Gateway" active={isActive("/admin/payment-gateway")} />
+        <NavItem onClick={handleNavClick} href="/admin/pricing" icon={<DollarSign size={20} />} label="Pricing" active={isActive("/admin/pricing")} />
+        <NavItem onClick={handleNavClick} href="/admin/dispatch" icon={<Radio size={20} />} label="Dispatch" active={isActive("/admin/dispatch")} />
+        <NavItem onClick={handleNavClick} href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
       </nav>
 
       {/* Logout Button */}
@@ -58,10 +85,11 @@ export function Sidebar({ onLogout }: { onLogout: () => void }) {
   )
 }
 
-function NavItem({ href, icon, label, active }: { href: string; icon: React.ReactNode; label: string; active?: boolean }) {
+function NavItem({ href, icon, label, active, onClick }: { href: string; icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
         active ? "bg-tride-yellow text-black font-bold" : "text-white/50 hover:text-white hover:bg-white/5"
       }`}

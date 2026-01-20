@@ -320,34 +320,36 @@ export default function RentPage() {
             title="Rent Management"
             description="Vehicle rentals and fleet management"
             actions={
-                <div className="flex items-center gap-3">
-                     <div className="relative">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                     <div className="relative w-full sm:w-auto">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search..." 
                             value={searchTerm}
                             onChange={handleSearch}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
-                    <Button variant="secondary" onClick={handleExport} disabled={isExporting || activeTab !== "Fleet Vehicles"}>
-                        {isExporting ? (
-                             <>
-                                <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                                Exporting...
-                            </>
-                        ) : (
-                            <>
-                                <Download size={18} className="mr-2" />
-                                Export
-                            </>
-                        )}
-                    </Button>
-                    <Button variant="default" onClick={() => { setEditingVehicle(null); setIsModalOpen(true); }}>
-                        <Plus size={18} className="mr-2" />
-                        Add Vehicle
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="secondary" className="flex-1 sm:flex-none justify-center" onClick={handleExport} disabled={isExporting || activeTab !== "Fleet Vehicles"}>
+                            {isExporting ? (
+                                 <>
+                                    <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+                                    Exporting...
+                                </>
+                            ) : (
+                                <>
+                                    <Download size={18} className="mr-2" />
+                                    Export
+                                </>
+                            )}
+                        </Button>
+                        <Button variant="default" className="flex-1 sm:flex-none justify-center" onClick={() => { setEditingVehicle(null); setIsModalOpen(true); }}>
+                            <Plus size={18} className="mr-2" />
+                            Add Vehicle
+                        </Button>
+                    </div>
                 </div>
             }
         >

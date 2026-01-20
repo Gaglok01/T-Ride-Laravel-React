@@ -69,12 +69,14 @@ export default function ViewDriver({ id }: { id: number }) {
             title="Driver Profile"
             description={`Details for ${driver.driver_id}`}
             actions={
-                <Link href="/admin/drivers">
-                    <Button variant="secondary">
-                        <ArrowLeft size={16} className="mr-2" />
-                        Back to Drivers
-                    </Button>
-                </Link>
+                <div className="w-full sm:w-auto">
+                    <Link href="/admin/drivers" className="w-full sm:w-auto">
+                        <Button variant="secondary" className="w-full sm:w-auto justify-center">
+                            <ArrowLeft size={16} className="mr-2" />
+                            Back to Drivers
+                        </Button>
+                    </Link>
+                </div>
             }
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -76,12 +76,14 @@ export default function ViewCourierOrder({ id }: { id: number }) {
             title={`Courier Order #${order.order_id}`}
             description={`Created on ${new Date(order.created_at).toLocaleDateString()}`}
             actions={
-                <Link href="/admin/orders">
-                    <Button variant="secondary">
-                        <ArrowLeft size={16} className="mr-2" />
-                        Back to Orders
-                    </Button>
-                </Link>
+                <div className="w-full sm:w-auto">
+                    <Link href="/admin/orders" className="w-full sm:w-auto">
+                        <Button variant="secondary" className="w-full sm:w-auto justify-center">
+                            <ArrowLeft size={16} className="mr-2" />
+                            Back to Orders
+                        </Button>
+                    </Link>
+                </div>
             }
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

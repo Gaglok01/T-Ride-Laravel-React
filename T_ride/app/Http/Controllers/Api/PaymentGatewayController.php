@@ -17,6 +17,32 @@ use Illuminate\Support\Str;
 class PaymentGatewayController extends Controller
 {
     // Payment Providers
+    public function getProvider($id)
+    {
+        $provider = PaymentProvider::findOrFail($id);
+        
+        // Fetch recent transactions for this provider
+        $transactions = PaymentTransaction::with('user')
+            ->where('payment_provider_id', $id)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $stats = [
+            'total_processed' => PaymentTransaction::where('payment_provider_id', $id)->where('status', 'success')->sum('amount'),
+            'transaction_count' => PaymentTransaction::where('payment_provider_id', $id)->count(),
+            'success_rate' => PaymentTransaction::where('payment_provider_id', $id)->where('status', 'success')->count() / max(PaymentTransaction::where('payment_provider_id', $id)->count(), 1) * 100,
+            'failed_count' => PaymentTransaction::where('payment_provider_id', $id)->where('status', 'failed')->count(),
+        ];
+
+        return response()->json([
+            'status' => true,
+            'data' => $provider,
+            'transactions' => $transactions,
+            'stats' => $stats
+        ]);
+    }
+
     public function getProviders()
     {
         $providers = PaymentProvider::all();
@@ -39,7 +65,7 @@ class PaymentGatewayController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:payment_providers',
-            'type' => 'required|in:card,mobile_money,wallet',
+            'type' => 'required|in:card,mobile_money,wallet,bank_transfer',
             'api_key' => 'nullable|string',
             'secret_key' => 'nullable|string',
             'country' => 'nullable|string',
@@ -71,7 +97,7 @@ class PaymentGatewayController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|unique:payment_providers,name,' . $id,
-            'type' => 'sometimes|in:card,mobile_money,wallet',
+            'type' => 'required|in:card,mobile_money,wallet,bank_transfer',
             'api_key' => 'nullable|string',
             'secret_key' => 'nullable|string',
             'country' => 'nullable|string',

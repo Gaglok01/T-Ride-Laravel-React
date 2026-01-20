@@ -63,12 +63,14 @@ export default function ViewUser({ id }: { id: number }) {
             title="User Profile"
             description={`Details for ${user.name}`}
             actions={
-                <Link href="/admin/users">
-                    <Button variant="secondary">
-                        <ArrowLeft size={16} className="mr-2" />
-                        Back to Users
-                    </Button>
-                </Link>
+                <div className="w-full sm:w-auto">
+                    <Link href="/admin/users" className="w-full sm:w-auto">
+                        <Button variant="secondary" className="w-full sm:w-auto justify-center">
+                            <ArrowLeft size={16} className="mr-2" />
+                            Back to Users
+                        </Button>
+                    </Link>
+                </div>
             }
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

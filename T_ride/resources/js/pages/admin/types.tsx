@@ -139,18 +139,18 @@ export default function TypesPage() {
       title="Driver Types"
       description="Manage driver categories available on the platform"
       actions={
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
             <input 
               type="text" 
               placeholder="Search types..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+              className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
             />
           </div>
-          <Button onClick={openCreateModal}>
+          <Button onClick={openCreateModal} className="flex-1 sm:flex-none justify-center">
             <Plus size={18} />
             Add Driver Type
           </Button>

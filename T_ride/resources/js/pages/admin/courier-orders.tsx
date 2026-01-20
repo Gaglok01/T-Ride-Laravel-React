@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Search, Filter, Plus, Package, CheckCircle, Activity, DollarSign, Eye, Edit, Trash2 } from "lucide-react"
+import { Search, Filter, Plus, Package, CheckCircle, Activity, DollarSign, Eye, Edit, Trash2, Download } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { Button, IconButton } from "@/components/ui/button"
 import orderService, { Order, CreateOrderRequest } from "@/services/orderService"
@@ -9,6 +9,8 @@ import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationMo
 import { StatusUpdateModal } from "@/components/admin/StatusUpdateModal"
 import { ModalInput, ModalSelect } from "@/components/ui/modal"
 import { Check, X } from "lucide-react"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 export default function CourierOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([])
@@ -37,6 +39,7 @@ export default function CourierOrdersPage() {
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
     const [orderToUpdateStatus, setOrderToUpdateStatus] = useState<Order | null>(null)
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+    const [isExporting, setIsExporting] = useState(false)
 
     useEffect(() => {
         fetchOrders()
@@ -98,6 +101,56 @@ export default function CourierOrdersPage() {
     const applyFilters = () => {
         setAppliedFilters(tempFilters)
         setShowFilters(false)
+    }
+
+    const handleExport = async () => {
+        try {
+            setIsExporting(true)
+            const params: any = {}
+            if (activeTab !== "All Orders") params.status = activeTab
+            if (appliedFilters.package_type !== "All Package Types") params.package_type = appliedFilters.package_type
+            if (appliedFilters.order_id) params.order_id = appliedFilters.order_id
+            
+            const data = await orderService.getAll(params)
+
+            const doc = new jsPDF()
+            doc.setFontSize(20)
+            doc.setTextColor(40, 40, 40)
+            doc.text("T-RIDE", 14, 20)
+            
+            doc.setFontSize(12)
+            doc.setTextColor(100, 100, 100)
+            doc.text("Courier Orders Report", 14, 28)
+            
+            doc.setFontSize(10)
+            doc.setTextColor(150, 150, 150)
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 35)
+
+            const tableData = data.map((order: Order) => [
+                order.order_id || `#${order.id}`,
+                order.sender,
+                order.recipient,
+                order.package_type,
+                order.courier,
+                `$${Number(order.fee).toFixed(2)}`,
+                order.status,
+            ])
+
+            autoTable(doc, {
+                head: [["Order ID", "Sender", "Recipient", "Type", "Courier", "Fee", "Status"]],
+                body: tableData,
+                startY: 40,
+                theme: 'grid',
+                headStyles: { fillColor: [245, 197, 24], textColor: [0, 0, 0] }
+            })
+            
+            doc.save(`courier_orders_${Date.now()}.pdf`)
+
+        } catch (error) {
+            console.error("Export failed:", error)
+        } finally {
+            setIsExporting(false)
+        }
     }
 
     const handleSaveOrder = async (data: CreateOrderRequest) => {
@@ -165,91 +218,97 @@ export default function CourierOrdersPage() {
             title="Courier Orders"
             description="Package delivery management"
             actions={
-                <div className="flex items-center gap-3">
-                    <div className="relative">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+                    <div className="relative w-full md:w-auto">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search orders..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-64"
+                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full md:w-64"
                         />
                     </div>
 
-                    <div className="relative">
-                        <Button 
-                            variant={showFilters ? "default" : "secondary"} 
-                            onClick={() => {
-                                if (!showFilters) setTempFilters(appliedFilters)
-                                setShowFilters(!showFilters)
-                            }}
-                        >
-                            <Filter size={18} />
-                            Filter
+                    <div className="flex gap-2 flex-wrap">
+                        <Button variant="secondary" className="gap-2" onClick={handleExport} disabled={isExporting}>
+                            <Download size={18} className={isExporting ? "animate-bounce" : ""} />
+                            {isExporting ? "Exporting..." : "Export"}
                         </Button>
+                        <div className="relative">
+                            <Button 
+                                variant={showFilters ? "default" : "secondary"} 
+                                onClick={() => {
+                                    if (!showFilters) setTempFilters(appliedFilters)
+                                    setShowFilters(!showFilters)
+                                }}
+                            >
+                                <Filter size={18} />
+                                Filter
+                            </Button>
 
-                        {/* Filter Dropdown Panel */}
-                        {showFilters && (
-                            <div className="absolute right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
-                                <div className="space-y-5">
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                                        <h3 className="font-semibold text-white">Filter Orders</h3>
-                                        <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
-                                            <span className="sr-only">Close</span>
-                                            <X size={18} />
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="space-y-4">
-                                        <ModalSelect
-                                            label="Package Type"
-                                            value={tempFilters.package_type}
-                                            onChange={(val) => setTempFilters({...tempFilters, package_type: val})}
-                                            options={[
-                                                { label: "All Package Types", value: "All Package Types" },
-                                                { label: "Small", value: "Small" },
-                                                { label: "Medium", value: "Medium" },
-                                                { label: "Large", value: "Large" },
-                                                { label: "Document", value: "Document" }
-                                            ]}
-                                        />
+                            {/* Filter Dropdown Panel */}
+                            {showFilters && (
+                                <div className="absolute right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="space-y-5">
+                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                            <h3 className="font-semibold text-white">Filter Orders</h3>
+                                            <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
+                                                <span className="sr-only">Close</span>
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            <ModalSelect
+                                                label="Package Type"
+                                                value={tempFilters.package_type}
+                                                onChange={(val) => setTempFilters({...tempFilters, package_type: val})}
+                                                options={[
+                                                    { label: "All Package Types", value: "All Package Types" },
+                                                    { label: "Small", value: "Small" },
+                                                    { label: "Medium", value: "Medium" },
+                                                    { label: "Large", value: "Large" },
+                                                    { label: "Document", value: "Document" }
+                                                ]}
+                                            />
 
-                                        <ModalInput
-                                            label="Order ID"
-                                            placeholder="e.g. PKG-0021"
-                                            value={tempFilters.order_id}
-                                            onChange={(val) => setTempFilters({...tempFilters, order_id: val})}
-                                            icon={<Search size={16} />}
-                                        />
-                                    </div>
+                                            <ModalInput
+                                                label="Order ID"
+                                                placeholder="e.g. PKG-0021"
+                                                value={tempFilters.order_id}
+                                                onChange={(val) => setTempFilters({...tempFilters, order_id: val})}
+                                                icon={<Search size={16} />}
+                                            />
+                                        </div>
 
-                                    <div className="pt-4 grid grid-cols-2 gap-3">
-                                        <Button 
-                                            onClick={clearFilters}
-                                            variant="secondary"
-                                            className="w-full justify-center"
-                                        >
-                                            <X size={16} />
-                                            Clear
-                                        </Button>
-                                        <Button 
-                                            onClick={applyFilters} 
-                                            variant="default"
-                                            className="w-full justify-center"
-                                        >
-                                            <Check size={16} />
-                                            Apply
-                                        </Button>
+                                        <div className="pt-4 grid grid-cols-2 gap-3">
+                                            <Button 
+                                                onClick={clearFilters}
+                                                variant="secondary"
+                                                className="w-full justify-center"
+                                            >
+                                                <X size={16} />
+                                                Clear
+                                            </Button>
+                                            <Button 
+                                                onClick={applyFilters} 
+                                                variant="default"
+                                                className="w-full justify-center"
+                                            >
+                                                <Check size={16} />
+                                                Apply
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        <Button onClick={openCreateModal}>
+                            <Plus size={18} className="mr-2" />
+                            Create Order
+                        </Button>
                     </div>
-                    <Button onClick={openCreateModal}>
-                        <Plus size={18} className="mr-2" />
-                        Create Order
-                    </Button>
                 </div>
             }
         >
@@ -435,7 +494,7 @@ function OrderRow({ order, onEdit, onDelete, onToggleStatus }: { order: Order, o
                 </button>
             </td>
             <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center justify-end gap-2">
                     <Link href={`/admin/orders/${order.id}`}>
                         <IconButton tooltip="View">
                             <Eye size={16} />

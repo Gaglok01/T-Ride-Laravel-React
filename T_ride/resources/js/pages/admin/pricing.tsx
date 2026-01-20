@@ -138,12 +138,14 @@ export default function PricingPage() {
             title="Pricing Configuration"
             description="Manage fares and pricing rules"
             actions={
-                <Button onClick={openAddModal}>
-                    <Plus size={18} />
-                    {activeTab === "Ride Pricing" ? "Add Pricing Zone" : 
-                     activeTab === "Courier Pricing" ? "Add Package" :
-                     activeTab === "Delivery Fees" ? "Add Delivery Fee" : "Add Surge Rule"}
-                </Button>
+                <div className="w-full sm:w-auto">
+                    <Button onClick={openAddModal} className="w-full sm:w-auto justify-center">
+                        <Plus size={18} className="mr-2" />
+                        {activeTab === "Ride Pricing" ? "Add Pricing Zone" : 
+                        activeTab === "Courier Pricing" ? "Add Package" :
+                        activeTab === "Delivery Fees" ? "Add Delivery Fee" : "Add Surge Rule"}
+                    </Button>
+                </div>
             }
         >
             {/* Tabs */}
@@ -358,59 +360,61 @@ function CourierPricingTab({ packages, onEdit, onRefresh }: { packages: PackageP
 function DeliveryFeesTab({ fees, onEdit, onRefresh }: { fees: DeliveryFee[], onEdit: (fee: DeliveryFee) => void, onRefresh: () => void }) {
     return (
         <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden">
-            <table className="w-full">
-                <thead>
-                    <tr className="border-b border-white/5 text-left text-white/40 text-sm">
-                        <th className="px-6 py-4 font-medium">Name</th>
-                        <th className="px-6 py-4 font-medium">Base Fee</th>
-                        <th className="px-6 py-4 font-medium">Per KM</th>
-                        <th className="px-6 py-4 font-medium">Min Order</th>
-                        <th className="px-6 py-4 font-medium">Free Delivery</th>
-                        <th className="px-6 py-4 font-medium">Status</th>
-                        <th className="px-6 py-4 font-medium text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                    {fees.length === 0 ? (
-                        <tr>
-                            <td colSpan={7} className="px-6 py-8 text-center text-white/50">
-                                No delivery fees configured yet.
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <th className="px-6 py-4 font-medium">Name</th>
+                            <th className="px-6 py-4 font-medium">Base Fee</th>
+                            <th className="px-6 py-4 font-medium">Per KM</th>
+                            <th className="px-6 py-4 font-medium">Min Order</th>
+                            <th className="px-6 py-4 font-medium">Free Delivery</th>
+                            <th className="px-6 py-4 font-medium">Status</th>
+                            <th className="px-6 py-4 font-medium text-right">Actions</th>
                         </tr>
-                    ) : (
-                        fees.map(fee => (
-                            <tr key={fee.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4">
-                                    <div>
-                                        <p className="font-medium text-white">{fee.name}</p>
-                                        <p className="text-xs text-white/50">{fee.description}</p>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 font-mono">${Number(fee.base_fee).toFixed(2)}</td>
-                                <td className="px-6 py-4 font-mono">${Number(fee.per_km).toFixed(2)}</td>
-                                <td className="px-6 py-4 font-mono">${Number(fee.min_order).toFixed(2)}</td>
-                                <td className="px-6 py-4 font-mono">
-                                    {fee.free_delivery_threshold ? `$${Number(fee.free_delivery_threshold).toFixed(2)}+` : '-'}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                        fee.status === 'active' 
-                                            ? 'bg-blue-600 text-white' 
-                                            : 'bg-white/10 text-white/50'
-                                    }`}>
-                                        {fee.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <IconButton tooltip="Edit" onClick={() => onEdit(fee)}>
-                                        <Edit size={16} />
-                                    </IconButton>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                        {fees.length === 0 ? (
+                            <tr>
+                                <td colSpan={7} className="px-6 py-8 text-center text-white/50">
+                                    No delivery fees configured yet.
                                 </td>
                             </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                        ) : (
+                            fees.map(fee => (
+                                <tr key={fee.id} className="hover:bg-white/5 transition-colors group">
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <p className="font-medium text-white">{fee.name}</p>
+                                            <p className="text-xs text-white/50">{fee.description}</p>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 font-mono">${Number(fee.base_fee).toFixed(2)}</td>
+                                    <td className="px-6 py-4 font-mono">${Number(fee.per_km).toFixed(2)}</td>
+                                    <td className="px-6 py-4 font-mono">${Number(fee.min_order).toFixed(2)}</td>
+                                    <td className="px-6 py-4 font-mono">
+                                        {fee.free_delivery_threshold ? `$${Number(fee.free_delivery_threshold).toFixed(2)}+` : '-'}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                            fee.status === 'active' 
+                                                ? 'bg-blue-600 text-white' 
+                                                : 'bg-white/10 text-white/50'
+                                        }`}>
+                                            {fee.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <IconButton tooltip="Edit" onClick={() => onEdit(fee)}>
+                                            <Edit size={16} />
+                                        </IconButton>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     )
 }
@@ -429,72 +433,74 @@ function SurgeRulesTab({ rules, onEdit, onRefresh }: { rules: SurgeRule[], onEdi
 
     return (
         <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden">
-            <table className="w-full">
-                <thead>
-                    <tr className="border-b border-white/5 text-left text-white/40 text-sm">
-                        <th className="px-6 py-4 font-medium">Rule Name</th>
-                        <th className="px-6 py-4 font-medium">Multiplier</th>
-                        <th className="px-6 py-4 font-medium">Trigger</th>
-                        <th className="px-6 py-4 font-medium">Time</th>
-                        <th className="px-6 py-4 font-medium">Status</th>
-                        <th className="px-6 py-4 font-medium text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                    {rules.length === 0 ? (
-                        <tr>
-                            <td colSpan={6} className="px-6 py-8 text-center text-white/50">
-                                No surge rules configured yet.
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <th className="px-6 py-4 font-medium">Rule Name</th>
+                            <th className="px-6 py-4 font-medium">Multiplier</th>
+                            <th className="px-6 py-4 font-medium">Trigger</th>
+                            <th className="px-6 py-4 font-medium">Time</th>
+                            <th className="px-6 py-4 font-medium">Status</th>
+                            <th className="px-6 py-4 font-medium text-right">Actions</th>
                         </tr>
-                    ) : (
-                        rules.map(rule => (
-                            <tr key={rule.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4">
-                                    <div>
-                                        <p className="font-medium text-white">{rule.name}</p>
-                                        <p className="text-xs text-white/50">{rule.description}</p>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full text-sm font-bold">
-                                        {Number(rule.multiplier).toFixed(1)}x
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 capitalize text-white/70">{rule.trigger_type}</td>
-                                <td className="px-6 py-4 text-white/70">
-                                    {rule.trigger_type === 'time' && rule.start_time && rule.end_time 
-                                        ? `${rule.start_time} - ${rule.end_time}` 
-                                        : rule.trigger_type === 'weather' && rule.weather_condition
-                                        ? `Condition: ${rule.weather_condition}`
-                                        : rule.trigger_type === 'event' && rule.event_name
-                                        ? `Event: ${rule.event_name}`
-                                        : rule.trigger_type === 'custom'
-                                        ? 'Custom Config'
-                                        : '-'}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <button 
-                                        onClick={() => handleToggleStatus(rule)}
-                                        className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                                            rule.status === 'active' 
-                                                ? 'bg-blue-600 text-white hover:bg-blue-500' 
-                                                : 'bg-white/10 text-white/50 hover:bg-white/20'
-                                        }`}
-                                    >
-                                        {rule.status}
-                                    </button>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <IconButton tooltip="Edit" onClick={() => onEdit(rule)}>
-                                        <Edit size={16} />
-                                    </IconButton>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                        {rules.length === 0 ? (
+                            <tr>
+                                <td colSpan={6} className="px-6 py-8 text-center text-white/50">
+                                    No surge rules configured yet.
                                 </td>
                             </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                        ) : (
+                            rules.map(rule => (
+                                <tr key={rule.id} className="hover:bg-white/5 transition-colors group">
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <p className="font-medium text-white">{rule.name}</p>
+                                            <p className="text-xs text-white/50">{rule.description}</p>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full text-sm font-bold">
+                                            {Number(rule.multiplier).toFixed(1)}x
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 capitalize text-white/70">{rule.trigger_type}</td>
+                                    <td className="px-6 py-4 text-white/70">
+                                        {rule.trigger_type === 'time' && rule.start_time && rule.end_time 
+                                            ? `${rule.start_time} - ${rule.end_time}` 
+                                            : rule.trigger_type === 'weather' && rule.weather_condition
+                                            ? `Condition: ${rule.weather_condition}`
+                                            : rule.trigger_type === 'event' && rule.event_name
+                                            ? `Event: ${rule.event_name}`
+                                            : rule.trigger_type === 'custom'
+                                            ? 'Custom Config'
+                                            : '-'}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <button 
+                                            onClick={() => handleToggleStatus(rule)}
+                                            className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                                                rule.status === 'active' 
+                                                    ? 'bg-blue-600 text-white hover:bg-blue-500' 
+                                                    : 'bg-white/10 text-white/50 hover:bg-white/20'
+                                            }`}
+                                        >
+                                            {rule.status}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <IconButton tooltip="Edit" onClick={() => onEdit(rule)}>
+                                            <Edit size={16} />
+                                        </IconButton>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     )
 }
