@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\PromotionController;
 use App\Http\Controllers\Api\DeliveryOrderController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PaymentGatewayController;
+use App\Http\Controllers\Api\CityZoneController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -176,6 +177,48 @@ Route::middleware('auth:api')->group(function () {
         // Transactions
         Route::get('/payment-gateway/transactions', [PaymentGatewayController::class, 'getTransactions']);
         Route::post('/payment-gateway/transactions', [PaymentGatewayController::class, 'processTransaction']);
+
+        // Cities & Service Zones Management
+        Route::get('/cities-zones/stats', [CityZoneController::class, 'getDashboardStats']);
+        
+        // Cities
+        Route::get('/cities', [CityZoneController::class, 'getCities']);
+        Route::post('/cities', [CityZoneController::class, 'storeCity']);
+        Route::get('/cities/{id}', [CityZoneController::class, 'showCity']);
+        Route::put('/cities/{id}', [CityZoneController::class, 'updateCity']);
+        Route::patch('/cities/{id}/status', [CityZoneController::class, 'updateCityStatus']);
+        Route::delete('/cities/{id}', [CityZoneController::class, 'destroyCity']);
+
+        // Service Zones
+        Route::get('/service-zones', [CityZoneController::class, 'getServiceZones']);
+        Route::post('/service-zones', [CityZoneController::class, 'storeServiceZone']);
+        Route::get('/service-zones/{id}', [CityZoneController::class, 'showServiceZone']);
+        Route::put('/service-zones/{id}', [CityZoneController::class, 'updateServiceZone']);
+        Route::patch('/service-zones/{id}/status', [CityZoneController::class, 'updateServiceZoneStatus']);
+        Route::delete('/service-zones/{id}', [CityZoneController::class, 'destroyServiceZone']);
+
+        // Transportation Hubs (Airports, Stations, etc.)
+        Route::get('/transportation-hubs', [CityZoneController::class, 'getTransportationHubs']);
+        Route::post('/transportation-hubs', [CityZoneController::class, 'storeTransportationHub']);
+        Route::get('/transportation-hubs/{id}', [CityZoneController::class, 'showTransportationHub']);
+        Route::put('/transportation-hubs/{id}', [CityZoneController::class, 'updateTransportationHub']);
+        Route::patch('/transportation-hubs/{id}/status', [CityZoneController::class, 'updateTransportationHubStatus']);
+        Route::delete('/transportation-hubs/{id}', [CityZoneController::class, 'destroyTransportationHub']);
+
+        // Restricted Areas
+        Route::get('/restricted-areas', [CityZoneController::class, 'getRestrictedAreas']);
+        Route::post('/restricted-areas', [CityZoneController::class, 'storeRestrictedArea']);
+        Route::get('/restricted-areas/{id}', [CityZoneController::class, 'showRestrictedArea']);
+        Route::put('/restricted-areas/{id}', [CityZoneController::class, 'updateRestrictedArea']);
+        Route::patch('/restricted-areas/{id}/status', [CityZoneController::class, 'updateRestrictedAreaStatus']);
+        Route::delete('/restricted-areas/{id}', [CityZoneController::class, 'destroyRestrictedArea']);
+
+        // Expansion Plans
+        Route::get('/expansion-plans', [CityZoneController::class, 'getExpansionPlans']);
+        Route::post('/expansion-plans', [CityZoneController::class, 'storeExpansionPlan']);
+        Route::get('/expansion-plans/{id}', [CityZoneController::class, 'showExpansionPlan']);
+        Route::put('/expansion-plans/{id}', [CityZoneController::class, 'updateExpansionPlan']);
+        Route::delete('/expansion-plans/{id}', [CityZoneController::class, 'destroyExpansionPlan']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
