@@ -7,6 +7,8 @@ import {
     Train, ShieldAlert, CheckCircle, XCircle, Loader2 
 } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
+import { Dropdown } from "@/components/ui/dropdown"
+
 import { Link } from "@inertiajs/react"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
 import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationModal"
@@ -552,16 +554,16 @@ function ServiceZonesTab({ zones, cities, onDelete, onStatusToggle, onEdit, onAd
             <div className="lg:col-span-2 border-r border-white/5 bg-white/5 flex flex-col p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div className="font-semibold text-lg">Zone Map</div>
-                    <select 
-                        className="bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
-                        value={selectedCity || ''}
-                        onChange={(e) => setSelectedCity(e.target.value ? Number(e.target.value) : null)}
-                    >
-                        <option value="">All Cities</option>
-                        {cities.map(city => (
-                            <option key={city.id} value={city.id}>{city.name}</option>
-                        ))}
-                    </select>
+                    <Dropdown 
+                        value={selectedCity ? selectedCity.toString() : "all"}
+                        onChange={(val) => setSelectedCity(val === "all" ? null : Number(val))}
+                        placeholder="All Cities"
+                        options={[
+                            { value: "all", label: "All Cities" },
+                            ...cities.map(city => ({ value: city.id, label: city.name }))
+                        ]}
+                        className="w-[180px]"
+                    />
                 </div>
                 <div className="flex-1 bg-white/5 rounded-2xl border-2 border-dashed border-white/10 flex items-center justify-center text-white/20">
                     <MapIcon size={48} />
