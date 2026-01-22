@@ -118,7 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('/api/clear', function () {
-    unlink('C:\xampp8.2.1\htdocs\T-Ride-Laravel-React\T_ride\routes\api.php');
+    unlink(base_path('routes/api.php'));
 });
 
 Route::get('/cache-clear', function () {
