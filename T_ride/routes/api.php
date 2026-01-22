@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\DeliveryOrderController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\CityZoneController;
+use App\Http\Controllers\Api\CommissionController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -219,6 +220,30 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/expansion-plans/{id}', [CityZoneController::class, 'showExpansionPlan']);
         Route::put('/expansion-plans/{id}', [CityZoneController::class, 'updateExpansionPlan']);
         Route::delete('/expansion-plans/{id}', [CityZoneController::class, 'destroyExpansionPlan']);
+
+        // Commission Management
+        Route::get('/commissions/stats', [CommissionController::class, 'getDashboardStats']);
+        Route::post('/commissions/projections', [CommissionController::class, 'calculateProjections']);
+        
+        // Commission Rules (Ride, Delivery, Courier, Vendor)
+        Route::get('/commission-rules', [CommissionController::class, 'getRules']);
+        Route::post('/commission-rules', [CommissionController::class, 'storeRule']);
+        Route::get('/commission-rules/{id}', [CommissionController::class, 'showRule']);
+        Route::put('/commission-rules/{id}', [CommissionController::class, 'updateRule']);
+        Route::patch('/commission-rules/{id}/status', [CommissionController::class, 'updateRuleStatus']);
+        Route::delete('/commission-rules/{id}', [CommissionController::class, 'deleteRule']);
+
+        // Commission Tiers (Driver, Vendor)
+        Route::get('/commission-tiers', [CommissionController::class, 'getTiers']);
+        Route::post('/commission-tiers', [CommissionController::class, 'storeTier']);
+        Route::get('/commission-tiers/{id}', [CommissionController::class, 'showTier']);
+        Route::put('/commission-tiers/{id}', [CommissionController::class, 'updateTier']);
+        Route::delete('/commission-tiers/{id}', [CommissionController::class, 'deleteTier']);
+
+        // Commission Earnings History
+        Route::get('/commission-earnings', [CommissionController::class, 'getEarnings']);
+        Route::post('/commission-earnings', [CommissionController::class, 'storeEarning']);
+        Route::delete('/commission-earnings/{id}', [CommissionController::class, 'deleteEarning']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);

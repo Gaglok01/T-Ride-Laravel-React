@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface SidebarProps {
@@ -57,6 +57,7 @@ export function Sidebar({ onLogout, isOpen, onClose, className }: SidebarProps) 
         <NavItem onClick={handleNavClick} href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
         <NavItem onClick={handleNavClick} href="/admin/rents" icon={<Key size={20} />} label="Rent Management" active={isActive("/admin/rents")} />
         <NavItem onClick={handleNavClick} href="/admin/cities-zones" icon={<Map size={20} />} label="Cities & Zones" active={isActive("/admin/cities-zones")} />
+        <NavItem onClick={handleNavClick} href="/admin/commission-management" icon={<Percent size={20} />} label="Commissions" active={isActive("/admin/commission-management")} />
         <NavItem onClick={handleNavClick} href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
         <NavItem onClick={handleNavClick} href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
         <NavItem onClick={handleNavClick} href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
@@ -98,5 +99,24 @@ function NavItem({ href, icon, label, active, onClick }: { href: string; icon: R
       {icon}
       <span className="text-sm font-medium">{label}</span>
     </Link>
+  )
+}
+
+// SidebarInset component for content area next to sidebar
+interface SidebarInsetProps extends React.HTMLAttributes<HTMLElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarInset({ children, className, ...props }: SidebarInsetProps) {
+  return (
+    <main
+      className={cn(
+        "flex-1 overflow-auto lg:ml-64",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </main>
   )
 }

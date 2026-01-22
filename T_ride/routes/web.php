@@ -110,6 +110,10 @@ Route::get('/admin/cities-zones', function () {
     return Inertia::render('admin/cities-zones');
 })->name('admin.cities-zones');
 
+Route::get('/admin/commission-management', function () {
+    return Inertia::render('admin/commission-management');
+})->name('admin.commission-management');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
