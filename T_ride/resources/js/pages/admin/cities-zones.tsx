@@ -9,7 +9,7 @@ import {
 import { Button, IconButton } from "@/components/ui/button"
 import { Dropdown } from "@/components/ui/dropdown"
 
-import { Link } from "@inertiajs/react"
+import { Link, router } from "@inertiajs/react"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
 import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationModal"
 import { CityModal } from "@/components/admin/CityModal"
@@ -510,7 +510,7 @@ function CitiesTab({ cities, onDelete, onStatusToggle, onEdit }: { cities: City[
                             </td>
                             <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
-                                    <IconButton tooltip="View">
+                                    <IconButton tooltip="View" onClick={() => router.visit(`/admin/cities-zones/${city.id}`)}>
                                         <Eye size={16} />
                                     </IconButton>
                                     <IconButton tooltip="Edit" onClick={() => onEdit(city)}>

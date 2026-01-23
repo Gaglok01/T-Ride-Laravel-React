@@ -107,6 +107,10 @@ Route::get('/admin/payment-gateway/{id}', function ($id) {
     return Inertia::render('admin/view-payment-provider', ['id' => $id]);
 })->name('admin.view-payment-provider');
 
+Route::get('/admin/cities-zones/{id}', function ($id) {
+    return Inertia::render('admin/view-city', ['id' => $id]);
+})->name('admin.view-city');
+
 Route::get('/admin/cities-zones', function () {
     return Inertia::render('admin/cities-zones');
 })->name('admin.cities-zones');
