@@ -1,20 +1,100 @@
 "use client"
 
 import type React from "react"
+import { createContext, useContext, useState } from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent, Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// Sidebar Context for useSidebar hook
+interface SidebarContextValue {
+  state: "expanded" | "collapsed"
+  open: boolean
+  setOpen: (open: boolean) => void
+  toggleSidebar: () => void
+}
+
+const SidebarContext = createContext<SidebarContextValue | undefined>(undefined)
+
+export function useSidebar() {
+  const context = useContext(SidebarContext)
+  if (!context) {
+    // Return default values if not within a SidebarProvider
+    return {
+      state: "expanded" as const,
+      open: true,
+      setOpen: () => {},
+      toggleSidebar: () => {}
+    }
+  }
+  return context
+}
+
+// SidebarProvider component
+interface SidebarProviderProps {
+  children: React.ReactNode
+  defaultOpen?: boolean
+}
+
+export function SidebarProvider({ children, defaultOpen = true }: SidebarProviderProps) {
+  const [open, setOpen] = useState(defaultOpen)
+  
+  const value: SidebarContextValue = {
+    state: open ? "expanded" : "collapsed",
+    open,
+    setOpen,
+    toggleSidebar: () => setOpen(!open)
+  }
+
+  return (
+    <SidebarContext.Provider value={value}>
+      <div className="group/sidebar-wrapper flex min-h-svh w-full" data-sidebar-state={value.state}>
+        {children}
+      </div>
+    </SidebarContext.Provider>
+  )
+}
+
+// Main Sidebar component - supports both admin panel style and generic component style
 interface SidebarProps {
-  onLogout: () => void
+  children?: React.ReactNode
+  onLogout?: () => void
   isOpen?: boolean
   onClose?: () => void
   className?: string
+  collapsible?: "icon" | "offcanvas" | "none"
+  variant?: "default" | "inset" | "floating"
 }
 
-export function Sidebar({ onLogout, isOpen, onClose, className }: SidebarProps) {
+export function Sidebar({ 
+  children,
+  onLogout, 
+  isOpen, 
+  onClose, 
+  className,
+  collapsible,
+  variant = "default"
+}: SidebarProps) {
   const { url } = usePage()
 
+  // If children are provided, use the generic sidebar component style
+  if (children) {
+    return (
+      <aside 
+        className={cn(
+          "flex flex-col h-full bg-sidebar text-sidebar-foreground",
+          variant === "inset" && "rounded-lg border border-sidebar-border",
+          className
+        )}
+        data-collapsible={collapsible}
+        data-variant={variant}
+      >
+        {children}
+      </aside>
+    )
+  }
+
+  // Otherwise, use the admin panel sidebar style
   const isActive = (path: string) => {
     if (path === "/admin" && url === "/admin") return true
     if (path !== "/admin" && url.startsWith(path)) return true
@@ -118,5 +198,181 @@ export function SidebarInset({ children, className, ...props }: SidebarInsetProp
     >
       {children}
     </main>
+  )
+}
+
+// SidebarGroup component
+interface SidebarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarGroup({ children, className, ...props }: SidebarGroupProps) {
+  return (
+    <div className={cn("flex flex-col gap-2", className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+// SidebarGroupContent component
+interface SidebarGroupContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarGroupContent({ children, className, ...props }: SidebarGroupContentProps) {
+  return (
+    <div className={cn("flex flex-col", className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+// SidebarGroupLabel component
+interface SidebarGroupLabelProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarGroupLabel({ children, className, ...props }: SidebarGroupLabelProps) {
+  return (
+    <div 
+      className={cn(
+        "px-3 py-2 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider",
+        className
+      )} 
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
+
+// SidebarMenu component
+interface SidebarMenuProps extends React.HTMLAttributes<HTMLUListElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarMenu({ children, className, ...props }: SidebarMenuProps) {
+  return (
+    <ul className={cn("flex flex-col gap-1", className)} {...props}>
+      {children}
+    </ul>
+  )
+}
+
+// SidebarMenuItem component
+interface SidebarMenuItemProps extends React.HTMLAttributes<HTMLLIElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarMenuItem({ children, className, ...props }: SidebarMenuItemProps) {
+  return (
+    <li className={cn("", className)} {...props}>
+      {children}
+    </li>
+  )
+}
+
+// SidebarMenuButton component
+interface SidebarMenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children?: React.ReactNode
+  asChild?: boolean
+  size?: "default" | "sm" | "lg"
+  isActive?: boolean
+  tooltip?: { children: React.ReactNode } | React.ReactNode
+}
+
+export function SidebarMenuButton({ 
+  children, 
+  className, 
+  asChild, 
+  size = "default",
+  isActive,
+  tooltip,
+  ...props 
+}: SidebarMenuButtonProps) {
+  const sizeClasses = {
+    default: "px-3 py-2",
+    sm: "px-2 py-1 text-sm",
+    lg: "px-4 py-3"
+  }
+
+  const baseClasses = cn(
+    "flex items-center gap-2 rounded-lg transition-colors w-full text-left",
+    sizeClasses[size],
+    isActive 
+      ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+      : "hover:bg-white/5",
+    className
+  )
+
+  if (asChild) {
+    return (
+      <div className={baseClasses}>
+        {children}
+      </div>
+    )
+  }
+  
+  return (
+    <button className={baseClasses} {...props}>
+      {children}
+    </button>
+  )
+}
+
+// SidebarHeader component
+interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarHeader({ children, className, ...props }: SidebarHeaderProps) {
+  return (
+    <div className={cn("flex flex-col gap-2 p-2", className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+// SidebarContent component
+interface SidebarContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarContent({ children, className, ...props }: SidebarContentProps) {
+  return (
+    <div className={cn("flex-1 overflow-auto", className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+// SidebarFooter component
+interface SidebarFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode
+}
+
+export function SidebarFooter({ children, className, ...props }: SidebarFooterProps) {
+  return (
+    <div className={cn("flex flex-col gap-2 p-2", className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+// SidebarTrigger component
+interface SidebarTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+
+export function SidebarTrigger({ className, ...props }: SidebarTriggerProps) {
+  return (
+    <button
+      className={cn(
+        "inline-flex items-center justify-center rounded-md p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
+        className
+      )}
+      {...props}
+    >
+      <Menu className="h-5 w-5" />
+      <span className="sr-only">Toggle sidebar</span>
+    </button>
   )
 }

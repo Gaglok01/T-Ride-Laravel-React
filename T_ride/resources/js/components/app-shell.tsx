@@ -1,4 +1,4 @@
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { Sidebar } from './ui/sidebar';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 
@@ -16,5 +16,5 @@ export function AppShell({ children, variant = 'header' }: AppShellProps) {
         );
     }
 
-    return <SidebarProvider defaultOpen={isOpen}>{children}</SidebarProvider>;
+    return <Sidebar isOpen={isOpen}>{children}</Sidebar>;
 }
