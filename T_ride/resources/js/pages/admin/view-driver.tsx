@@ -81,21 +81,21 @@ export default function ViewDriver({ id }: { id: number }) {
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Profile Card */}
-                <div className="bg-white/5 border border-white/5 rounded-3xl p-6 lg:col-span-1 h-fit">
+                <div className="bg-tride-card border border-tride-border rounded-3xl p-6 lg:col-span-1 h-fit">
                     <div className="flex flex-col items-center text-center">
-                        <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-3xl font-bold mb-4 overflow-hidden outline outline-4 outline-white/5 text-white/20">
+                        <div className="w-24 h-24 rounded-full bg-tride-hover flex items-center justify-center text-3xl font-bold mb-4 overflow-hidden outline outline-4 outline-tride-hover text-tride-text-muted">
                             {driver.image ? (
                                 <img src={`/storage/${driver.image}`} alt={driver.name} className="w-full h-full object-cover" />
                             ) : (
                                 <Car size={40} />
                             )}
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-1">{driver.name}</h2>
-                        <p className="text-white/50 text-sm mb-4">{driver.driver_id}</p>
+                        <h2 className="text-2xl font-bold text-tride-text mb-1">{driver.name}</h2>
+                        <p className="text-tride-text-muted text-sm mb-4">{driver.driver_id}</p>
                         
                         <span className={`px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
                             driver.status === 'Active' ? 'bg-green-500/20 text-green-400 border-green-500/20' : 
-                            'bg-white/5 text-white/50 border-white/10'
+                            'bg-tride-hover text-tride-text-muted border-tride-border'
                         }`}>
                             {driver.status}
                         </span>
@@ -123,22 +123,22 @@ export default function ViewDriver({ id }: { id: number }) {
                     </div>
 
                     {/* Documents Section */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
-                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                             <FileText size={18} className="text-white/70" />
+                    <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-tride-text">
+                             <FileText size={18} className="text-tride-text-muted" />
                              Documents & Licenses
                         </h3>
                         {driver.documents && driver.documents.length > 0 ? (
                             <div className="space-y-3">
                                 {driver.documents.map((doc, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 hover:border-white/20 transition-colors">
+                                    <div key={idx} className="flex items-center justify-between p-4 bg-tride-hover rounded-xl border border-tride-border hover:border-tride-yellow/50 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
                                                 <FileText size={20} />
                                             </div>
                                             <div>
-                                                <p className="font-medium text-white text-sm">Document #{idx + 1}</p>
-                                                <p className="text-xs text-white/40">Verified</p>
+                                                <p className="font-medium text-tride-text text-sm">Document #{idx + 1}</p>
+                                                <p className="text-xs text-tride-text-muted">Verified</p>
                                             </div>
                                         </div>
                                         <div className="px-3 py-1 bg-green-500/10 text-green-400 text-xs rounded-lg border border-green-500/20 font-medium">Valid</div>
@@ -146,7 +146,7 @@ export default function ViewDriver({ id }: { id: number }) {
                                 ))}
                             </div>
                         ) : (
-                             <div className="text-center py-8 text-white/40 border border-dashed border-white/10 rounded-xl bg-white/5">
+                             <div className="text-center py-8 text-tride-text-muted border border-dashed border-tride-border rounded-xl bg-tride-hover">
                                 <XCircle size={32} className="mx-auto mb-2 opacity-50 text-red-400" />
                                 No documents submitted.
                             </div>
@@ -160,22 +160,22 @@ export default function ViewDriver({ id }: { id: number }) {
 
 function InfoRow({ icon, label, value }: { icon: any, label: string, value: string }) {
     return (
-        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-            <div className="flex items-center gap-3 text-white/60">
+        <div className="flex items-center justify-between p-3 bg-tride-hover rounded-xl border border-tride-border">
+            <div className="flex items-center gap-3 text-tride-text-muted">
                 {icon}
                 <span className="text-sm">{label}</span>
             </div>
-            <span className="text-sm font-medium text-white/90 truncate max-w-[150px]">{value}</span>
+            <span className="text-sm font-medium text-tride-text truncate max-w-[150px]">{value}</span>
         </div>
     )
 }
 
 function StatBox({ label, value, icon, color, bg }: { label: string, value: string, icon: any, color: string, bg: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
+        <div className="bg-tride-card border border-tride-border rounded-2xl p-5 flex items-center justify-between shadow-sm">
             <div>
-                <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">{label}</p>
-                <p className="text-2xl font-bold">{value}</p>
+                <p className="text-tride-text-muted text-xs font-medium uppercase tracking-wider mb-1">{label}</p>
+                <p className="text-2xl font-bold text-tride-text">{value}</p>
             </div>
             <div className={`p-3 rounded-xl ${bg} ${color}`}>
                 {icon}

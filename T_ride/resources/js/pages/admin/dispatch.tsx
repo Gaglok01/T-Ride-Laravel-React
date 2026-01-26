@@ -191,9 +191,9 @@ export default function DispatchPage() {
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Live Map */}
-                <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
-                    <h3 className="text-lg font-bold text-white mb-4">Live Map</h3>
-                    <div className="bg-white/5 rounded-2xl h-96 overflow-hidden">
+                <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+                    <h3 className="text-lg font-bold text-tride-text mb-4">Live Map</h3>
+                    <div className="bg-tride-hover rounded-2xl h-96 overflow-hidden">
                         {isLoaded ? (
                             <GoogleMap
                                 mapContainerStyle={mapContainerStyle}
@@ -208,7 +208,7 @@ export default function DispatchPage() {
                                 {/* We can add markers for active drivers/rides here */}
                             </GoogleMap>
                         ) : (
-                            <div className="h-full w-full flex items-center justify-center text-white/30">
+                            <div className="h-full w-full flex items-center justify-center text-tride-text-muted">
                                 <MapPin size={48} className="mx-auto mb-3" />
                                 <p>Loading map...</p>
                             </div>
@@ -217,15 +217,15 @@ export default function DispatchPage() {
                 </div>
 
                 {/* Pending Orders */}
-                <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
-                    <h3 className="text-lg font-bold text-white mb-4">Pending Orders</h3>
+                <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+                    <h3 className="text-lg font-bold text-tride-text mb-4">Pending Orders</h3>
                     <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                         {loading ? (
                             <div className="flex items-center justify-center py-8">
                                 <div className="animate-spin h-6 w-6 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
                             </div>
                         ) : pendingOrders.length === 0 ? (
-                            <div className="text-center py-8 text-white/50">
+                            <div className="text-center py-8 text-tride-text-muted">
                                 No pending orders at the moment
                             </div>
                         ) : (
@@ -278,15 +278,15 @@ function StatsCard({ label, value, trend, icon, iconBg, trendDown = false }: {
     const isPositive = trend.startsWith('+') || (!trend.startsWith('-') && !trendDown)
     
     return (
-        <div className="bg-white/5 border border-white/5 p-5 rounded-2xl">
+        <div className="bg-tride-card border border-tride-border p-5 rounded-2xl shadow-sm">
             <div className="flex items-start justify-between mb-3">
-                <p className="text-sm text-white/50">{label}</p>
+                <p className="text-sm text-tride-text-muted">{label}</p>
                 <div className={`w-9 h-9 ${iconBg} rounded-xl flex items-center justify-center`}>
                     {icon}
                 </div>
             </div>
-            <p className="text-3xl font-bold text-white mb-1">{value.toLocaleString()}</p>
-            <p className={`text-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+            <p className="text-3xl font-bold text-tride-text mb-1">{value.toLocaleString()}</p>
+            <p className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
                 ↗ {trend}
             </p>
         </div>
@@ -304,15 +304,15 @@ function OrderCard({ order, onAssign }: { order: PendingOrder, onAssign: () => v
     }
 
     return (
-        <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
+        <div className="bg-tride-hover border border-tride-border rounded-2xl p-4">
             <div className="flex items-start justify-between mb-3">
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getTypeColor(order.type)}`}>
                     {order.type}
                 </span>
-                <span className="text-xs text-white/40">{order.time_ago}</span>
+                <span className="text-xs text-tride-text-muted">{order.time_ago}</span>
             </div>
-            <p className="font-bold text-white mb-1">Order #{order.order_id}</p>
-            <p className="text-sm text-white/50 mb-3">{order.status}</p>
+            <p className="font-bold text-tride-text mb-1">Order #{order.order_id}</p>
+            <p className="text-sm text-tride-text-muted mb-3">{order.status}</p>
             <Button 
                 variant="secondary" 
                 size="sm" 
@@ -474,7 +474,7 @@ function ManualBookingModal({ isOpen, onClose, onSave, isLoaded }: {
                                 value={pickupAddress}
                                 onChange={(e) => setPickupAddress(e.target.value)}
                                 placeholder="123 Main St, City"
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-tride-yellow transition-all"
+                                className="w-full bg-tride-hover border border-tride-border rounded-xl px-4 py-3 text-tride-text focus:outline-none focus:border-tride-yellow transition-all"
                                 required
                             />
                         </Autocomplete>
@@ -499,7 +499,7 @@ function ManualBookingModal({ isOpen, onClose, onSave, isLoaded }: {
                                 value={dropoffAddress}
                                 onChange={(e) => setDropoffAddress(e.target.value)}
                                 placeholder="456 Oak Ave, City"
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-tride-yellow transition-all"
+                                className="w-full bg-tride-hover border border-tride-border rounded-xl px-4 py-3 text-tride-text focus:outline-none focus:border-tride-yellow transition-all"
                                 required
                             />
                         </Autocomplete>
@@ -595,7 +595,7 @@ function AssignDriverModal({ isOpen, onClose, order, drivers, onAssign, isAssign
                 />
                 
                 {selectedDriverId && (
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                    <div className="bg-tride-hover border border-tride-border rounded-xl p-4 flex items-center gap-4">
                         {drivers.find(d => d.id.toString() === selectedDriverId)?.photo ? (
                             <img 
                                 src={drivers.find(d => d.id.toString() === selectedDriverId)?.photo || ""} 
@@ -603,15 +603,15 @@ function AssignDriverModal({ isOpen, onClose, order, drivers, onAssign, isAssign
                                 className="w-12 h-12 rounded-full object-cover" 
                             />
                         ) : (
-                            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                                <User size={24} className="text-white/30" />
+                            <div className="w-12 h-12 rounded-full bg-tride-card flex items-center justify-center">
+                                <User size={24} className="text-tride-text-muted" />
                             </div>
                         )}
                         <div>
-                            <p className="font-semibold text-white">
+                            <p className="font-semibold text-tride-text">
                                 {drivers.find(d => d.id.toString() === selectedDriverId)?.name}
                             </p>
-                            <p className="text-sm text-white/50">
+                            <p className="text-sm text-tride-text-muted">
                                 {drivers.find(d => d.id.toString() === selectedDriverId)?.phone}
                             </p>
                         </div>

@@ -264,54 +264,59 @@ export default function CommissionManagementPage() {
                     value={formatCurrency(stats?.total_earned ?? 0)} 
                     trend={`${stats?.total_earned_trend !== undefined && stats.total_earned_trend >= 0 ? '+' : ''}${stats?.total_earned_trend ?? 0}%`} 
                     trendUp={(stats?.total_earned_trend ?? 0) >= 0} 
-                    icon={<DollarSign size={20} />} 
+                    icon={<DollarSign size={20} className="text-blue-500" />} 
+                    iconBg="bg-blue-500/10"
                 />
                 <StatsCard 
                     label="Avg Commission" 
                     value={`${stats?.avg_commission ?? 0}%`} 
                     trend={`${stats?.avg_commission_trend !== undefined && stats.avg_commission_trend >= 0 ? '+' : ''}${stats?.avg_commission_trend ?? 0}%`} 
                     trendUp={(stats?.avg_commission_trend ?? 0) >= 0} 
-                    icon={<Percent size={20} />} 
+                    icon={<Percent size={20} className="text-green-500" />} 
+                    iconBg="bg-green-500/10"
                 />
                 <StatsCard 
                     label="Driver Commission" 
                     value={formatCurrency(stats?.driver_commission ?? 0)} 
                     trend={`${stats?.driver_commission_trend !== undefined && stats.driver_commission_trend >= 0 ? '+' : ''}${stats?.driver_commission_trend ?? 0}%`} 
                     trendUp={(stats?.driver_commission_trend ?? 0) >= 0} 
-                    icon={<Car size={20} />} 
+                    icon={<Car size={20} className="text-blue-400" />} 
+                    iconBg="bg-blue-500/10"
                 />
                 <StatsCard 
                     label="Vendor Commission" 
                     value={formatCurrency(stats?.vendor_commission ?? 0)} 
                     trend={`${stats?.vendor_commission_trend !== undefined && stats.vendor_commission_trend >= 0 ? '+' : ''}${stats?.vendor_commission_trend ?? 0}%`} 
                     trendUp={(stats?.vendor_commission_trend ?? 0) >= 0} 
-                    icon={<Building size={20} />} 
+                    icon={<Building size={20} className="text-purple-500" />} 
+                    iconBg="bg-purple-500/10"
                 />
                 <StatsCard 
                     label="Courier Commission" 
                     value={formatCurrency(stats?.courier_commission ?? 0)} 
                     trend={`${stats?.courier_commission_trend !== undefined && stats.courier_commission_trend >= 0 ? '+' : ''}${stats?.courier_commission_trend ?? 0}%`} 
                     trendUp={(stats?.courier_commission_trend ?? 0) >= 0} 
-                    icon={<Package size={20} />} 
+                    icon={<Package size={20} className="text-orange-500" />} 
+                    iconBg="bg-orange-500/10"
                 />
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-2xl w-fit flex-wrap">
-                {tabs.map((tab) => (
-                    <Button
-                        key={tab}
-                        variant={activeTab === tab ? "secondary" : "ghost"}
-                        className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white hover:bg-white/5"}
-                        onClick={() => setActiveTab(tab)}
-                    >
-                        {tab}
-                    </Button>
-                ))}
-            </div>
+
 
             {/* Main Content */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm min-h-[400px]">
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm min-h-[400px]">
+                <div className="flex gap-1 p-4 border-b border-tride-border flex-wrap">
+                    {tabs.map((tab) => (
+                        <Button
+                            key={tab}
+                            variant={activeTab === tab ? "default" : "ghost"}
+                            onClick={() => setActiveTab(tab)}
+                        >
+                            {tab}
+                        </Button>
+                    ))}
+                </div>
                 {loading ? (
                     <div className="flex items-center justify-center h-96">
                         <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
@@ -396,48 +401,48 @@ function OverviewTab({ stats, formatCurrency }: { stats: DashboardStats | null, 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 {/* Commission Revenue Chart Placeholder */}
-                <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-6">
-                    <h3 className="font-semibold text-lg mb-4">Commission Revenue</h3>
-                    <div className="h-64 flex items-center justify-center text-white/20 border-2 border-dashed border-white/10 rounded-xl">
+                <div className="lg:col-span-2 bg-tride-card border border-tride-border rounded-2xl p-6 shadow-sm">
+                    <h3 className="font-semibold text-lg mb-4 text-tride-text">Commission Revenue</h3>
+                    <div className="h-64 flex items-center justify-center text-tride-text-muted border-2 border-dashed border-tride-border rounded-xl bg-tride-hover">
                         <TrendingUp size={48} />
                     </div>
                 </div>
 
                 {/* Revenue Breakdown */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                    <h3 className="font-semibold text-lg mb-4">Revenue Breakdown</h3>
-                    <div className="h-40 flex items-center justify-center text-white/20 border-2 border-dashed border-white/10 rounded-xl mb-4">
+                <div className="bg-tride-card border border-tride-border rounded-2xl p-6 shadow-sm">
+                    <h3 className="font-semibold text-lg mb-4 text-tride-text">Revenue Breakdown</h3>
+                    <div className="h-40 flex items-center justify-center text-tride-text-muted border-2 border-dashed border-tride-border rounded-xl mb-4 bg-tride-hover">
                         <PieChart size={48} />
                     </div>
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full bg-blue-500" />
-                                <span className="text-sm text-white/70">Rides</span>
+                                <span className="text-sm text-tride-text-muted">Rides</span>
                             </div>
                             <div className="text-right">
-                                <span className="font-bold">{formatCurrency(revenueBreakdown.rides)}</span>
-                                <span className="text-white/50 text-sm ml-2">{revenueBreakdown.rides_percent ?? 0}%</span>
+                                <span className="font-bold text-tride-text">{formatCurrency(revenueBreakdown.rides)}</span>
+                                <span className="text-tride-text-muted text-sm ml-2">{revenueBreakdown.rides_percent ?? 0}%</span>
                             </div>
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full bg-purple-500" />
-                                <span className="text-sm text-white/70">Delivery</span>
+                                <span className="text-sm text-tride-text-muted">Delivery</span>
                             </div>
                             <div className="text-right">
-                                <span className="font-bold">{formatCurrency(revenueBreakdown.delivery)}</span>
-                                <span className="text-white/50 text-sm ml-2">{revenueBreakdown.delivery_percent ?? 0}%</span>
+                                <span className="font-bold text-tride-text">{formatCurrency(revenueBreakdown.delivery)}</span>
+                                <span className="text-tride-text-muted text-sm ml-2">{revenueBreakdown.delivery_percent ?? 0}%</span>
                             </div>
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full bg-orange-500" />
-                                <span className="text-sm text-white/70">Courier</span>
+                                <span className="text-sm text-tride-text-muted">Courier</span>
                             </div>
                             <div className="text-right">
-                                <span className="font-bold">{formatCurrency(revenueBreakdown.courier)}</span>
-                                <span className="text-white/50 text-sm ml-2">{revenueBreakdown.courier_percent ?? 0}%</span>
+                                <span className="font-bold text-tride-text">{formatCurrency(revenueBreakdown.courier)}</span>
+                                <span className="text-tride-text-muted text-sm ml-2">{revenueBreakdown.courier_percent ?? 0}%</span>
                             </div>
                         </div>
                     </div>
@@ -477,20 +482,20 @@ function OverviewTab({ stats, formatCurrency }: { stats: DashboardStats | null, 
 
 function ServiceCard({ title, rate, volume, earned }: { title: string, rate: number, volume: string, earned: string }) {
     return (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-            <h4 className="font-semibold mb-4">{title}</h4>
+        <div className="bg-tride-card border border-tride-border rounded-2xl p-5 shadow-sm">
+            <h4 className="font-semibold mb-4 text-tride-text">{title}</h4>
             <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                    <span className="text-white/50 text-sm">Rate</span>
-                    <span className="text-blue-400 font-bold">{rate}%</span>
+                    <span className="text-tride-text-muted text-sm">Rate</span>
+                    <span className="text-blue-500 font-bold">{rate}%</span>
                 </div>
                 <div className="flex justify-between items-center">
-                    <span className="text-white/50 text-sm">Volume</span>
-                    <span className="font-medium">{volume}</span>
+                    <span className="text-tride-text-muted text-sm">Volume</span>
+                    <span className="font-medium text-tride-text">{volume}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                    <span className="text-white/50 text-sm">Earned</span>
-                    <span className="text-green-400 font-bold">{earned}</span>
+                    <span className="text-tride-text-muted text-sm">Earned</span>
+                    <span className="text-green-500 font-bold">{earned}</span>
                 </div>
             </div>
         </div>
@@ -502,8 +507,8 @@ function RulesTab({ rules, title, subtitle, onDelete, onStatusToggle, onAdd, onE
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-xl font-bold">{title}</h2>
-                    <p className="text-white/50 text-sm">{subtitle}</p>
+                    <h2 className="text-xl font-bold text-tride-text">{title}</h2>
+                    <p className="text-tride-text-muted text-sm">{subtitle}</p>
                 </div>
                 <Button onClick={onAdd}>
                     <Plus size={16} />
@@ -520,7 +525,7 @@ function RulesTab({ rules, title, subtitle, onDelete, onStatusToggle, onAdd, onE
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-4 py-3 font-medium">Ride Type</th>
                                 <th className="px-4 py-3 font-medium">Base Rate</th>
                                 <th className="px-4 py-3 font-medium">Min Commission</th>
@@ -531,19 +536,19 @@ function RulesTab({ rules, title, subtitle, onDelete, onStatusToggle, onAdd, onE
                                 <th className="px-4 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {rules.map((rule) => (
-                                <tr key={rule.id} className="hover:bg-white/5 transition-colors">
-                                    <td className="px-4 py-4 font-medium">{rule.name}</td>
+                                <tr key={rule.id} className="hover:bg-tride-hover transition-colors">
+                                    <td className="px-4 py-4 font-medium text-tride-text">{rule.name}</td>
                                     <td className="px-4 py-4">
                                         <span className="px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold">
                                             {rule.base_rate}%
                                         </span>
                                     </td>
-                                    <td className="px-4 py-4 text-white/70">${rule.min_commission ? Number(rule.min_commission).toFixed(2) : '0.00'}</td>
-                                    <td className="px-4 py-4 text-white/70">${rule.max_commission ? Number(rule.max_commission).toFixed(2) : '∞'}</td>
-                                    <td className="px-4 py-4 text-white/70">{rule.surge_multiplier || 'Same Rate'}</td>
-                                    <td className="px-4 py-4 text-blue-400">{rule.city?.name || 'All Cities'}</td>
+                                    <td className="px-4 py-4 text-tride-text-muted">${rule.min_commission ? Number(rule.min_commission).toFixed(2) : '0.00'}</td>
+                                    <td className="px-4 py-4 text-tride-text-muted">${rule.max_commission ? Number(rule.max_commission).toFixed(2) : '∞'}</td>
+                                    <td className="px-4 py-4 text-tride-text-muted">{rule.surge_multiplier || 'Same Rate'}</td>
+                                    <td className="px-4 py-4 text-blue-500">{rule.city?.name || 'All Cities'}</td>
                                     <td className="px-4 py-4">
                                         <button 
                                             onClick={() => onStatusToggle(rule)}
@@ -599,7 +604,7 @@ function VendorRulesTab({ rules, onDelete, onStatusToggle, onAdd, onEdit }: { ru
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-4 py-3 font-medium">Vendor Category</th>
                                 <th className="px-4 py-3 font-medium">Standard Rate</th>
                                 <th className="px-4 py-3 font-medium">Featured Rate</th>
@@ -610,24 +615,24 @@ function VendorRulesTab({ rules, onDelete, onStatusToggle, onAdd, onEdit }: { ru
                                 <th className="px-4 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {rules.map((rule) => (
-                                <tr key={rule.id} className="hover:bg-white/5 transition-colors">
-                                    <td className="px-4 py-4 font-medium">{rule.name}</td>
+                                <tr key={rule.id} className="hover:bg-tride-hover transition-colors">
+                                    <td className="px-4 py-4 font-medium text-tride-text">{rule.name}</td>
                                     <td className="px-4 py-4">
                                         <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold">
                                             {rule.base_rate}%
                                         </span>
                                     </td>
-                                    <td className="px-4 py-4 text-white/70">{rule.attributes?.featured_rate || 30}%</td>
+                                    <td className="px-4 py-4 text-tride-text-muted">{rule.attributes?.featured_rate || 30}%</td>
                                     <td className="px-4 py-4">
                                         <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold">
                                             {rule.attributes?.new_vendor_rate || 15}%
                                         </span>
                                     </td>
-                                    <td className="px-4 py-4 text-white/70">{rule.attributes?.promo_period || '30 days'}</td>
-                                    <td className="px-4 py-4 text-white/70">{rule.attributes?.vendors_count || 0}</td>
-                                    <td className="px-4 py-4 text-green-400">${((rule.attributes?.monthly_revenue || 0) / 1000).toFixed(0)}K</td>
+                                    <td className="px-4 py-4 text-tride-text-muted">{rule.attributes?.promo_period || '30 days'}</td>
+                                    <td className="px-4 py-4 text-tride-text-muted">{rule.attributes?.vendors_count || 0}</td>
+                                    <td className="px-4 py-4 text-green-500">${((rule.attributes?.monthly_revenue || 0) / 1000).toFixed(0)}K</td>
                                     <td className="px-4 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <IconButton tooltip="Edit" onClick={() => onEdit(rule)}>
@@ -652,11 +657,11 @@ function TiersTab({ driverTiers, vendorTiers, onDelete, onAddDriverTier, onAddVe
     return (
         <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Driver Commission Tiers */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="bg-tride-card border border-tride-border rounded-2xl p-6 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                     <div>
-                        <h3 className="font-bold text-lg">Driver Commission Tiers</h3>
-                        <p className="text-white/50 text-sm">Performance-based commission rates</p>
+                        <h3 className="font-bold text-lg text-tride-text">Driver Commission Tiers</h3>
+                        <p className="text-tride-text-muted text-sm">Performance-based commission rates</p>
                     </div>
                     <Button variant="outline" size="sm" onClick={onAddDriverTier}>
                         <Plus size={14} />
@@ -689,11 +694,11 @@ function TiersTab({ driverTiers, vendorTiers, onDelete, onAddDriverTier, onAddVe
             </div>
 
             {/* Vendor Loyalty Tiers */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="bg-tride-card border border-tride-border rounded-2xl p-6 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                     <div>
-                        <h3 className="font-bold text-lg">Vendor Loyalty Tiers</h3>
-                        <p className="text-white/50 text-sm">Volume-based commission discounts</p>
+                        <h3 className="font-bold text-lg text-tride-text">Vendor Loyalty Tiers</h3>
+                        <p className="text-tride-text-muted text-sm">Volume-based commission discounts</p>
                     </div>
                     <Button variant="outline" size="sm" onClick={onAddVendorTier}>
                         <Plus size={14} />
@@ -730,11 +735,11 @@ function TiersTab({ driverTiers, vendorTiers, onDelete, onAddDriverTier, onAddVe
 
 function TierCard({ tier, name, range, rate, count, rateColor, onDelete, onEdit }: { tier: CommissionTier, name: string, range: string, rate: string, count: string, rateColor: string, onDelete: () => void, onEdit: () => void }) {
     return (
-        <div className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
+        <div className="bg-tride-card border border-tride-border p-4 rounded-xl hover:bg-tride-hover transition-colors shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <div className="font-semibold">{name}</div>
-                    <div className="text-xs text-blue-400">{range}</div>
+                    <div className="font-semibold text-tride-text">{name}</div>
+                    <div className="text-xs text-blue-500">{range}</div>
                 </div>
                 <div className="flex items-center gap-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${rateColor}`}>
@@ -776,7 +781,7 @@ function EarningsTab({ earnings, formatCurrency }: { earnings: CommissionEarning
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-4 py-3 font-medium">Period</th>
                                 <th className="px-4 py-3 font-medium">Rides Revenue</th>
                                 <th className="px-4 py-3 font-medium">Delivery Revenue</th>
@@ -787,10 +792,10 @@ function EarningsTab({ earnings, formatCurrency }: { earnings: CommissionEarning
                                 <th className="px-4 py-3 font-medium">Growth</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {earnings.map((earning) => (
-                                <tr key={earning.id} className="hover:bg-white/5 transition-colors">
-                                    <td className="px-4 py-4 font-medium text-blue-400">{earning.period}</td>
+                                <tr key={earning.id} className="hover:bg-tride-hover transition-colors">
+                                    <td className="px-4 py-4 font-medium text-blue-500">{earning.period}</td>
                                     <td className="px-4 py-4 text-white/70">{formatCurrency(Number(earning.rides_revenue))}</td>
                                     <td className="px-4 py-4 text-white/70">{formatCurrency(Number(earning.delivery_revenue))}</td>
                                     <td className="px-4 py-4 text-white/70">{formatCurrency(Number(earning.courier_revenue))}</td>
@@ -813,21 +818,18 @@ function EarningsTab({ earnings, formatCurrency }: { earnings: CommissionEarning
     )
 }
 
-function StatsCard({ label, value, trend, trendUp, icon }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode }) {
+function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg?: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-6 rounded-3xl flex flex-col justify-between h-full relative overflow-hidden group hover:border-white/10 transition-colors">
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                    <p className="text-white/50 text-sm font-medium mb-1">{label}</p>
-                    <div className="text-3xl font-bold">{value}</div>
-                </div>
-                <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                    {icon}
+        <div className="bg-tride-card border border-tride-border p-6 rounded-3xl flex items-start justify-between shadow-sm">
+            <div>
+                <p className="text-tride-text-muted text-sm font-medium mb-1">{label}</p>
+                <div className="text-3xl font-bold text-tride-text mb-2">{value}</div>
+                <div className={`text-sm font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
+                    <span className="text-lg">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
-            
-            <div className={`text-sm font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
-                <span className="text-lg leading-none">{trendUp ? '↗' : '↘'}</span> {trend}
+            <div className={`w-12 h-12 ${iconBg || 'bg-tride-hover'} rounded-2xl flex items-center justify-center text-tride-text`}>
+                {icon}
             </div>
         </div>
     )

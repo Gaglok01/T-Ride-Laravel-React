@@ -55,12 +55,12 @@ export default function SettingsPage() {
 
 function SettingCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
     return (
-        <button className="bg-white/5 border border-white/5 p-8 rounded-3xl flex flex-col items-center justify-center text-center hover:bg-white/10 transition-all hover:scale-[1.02] group">
-            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform">
+        <button className="bg-tride-card border border-tride-border p-8 rounded-3xl flex flex-col items-center justify-center text-center hover:bg-tride-hover transition-all hover:scale-[1.02] group shadow-sm">
+            <div className="w-16 h-16 bg-tride-hover rounded-2xl flex items-center justify-center mb-6 text-tride-text group-hover:scale-110 transition-transform">
                 {icon}
             </div>
-            <h3 className="text-lg font-bold mb-2">{title}</h3>
-            <p className="text-sm text-white/50">{description}</p>
+            <h3 className="text-lg font-bold mb-2 text-tride-text">{title}</h3>
+            <p className="text-sm text-tride-text-muted">{description}</p>
         </button>
     )
 }

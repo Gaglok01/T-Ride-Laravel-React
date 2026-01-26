@@ -103,21 +103,20 @@ export default function ViewRent({ id }: { id: number }) {
             }
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column: Vehicle Profile */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
-                        <div className="aspect-video w-full bg-white/5 rounded-2xl mb-6 flex items-center justify-center overflow-hidden">
+                    <div className="bg-tride-card border border-tride-card/20 rounded-3xl p-6">
+                        <div className="aspect-video w-full bg-tride-hover rounded-2xl mb-6 flex items-center justify-center overflow-hidden">
                             {vehicle.image ? (
                                 <img src={`/storage/${vehicle.image}`} alt={vehicle.name} className="w-full h-full object-cover" />
                             ) : (
-                                <Car size={64} className="text-white/20" />
+                                <Car size={64} className="text-tride-text-muted" />
                             )}
                         </div>
                         
                         <div className="flex justify-between items-start mb-4">
                             <div>
-                                <h2 className="text-2xl font-bold text-white">{vehicle.name}</h2>
-                                <p className="text-white/50 font-mono">{vehicle.vin}</p>
+                                <h2 className="text-2xl font-bold text-tride-text">{vehicle.name}</h2>
+                                <p className="text-tride-text-muted font-mono">{vehicle.vin}</p>
                             </div>
                             <StatusBadge status={vehicle.status} />
                         </div>
@@ -130,7 +129,6 @@ export default function ViewRent({ id }: { id: number }) {
                         </div>
                     </div>
 
-                    {/* Quick Stats */}
                     <div className="grid grid-cols-2 gap-4">
                         <StatCard 
                             label="Total Earnings" 
@@ -150,12 +148,12 @@ export default function ViewRent({ id }: { id: number }) {
                 {/* Right Column: Details & History */}
                 <div className="lg:col-span-2">
                     {/* Tabs */}
-                    <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-2xl w-fit">
+                    <div className="flex gap-1 mb-6 bg-tride-card p-1 rounded-2xl w-fit">
                         {["Overview", "Rental History", "Maintenance"].map((tab) => (
                             <Button
                                 key={tab}
-                                variant={activeTab === tab ? "secondary" : "ghost"}
-                                className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                                variant={activeTab === tab ? "default" : "ghost"}
+                                className={activeTab === tab ? "" : ""}
                                 onClick={() => setActiveTab(tab)}
                             >
                                 {tab}
@@ -163,10 +161,10 @@ export default function ViewRent({ id }: { id: number }) {
                         ))}
                     </div>
 
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6 min-h-[400px]">
+                    <div className="bg-tride-card border border-white/5 rounded-3xl p-6 min-h-[400px]">
                         {activeTab === "Overview" && (
                             <div className="space-y-6">
-                                <h3 className="text-lg font-bold text-white mb-4">Current Status</h3>
+                                <h3 className="text-lg font-bold text-tride-text mb-4">Current Status</h3>
                                 {vehicle.active_rental ? (
                                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6">
                                         <div className="flex items-center gap-4 mb-4">
@@ -174,7 +172,7 @@ export default function ViewRent({ id }: { id: number }) {
                                                 <FileText size={24} />
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-white">Active Rental Contract</h4>
+                                                <h4 className="font-bold text-tride-text">Active Rental Contract</h4>
                                                 <p className="text-blue-200/60 text-sm">Contract #{vehicle.active_rental.id}</p>
                                             </div>
                                         </div>
@@ -187,9 +185,9 @@ export default function ViewRent({ id }: { id: number }) {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10">
+                                    <div className="text-center py-12 bg-tride-hover rounded-2xl border border-dashed border-white/10">
                                         <CheckCircle size={32} className="mx-auto mb-2 text-green-400 opacity-50" />
-                                        <p className="text-white/60">Vehicle is currently available</p>
+                                        <p className="text-tride-text">Vehicle is currently available</p>
                                     </div>
                                 )}
                             </div>
@@ -199,7 +197,7 @@ export default function ViewRent({ id }: { id: number }) {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                        <tr className="border-b border-white/5 text-left text-tride-text/40 text-sm">
                                             <th className="px-4 py-3 font-medium">Driver</th>
                                             <th className="px-4 py-3 font-medium">Dates</th>
                                             <th className="px-4 py-3 font-medium">Amount</th>
@@ -291,18 +289,18 @@ function StatusBadge({ status }: { status: string }) {
 function InfoRow({ label, value, highlight = false }: { label: string, value: string, highlight?: boolean }) {
     return (
         <div className="flex justify-between items-center py-1">
-            <span className="text-white/40 text-sm">{label}</span>
-            <span className={`text-sm font-medium ${highlight ? 'text-green-400' : 'text-white'}`}>{value}</span>
+            <span className="text-tride-text-muted text-sm">{label}</span>
+            <span className={`text-sm font-medium ${highlight ? 'text-green-400' : 'text-tride-text'}`}>{value}</span>
         </div>
     )
 }
 
 function StatCard({ label, value, icon, bg }: any) {
     return (
-        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+        <div className="bg-tride-card border border-white/5 rounded-2xl p-4 flex items-center justify-between">
             <div>
-                <p className="text-white/40 text-xs font-medium uppercase mb-1">{label}</p>
-                <p className="text-xl font-bold text-white">{value}</p>
+                <p className="text-tride-text-muted text-xs font-medium uppercase mb-1">{label}</p>
+                <p className="text-xl font-bold text-tride-text">{value}</p>
             </div>
             <div className={`p-2 rounded-xl ${bg}`}>
                 {icon}

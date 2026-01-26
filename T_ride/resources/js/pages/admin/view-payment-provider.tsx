@@ -112,15 +112,14 @@ export default function ViewPaymentProvider({ id }: { id: number }) {
             }
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Profile Card */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <div className="bg-tride-card border border-white/5 rounded-3xl p-6">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-24 h-24 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
+                            <div className="w-24 h-24 rounded-2xl bg-tride-hover flex items-center justify-center mb-6">
                                 {getIcon(provider.type)}
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-2">{provider.name}</h2>
-                            <p className="text-white/50 mb-4 capitalize">{provider.type.replace('_', ' ')} Provider</p>
+                            <h2 className="text-2xl font-bold text-tride-text mb-2">{provider.name}</h2>
+                            <p className="text-tride-text/50 mb-4 capitalize">{provider.type.replace('_', ' ')} Provider</p>
                             
                             <span className={`px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
                                 provider.is_active ? 'bg-green-500/20 text-green-400 border-green-500/20' : 
@@ -129,7 +128,7 @@ export default function ViewPaymentProvider({ id }: { id: number }) {
                                 {provider.is_active ? 'Active' : 'Inactive'}
                             </span>
 
-                            <div className="w-full mt-8 space-y-4 pt-6 border-t border-white/5">
+                            <div className="w-full mt-8 space-y-4 pt-6 border-t border-tride-hover">
                                 <InfoRow label="Transaction Fee" value={`${provider.transaction_fee}%`} />
                                 <InfoRow label="Limit" value={`$${Number(provider.transaction_limit).toLocaleString()}`} />
                                 <InfoRow label="Country" value={provider.country || 'Global'} />
@@ -161,17 +160,17 @@ export default function ViewPaymentProvider({ id }: { id: number }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-tride-card border border-white/5 rounded-3xl p-6 relative overflow-hidden">
                              <div className="absolute top-0 right-0 w-32 h-32 bg-tride-yellow/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-                             <h3 className="text-white/50 mb-2 font-medium">Total Processed Volume</h3>
-                             <p className="text-3xl font-bold text-white">${Number(stats.total_processed).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                             <h3 className="text-tride-text mb-2 font-medium">Total Processed Volume</h3>
+                             <p className="text-3xl font-bold text-tride-text">${Number(stats.total_processed).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                         </div>
-                        <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
-                             <h3 className="text-white/50 mb-2 font-medium">Total Transactions</h3>
-                             <p className="text-3xl font-bold text-white">{stats.transaction_count.toLocaleString()}</p>
+                        <div className="bg-tride-card border border-white/5 rounded-3xl p-6">
+                             <h3 className="text-tride-text mb-2 font-medium">Total Transactions</h3>
+                             <p className="text-3xl font-bold text-tride-text">{stats.transaction_count.toLocaleString()}</p>
                         </div>
                     </div>
 
                     {/* Recent Transactions */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <div className="bg-tride-card border border-white/5 rounded-3xl p-6">
                         <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
                              <Activity size={18} className="text-tride-yellow" />
                              Recent Transactions
@@ -180,7 +179,7 @@ export default function ViewPaymentProvider({ id }: { id: number }) {
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                    <tr className="border-b border-tride-hover text-left text-tride-text/40 text-sm">
                                         <th className="px-4 py-3 font-medium">Reference</th>
                                         <th className="px-4 py-3 font-medium">User</th>
                                         <th className="px-4 py-3 font-medium">Amount</th>
@@ -211,7 +210,7 @@ export default function ViewPaymentProvider({ id }: { id: number }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={5} className="px-4 py-8 text-center text-white/40">No transactions found.</td>
+                                            <td colSpan={5} className="px-4 py-8 text-center text-tride-text/40">No transactions found.</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -226,19 +225,19 @@ export default function ViewPaymentProvider({ id }: { id: number }) {
 
 function InfoRow({ label, value }: { label: string, value: string }) {
     return (
-        <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
-            <span className="text-white/40 text-sm">{label}</span>
-            <span className="text-sm font-medium text-white">{value}</span>
+        <div className="flex justify-between items-center py-2 border-b border-tride-hover last:border-0">
+            <span className="text-tride-text text-sm">{label}</span>
+            <span className="text-sm font-medium text-tride-text">{value}</span>
         </div>
     )
 }
 
 function StatCard({ label, value, icon, bg }: any) {
     return (
-        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+        <div className="bg-tride-card border border-white/5 rounded-2xl p-4 flex items-center justify-between">
             <div>
-                <p className="text-white/40 text-xs font-medium uppercase mb-1">{label}</p>
-                <p className="text-lg font-bold text-white">{value}</p>
+                <p className="text-tride-text/40 text-xs font-medium uppercase mb-1">{label}</p>
+                <p className="text-lg font-bold text-tride-text">{value}</p>
             </div>
             <div className={`p-2 rounded-xl ${bg}`}>
                 {icon}

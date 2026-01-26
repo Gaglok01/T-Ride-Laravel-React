@@ -88,10 +88,8 @@ export default function ViewCourierOrder({ id }: { id: number }) {
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                {/* Left Column: Order Info */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Status & Timeline */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="text-xl font-bold">Tracking Status</h2>
                             <span className={`px-4 py-1.5 rounded-full text-sm font-bold border capitalize ${getStatusColor(order.status)}`}>
@@ -109,7 +107,6 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                              </div>
                         ) : (
                             <div className="relative flex items-center justify-between px-4 my-4">
-                                {/* Line */}
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-white/5 -z-10"></div>
                                 
                                 {steps.map((step, idx) => {
@@ -121,12 +118,12 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors ${
                                                 isCompleted 
                                                     ? 'bg-tride-yellow border-tride-yellow text-black shadow-[0_0_15px_rgba(245,197,24,0.3)]' 
-                                                    : 'bg-[#1C1C1E] border-white/10 text-white/30'
+                                                    : 'bg-[#1C1C1E] border-white/10 text-white'
                                             }`}>
                                                 {isCompleted ? <CheckCircle size={18} /> : (idx + 1)}
                                             </div>
                                             <span className={`text-xs font-bold uppercase tracking-wider ${
-                                                isCompleted ? 'text-tride-yellow' : 'text-white/30'
+                                                isCompleted ? 'text-tride-yellow' : 'text-tride-text'
                                             }`}>
                                                 {step}
                                             </span>
@@ -138,7 +135,7 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                     </div>
 
                     {/* Shipment Details */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
                         <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                             <Package size={20} className="text-tride-yellow" />
                             Shipment Details
@@ -176,8 +173,8 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                     {/* Courier Summary */}
                     <div className="bg-tride-yellow/10 border border-tride-yellow/20 rounded-3xl p-6">
                          <h3 className="text-tride-yellow font-bold uppercase text-xs tracking-wider mb-2">Service</h3>
-                         <div className="text-2xl font-bold text-white mb-1">{order.courier}</div>
-                         <p className="text-white/60 text-sm">Standard Delivery</p>
+                         <div className="text-2xl font-bold text-tride-yellow mb-1">{order.courier}</div>
+                         <p className="text-tride-yellow/60 text-sm">Standard Delivery</p>
                     </div>
                 </div>
             </div>
@@ -187,10 +184,10 @@ export default function ViewCourierOrder({ id }: { id: number }) {
 
 function ContactCard({ title, icon, iconBg, name, detail }: any) {
     return (
-        <div className="bg-white/5 border border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:border-white/10 transition-colors">
+        <div className="bg-tride-card border border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:border-white/10 transition-colors">
             <div className={`absolute top-0 right-0 w-24 h-24 ${iconBg} blur-2xl rounded-full -mr-10 -mt-10 opacity-50`}></div>
             
-            <h3 className="text-white/50 text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2 z-10 relative">
+            <h3 className="text-tride-text text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2 z-10 relative">
                 <div className={`p-1.5 rounded-lg ${iconBg}`}>
                     {icon}
                 </div> 
@@ -199,12 +196,12 @@ function ContactCard({ title, icon, iconBg, name, detail }: any) {
             
             <div className="relative z-10">
                  <div className="flex items-center gap-3 mb-2">
-                     <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 font-bold text-xs">
+                     <div className="w-8 h-8 rounded-full  bg-tride-hover flex items-center justify-center text-tride-text/70 font-bold text-xs">
                         {name.charAt(0).toUpperCase()}
                      </div>
                      <p className="font-bold text-lg leading-tight truncate">{name}</p>
                  </div>
-                 {detail && <p className="text-white/40 text-xs pl-11">{detail}</p>}
+                 {detail && <p className="text-tride-text/40 text-xs pl-11">{detail}</p>}
             </div>
         </div>
     )
@@ -212,13 +209,13 @@ function ContactCard({ title, icon, iconBg, name, detail }: any) {
 
 function InfoCard({ icon, label, value, highlight }: any) {
     return (
-        <div className={`p-4 rounded-2xl border ${highlight ? 'bg-tride-yellow/10 border-tride-yellow/20' : 'bg-white/5 border-white/5 hover:bg-white/10'} transition-colors flex items-center gap-4`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${highlight ? 'bg-tride-yellow text-black' : 'bg-white/10 text-white/50'}`}>
+        <div className={`p-4 rounded-2xl border ${highlight ? 'bg-tride-yellow/10 border-tride-yellow/20' : ' bg-tride-hover border-tride-border hover:bg-white/10'} transition-colors flex items-center gap-4`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${highlight ? 'bg-tride-yellow text-black' : 'bg-white/10 text-tride-text'}`}>
                 {icon}
             </div>
             <div>
-                <p className={`text-xs font-medium uppercase tracking-wider mb-0.5 ${highlight ? 'text-tride-yellow/80' : 'text-white/40'}`}>{label}</p>
-                <p className={`font-bold ${highlight ? 'text-white text-lg' : 'text-white/90'}`}>{value}</p>
+                <p className={`text-xs font-medium uppercase tracking-wider mb-0.5 ${highlight ? 'text-tride-yellow/80' : 'text-tride-text'}`}>{label}</p>
+                <p className={`font-bold ${highlight ? 'text-tride-yellow text-lg' : 'text-tride-text'}`}>{value}</p>
             </div>
         </div>
     )

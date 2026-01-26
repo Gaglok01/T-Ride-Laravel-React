@@ -125,15 +125,15 @@ function Switch({ checked, onCheckedChange, disabled }: { checked: boolean, onCh
 // Stats Card matching RentPage design
 function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-5 rounded-3xl flex items-start justify-between">
+        <div className="bg-tride-card border border-tride-border p-6 rounded-3xl flex items-start justify-between shadow-sm">
             <div>
-                <p className="text-white/50 text-xs font-medium mb-1">{label}</p>
-                <div className="text-2xl font-bold mb-2">{value}</div>
-                <div className={`text-xs font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
-                    <span className="text-sm">{trendUp ? '↗' : '↘'}</span> {trend}
+                <p className="text-tride-text-muted text-sm font-medium mb-1">{label}</p>
+                <div className="text-3xl font-bold text-tride-text mb-2">{value}</div>
+                <div className={`text-sm font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
+                    <span className="text-lg">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
-            <div className={`w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center`}>
+            <div className={`w-12 h-12 ${iconBg} rounded-2xl flex items-center justify-center text-tride-text`}>
                 {icon}
             </div>
         </div>
@@ -369,18 +369,20 @@ export default function PaymentGateway() {
                 ))}
             </div>
 
-            <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit flex-wrap">
-                {["Payment Providers", "Mobile Money", "Card Processing", "Digital Wallets", "Bank Transfers", "Gateway Settings"].map((tab) => (
-                    <Button
-                        key={tab}
-                        variant={activeTab === tab ? "secondary" : "ghost"}
-                        className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
-                        onClick={() => setActiveTab(tab)}
-                    >
-                        {tab}
-                    </Button>
-                ))}
-            </div>
+            {/* Main Content Area */}
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm p-6">
+                <div className="flex gap-1 mb-8 p-1 rounded-2xl w-fit flex-wrap border-tride-border">
+                    {["Payment Providers", "Mobile Money", "Card Processing", "Digital Wallets", "Bank Transfers", "Gateway Settings"].map((tab) => (
+                        <Button
+                            key={tab}
+                            variant={activeTab === tab ? "default" : "ghost"}
+                            className={activeTab === tab ? "" : "text-tride-text-muted hover:text-tride-text"}
+                            onClick={() => setActiveTab(tab)}
+                        >
+                            {tab}
+                        </Button>
+                    ))}
+                </div>
 
             {loading ? (
                 <div className="flex justify-center py-20"><div className="w-10 h-10 border-4 border-tride-yellow border-t-transparent rounded-full animate-spin"></div></div>
@@ -389,45 +391,45 @@ export default function PaymentGateway() {
                     {activeTab === 'Payment Providers' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {providers.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map((provider) => (
-                                <div key={provider.id} className="bg-tride-card border border-white/5 rounded-xl p-6 relative group hover:border-white/10 transition-colors">
+                                <div key={provider.id} className="bg-tride-card border border-tride-border rounded-xl p-6 relative group hover:border-tride-yellow/30 transition-colors">
                                     <div className="flex justify-between items-start mb-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white">
+                                            <div className="w-10 h-10 bg-tride-hover rounded-lg flex items-center justify-center text-tride-text">
                                                 {provider.type === 'mobile_money' ? <Smartphone size={20} /> : provider.type === 'wallet' ? <Wallet size={20} /> : <CreditCard size={20} />}
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold text-white">{provider.name}</h3>
+                                                <h3 className="font-semibold text-tride-text">{provider.name}</h3>
                                                 <Badge variant={provider.is_active ? "default" : "secondary"} className={provider.is_active ? "bg-tride-yellow text-black" : "bg-neutral-700"}>{provider.is_active ? "Active" : "Inactive"}</Badge>
                                             </div>
                                         </div>
                                         <Switch checked={provider.is_active} onCheckedChange={() => handleToggleProvider(provider)} />
                                     </div>
                                     <div className="flex justify-between items-center mb-6 text-sm">
-                                        <div><p className="text-white/50 mb-1">Transactions</p><p className="text-white font-medium">{provider.transaction_count?.toLocaleString() || "0"}</p></div>
-                                        <div className="text-right"><p className="text-white/50 mb-1">Fees</p><p className="text-white font-medium">{formatPercentage(provider.transaction_fee)}</p></div>
+                                        <div><p className="text-tride-text-muted mb-1">Transactions</p><p className="text-tride-text font-medium">{provider.transaction_count?.toLocaleString() || "0"}</p></div>
+                                        <div className="text-right"><p className="text-tride-text-muted mb-1">Fees</p><p className="text-tride-text font-medium">{formatPercentage(provider.transaction_fee)}</p></div>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Link href={`/admin/payment-gateway/${provider.id}`} className="flex-1">
-                                             <Button variant="secondary" className="w-full bg-white/5 hover:bg-white/10 text-white"><Eye size={14} className="mr-2" /> View</Button>
+                                             <Button variant="secondary" className="w-full bg-tride-hover hover:bg-tride-border text-tride-text border border-tride-border"><Eye size={14} className="mr-2" /> View</Button>
                                         </Link>
-                                        <Button variant="outline" className="flex-1 border-white/10 hover:bg-white/5 text-white/80" onClick={() => { setEditingProvider(provider); setIsProviderModalOpen(true); }}><Settings size={14} className="mr-2" /> Configure</Button>
+                                        <Button variant="outline" className="flex-1 border-tride-border hover:bg-tride-hover text-tride-text-muted" onClick={() => { setEditingProvider(provider); setIsProviderModalOpen(true); }}><Settings size={14} className="mr-2" /> Configure</Button>
                                     </div>
                                 </div>
                             ))}
-                            {providers.length === 0 && <div className="col-span-full text-center py-10 text-white/50">No providers found.</div>}
+                            {providers.length === 0 && <div className="col-span-full text-center py-10 text-tride-text-muted">No providers found.</div>}
                         </div>
                     )}
 
                     {activeTab === 'Mobile Money' && (
-                        <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
-                            <div className="flex justify-between items-center p-6 border-b border-white/5">
-                                <h3 className="text-lg font-bold text-white">Mobile Money Providers</h3>
+                        <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden backdrop-blur-sm">
+                            <div className="flex justify-between items-center p-6 border-b border-tride-border">
+                                <h3 className="text-lg font-bold text-tride-text">Mobile Money Providers</h3>
                                 <Button onClick={() => setIsMobileModalOpen(true)}><Plus size={16} className="mr-2" /> Add Service</Button>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                        <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                             <th className="px-6 py-4">Provider</th>
                                             <th className="px-6 py-4">Country</th>
                                             <th className="px-6 py-4">Limit</th>
@@ -435,9 +437,9 @@ export default function PaymentGateway() {
                                             <th className="px-6 py-4">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/5 text-white">
+                                    <tbody className="divide-y divide-tride-border text-tride-text">
                                         {mobileMoneyProviders.map((item) => (
-                                            <tr key={item.id} className="hover:bg-white/5">
+                                            <tr key={item.id} className="hover:bg-tride-hover transition-colors">
                                                 <td className="px-6 py-4 flex items-center gap-3"><Smartphone size={16} /> {item.name}</td>
                                                 <td className="px-6 py-4">{item.country}</td>
                                                 <td className="px-6 py-4">{formatCurrency(item.transaction_limit)}</td>
@@ -445,7 +447,7 @@ export default function PaymentGateway() {
                                                 <td className="px-6 py-4"><Badge className={item.is_active ? "bg-tride-yellow text-black" : "bg-neutral-700"}>{item.is_active ? "Active" : "Inactive"}</Badge></td>
                                             </tr>
                                         ))}
-                                        {mobileMoneyProviders.length === 0 && <tr><td colSpan={5} className="px-6 py-10 text-center text-white/50">No mobile money services configured.</td></tr>}
+                                        {mobileMoneyProviders.length === 0 && <tr><td colSpan={5} className="px-6 py-10 text-center text-tride-text-muted">No mobile money services configured.</td></tr>}
                                     </tbody>
                                 </table>
                             </div>
@@ -454,112 +456,112 @@ export default function PaymentGateway() {
 
                     {activeTab === 'Card Processing' && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="bg-tride-card border border-white/5 rounded-xl p-6">
-                                <h3 className="text-lg font-bold text-white mb-6">Card Processing Settings</h3>
+                            <div className="bg-tride-card border border-tride-border rounded-xl p-6">
+                                <h3 className="text-lg font-bold text-tride-text mb-6">Card Processing Settings</h3>
                                 <div className="space-y-6">
                                     {cardSettings.map(s => (
-                                        <div key={s.id} className="flex items-center justify-between p-4 border border-white/5 rounded-lg">
-                                            <div className="flex items-center gap-3"><CreditCard size={18} className="text-white/60" /><span className="font-medium text-white capitalize">{s.setting_name.replace(/_/g, ' ')}</span></div>
+                                        <div key={s.id} className="flex items-center justify-between p-4 border border-tride-border rounded-lg bg-tride-hover/50">
+                                            <div className="flex items-center gap-3"><CreditCard size={18} className="text-tride-text-muted" /><span className="font-medium text-tride-text capitalize">{s.setting_name.replace(/_/g, ' ')}</span></div>
                                             <Switch checked={s.is_enabled} onCheckedChange={(c) => updateCardSetting(s.setting_name, c)} />
                                         </div>
                                     ))}
-                                    {cardSettings.length === 0 && <div className="text-center text-white/50">No settings available.</div>}
+                                    {cardSettings.length === 0 && <div className="text-center text-tride-text-muted">No settings available.</div>}
                                 </div>
                             </div>
-                            <div className="bg-tride-card border border-white/5 rounded-xl p-6">
-                                <h3 className="text-lg font-bold text-white mb-6">Fraud Prevention</h3>
+                            <div className="bg-tride-card border border-tride-border rounded-xl p-6">
+                                <h3 className="text-lg font-bold text-tride-text mb-6">Fraud Prevention</h3>
                                 <div className="space-y-6">
                                     <div>
-                                        <div className="flex justify-between mb-2"><span className="text-sm font-medium text-white">Risk Score Threshold</span><Badge className="bg-blue-600">{fraudSettings?.risk_score_threshold || 75}</Badge></div>
-                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-blue-600" style={{ width: `${fraudSettings?.risk_score_threshold || 75}%` }}></div></div>
+                                        <div className="flex justify-between mb-2"><span className="text-sm font-medium text-tride-text">Risk Score Threshold</span><Badge className="bg-blue-600">{fraudSettings?.risk_score_threshold || 75}</Badge></div>
+                                        <div className="h-2 bg-tride-hover rounded-full overflow-hidden"><div className="h-full bg-blue-600" style={{ width: `${fraudSettings?.risk_score_threshold || 75}%` }}></div></div>
                                     </div>
-                                    <div className="flex justify-between"><span className="text-sm font-medium text-white">Block Suspicious IPs</span><Switch checked={fraudSettings?.block_suspicious_ips ?? true} onCheckedChange={(c) => updateFraudSetting('block_suspicious_ips', c)} /></div>
-                                    <div className="flex justify-between"><span className="text-sm font-medium text-white">Velocity Checks</span><Switch checked={fraudSettings?.velocity_checks ?? true} onCheckedChange={(c) => updateFraudSetting('velocity_checks', c)} /></div>
-                                    <div className="flex justify-between"><span className="text-sm font-medium text-white">CVV Verification</span><Switch checked={fraudSettings?.cvv_verification ?? true} onCheckedChange={(c) => updateFraudSetting('cvv_verification', c)} /></div>
+                                    <div className="flex justify-between"><span className="text-sm font-medium text-tride-text">Block Suspicious IPs</span><Switch checked={fraudSettings?.block_suspicious_ips ?? true} onCheckedChange={(c) => updateFraudSetting('block_suspicious_ips', c)} /></div>
+                                    <div className="flex justify-between"><span className="text-sm font-medium text-tride-text">Velocity Checks</span><Switch checked={fraudSettings?.velocity_checks ?? true} onCheckedChange={(c) => updateFraudSetting('velocity_checks', c)} /></div>
+                                    <div className="flex justify-between"><span className="text-sm font-medium text-tride-text">CVV Verification</span><Switch checked={fraudSettings?.cvv_verification ?? true} onCheckedChange={(c) => updateFraudSetting('cvv_verification', c)} /></div>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'Digital Wallets' && (
-                        <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
-                             <div className="flex justify-between items-center p-6 border-b border-white/5">
-                                <h3 className="text-lg font-bold text-white">Digital Wallet Providers</h3>
+                        <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden backdrop-blur-sm">
+                             <div className="flex justify-between items-center p-6 border-b border-tride-border">
+                                <h3 className="text-lg font-bold text-tride-text">Digital Wallet Providers</h3>
                                 <Button onClick={() => { setEditingProvider({ type: 'wallet' } as any); setIsProviderModalOpen(true); }}>
                                     <Plus size={16} className="mr-2" /> Add Wallet
                                 </Button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                                 {providers.filter(p => p.type === 'wallet').map((provider) => (
-                                     <div key={provider.id} className="bg-tride-card border border-white/5 rounded-xl p-6 relative group hover:border-white/10 transition-colors">
+                                     <div key={provider.id} className="bg-tride-card border border-tride-border rounded-xl p-6 relative group hover:border-tride-yellow/30 transition-colors">
                                         <div className="flex justify-between items-start mb-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white">
+                                                <div className="w-10 h-10 bg-tride-hover rounded-lg flex items-center justify-center text-tride-text">
                                                     <Wallet size={20} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-semibold text-white">{provider.name}</h3>
+                                                    <h3 className="font-semibold text-tride-text">{provider.name}</h3>
                                                      <Badge variant={provider.is_active ? "default" : "secondary"} className={provider.is_active ? "bg-tride-yellow text-black" : "bg-neutral-700"}>{provider.is_active ? "Active" : "Inactive"}</Badge>
                                                 </div>
                                             </div>
                                             <Switch checked={provider.is_active} onCheckedChange={() => handleToggleProvider(provider)} />
                                         </div>
                                          <div className="flex justify-between items-center mb-6 text-sm">
-                                            <div><p className="text-white/50 mb-1">Transactions</p><p className="text-white font-medium">{provider.transaction_count?.toLocaleString() || "0"}</p></div>
-                                            <div className="text-right"><p className="text-white/50 mb-1">Fees</p><p className="text-white font-medium">{formatPercentage(provider.transaction_fee)}</p></div>
+                                            <div><p className="text-tride-text-muted mb-1">Transactions</p><p className="text-tride-text font-medium">{provider.transaction_count?.toLocaleString() || "0"}</p></div>
+                                            <div className="text-right"><p className="text-tride-text-muted mb-1">Fees</p><p className="text-tride-text font-medium">{formatPercentage(provider.transaction_fee)}</p></div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <Link href={`/admin/payment-gateway/${provider.id}`} className="flex-1">
-                                                 <Button variant="secondary" className="w-full bg-white/5 hover:bg-white/10 text-white"><Eye size={14} className="mr-2" /> View</Button>
+                                                 <Button variant="secondary" className="w-full bg-tride-hover hover:bg-tride-border text-tride-text border border-tride-border"><Eye size={14} className="mr-2" /> View</Button>
                                             </Link>
-                                            <Button variant="outline" className="flex-1 border-white/10 hover:bg-white/5 text-white/80" onClick={() => { setEditingProvider(provider); setIsProviderModalOpen(true); }}><Settings size={14} className="mr-2" /> Configure</Button>
+                                            <Button variant="outline" className="flex-1 border-tride-border hover:bg-tride-hover text-tride-text-muted" onClick={() => { setEditingProvider(provider); setIsProviderModalOpen(true); }}><Settings size={14} className="mr-2" /> Configure</Button>
                                         </div>
                                     </div>
                                 ))}
                                 {providers.filter(p => p.type === 'wallet').length === 0 && (
-                                     <div className="col-span-full text-center py-10 text-white/50">No digital wallets configured.</div>
+                                     <div className="col-span-full text-center py-10 text-tride-text-muted">No digital wallets configured.</div>
                                 )}
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'Bank Transfers' && (
-                         <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
-                             <div className="flex justify-between items-center p-6 border-b border-white/5">
-                                <h3 className="text-lg font-bold text-white">Bank Transfer Configuration</h3>
+                         <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden backdrop-blur-sm">
+                             <div className="flex justify-between items-center p-6 border-b border-tride-border">
+                                <h3 className="text-lg font-bold text-tride-text">Bank Transfer Configuration</h3>
                                 <Button onClick={() => { setEditingProvider({ type: 'bank_transfer' } as any); setIsProviderModalOpen(true); }}>
                                     <Plus size={16} className="mr-2" /> Add Bank
                                 </Button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                                 {providers.filter(p => p.type === 'bank_transfer').map((provider) => (
-                                     <div key={provider.id} className="bg-tride-card border border-white/5 rounded-xl p-6 relative group hover:border-white/10 transition-colors">
+                                     <div key={provider.id} className="bg-tride-card border border-tride-border rounded-xl p-6 relative group hover:border-tride-yellow/30 transition-colors">
                                         <div className="flex justify-between items-start mb-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white">
+                                                <div className="w-10 h-10 bg-tride-hover rounded-lg flex items-center justify-center text-tride-text">
                                                     <Landmark size={20} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-semibold text-white">{provider.name}</h3>
+                                                    <h3 className="font-semibold text-tride-text">{provider.name}</h3>
                                                      <Badge variant={provider.is_active ? "default" : "secondary"} className={provider.is_active ? "bg-tride-yellow text-black" : "bg-neutral-700"}>{provider.is_active ? "Active" : "Inactive"}</Badge>
                                                 </div>
                                             </div>
                                             <Switch checked={provider.is_active} onCheckedChange={() => handleToggleProvider(provider)} />
                                         </div>
                                          <div className="flex justify-between items-center mb-6 text-sm">
-                                            <div><p className="text-white/50 mb-1">Limit</p><p className="text-white font-medium">{formatCurrency(provider.transaction_limit)}</p></div>
-                                            <div className="text-right"><p className="text-white/50 mb-1">Fee</p><p className="text-white font-medium">{formatPercentage(provider.transaction_fee)}</p></div>
+                                            <div><p className="text-tride-text-muted mb-1">Limit</p><p className="text-tride-text font-medium">{formatCurrency(provider.transaction_limit)}</p></div>
+                                            <div className="text-right"><p className="text-tride-text-muted mb-1">Fee</p><p className="text-tride-text font-medium">{formatPercentage(provider.transaction_fee)}</p></div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <Link href={`/admin/payment-gateway/${provider.id}`} className="flex-1">
-                                                 <Button variant="secondary" className="w-full bg-white/5 hover:bg-white/10 text-white"><Eye size={14} className="mr-2" /> View</Button>
+                                                 <Button variant="secondary" className="w-full bg-tride-hover hover:bg-tride-border text-tride-text border border-tride-border"><Eye size={14} className="mr-2" /> View</Button>
                                             </Link>
-                                            <Button variant="outline" className="flex-1 border-white/10 hover:bg-white/5 text-white/80" onClick={() => { setEditingProvider(provider); setIsProviderModalOpen(true); }}><Settings size={14} className="mr-2" /> Configure</Button>
+                                            <Button variant="outline" className="flex-1 border-tride-border hover:bg-tride-hover text-tride-text-muted" onClick={() => { setEditingProvider(provider); setIsProviderModalOpen(true); }}><Settings size={14} className="mr-2" /> Configure</Button>
                                         </div>
                                     </div>
                                 ))}
                                 {providers.filter(p => p.type === 'bank_transfer').length === 0 && (
-                                     <div className="col-span-full text-center py-10 text-white/50">No bank transfer options configured.</div>
+                                     <div className="col-span-full text-center py-10 text-tride-text-muted">No bank transfer options configured.</div>
                                 )}
                             </div>
                         </div>
@@ -567,44 +569,45 @@ export default function PaymentGateway() {
 
                     {activeTab === 'Gateway Settings' && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="bg-tride-card border border-white/5 rounded-xl p-6">
-                                <h3 className="text-lg font-bold text-white mb-6">Transaction Limits</h3>
+                            <div className="bg-tride-card border border-tride-border rounded-xl p-6">
+                                <h3 className="text-lg font-bold text-tride-text mb-6">Transaction Limits</h3>
                                 <div className="space-y-4">
                                     {transactionLimits.map(limit => (
-                                        <div key={limit.id} className="flex justify-between p-4 border border-white/5 rounded-lg bg-white/5 items-center">
-                                            <span className="text-sm text-white/80">{limit.name || limit.limit_type}</span>
+                                        <div key={limit.id} className="flex justify-between p-4 border border-tride-border rounded-lg bg-tride-hover/50 items-center">
+                                            <span className="text-sm text-tride-text-muted">{limit.name || limit.limit_type}</span>
                                             <div className="flex items-center gap-3">
-                                                <span className="font-bold text-white">{formatCurrency(limit.amount)}</span>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6 text-white/50 hover:text-white" onClick={() => { setEditingLimit(limit); setIsLimitModalOpen(true); }}><Settings size={14} /></Button>
+                                                <span className="font-bold text-tride-text">{formatCurrency(limit.amount)}</span>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6 text-tride-text-muted hover:text-tride-text" onClick={() => { setEditingLimit(limit); setIsLimitModalOpen(true); }}><Settings size={14} /></Button>
                                             </div>
                                         </div>
                                     ))}
-                                    {transactionLimits.length === 0 && <div className="text-center text-white/50">No limits configured.</div>}
+                                    {transactionLimits.length === 0 && <div className="text-center text-tride-text-muted">No limits configured.</div>}
                                 </div>
                             </div>
 
-                            <div className="bg-tride-card border border-white/5 rounded-xl p-6">
-                                <h3 className="text-lg font-bold text-white mb-6">Webhook Configuration</h3>
+                            <div className="bg-tride-card border border-tride-border rounded-xl p-6">
+                                <h3 className="text-lg font-bold text-tride-text mb-6">Webhook Configuration</h3>
                                 <div className="space-y-4">
                                     {webhooks.map(webhook => (
-                                        <div key={webhook.id} className="border border-white/5 rounded-lg p-3 bg-white/5">
+                                        <div key={webhook.id} className="border border-tride-border rounded-lg p-3 bg-tride-hover/50">
                                             <div className="flex justify-between items-center mb-1">
-                                                <span className="text-xs text-white/50">{webhook.name}</span>
+                                                <span className="text-xs text-tride-text-muted">{webhook.name}</span>
                                                 <div className="flex gap-2">
-                                                    <Button variant="ghost" size="icon" className="h-5 w-5 text-white/50 hover:text-white" onClick={() => { setEditingWebhook(webhook); setIsWebhookModalOpen(true); }}><Settings size={12} /></Button>
+                                                    <Button variant="ghost" size="icon" className="h-5 w-5 text-tride-text-muted hover:text-tride-text" onClick={() => { setEditingWebhook(webhook); setIsWebhookModalOpen(true); }}><Settings size={12} /></Button>
                                                     <Button variant="ghost" size="icon" className="h-5 w-5 text-red-400/50 hover:text-red-400" onClick={() => deleteWebhook(webhook.id)}><Trash2 size={12} /></Button>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${webhook.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div><code className="text-xs text-blue-400 font-mono block truncate">{webhook.url}</code></div>
                                         </div>
                                     ))}
-                                    <Button variant="outline" className="w-full border-dashed border-white/20 text-white/50 hover:text-white hover:bg-white/5" onClick={() => { setEditingWebhook(null); setIsWebhookModalOpen(true); }}><Plus size={16} className="mr-2" /> Add Webhook</Button>
+                                    <Button variant="outline" className="w-full border-dashed border-tride-border text-tride-text-muted hover:text-tride-text hover:bg-tride-hover" onClick={() => { setEditingWebhook(null); setIsWebhookModalOpen(true); }}><Plus size={16} className="mr-2" /> Add Webhook</Button>
                                 </div>
                             </div>
                         </div>
                     )}
                 </>
             )}
+            </div>
 
             <PaymentProviderModal isOpen={isProviderModalOpen} onClose={() => { setIsProviderModalOpen(false); setEditingProvider(null); }} onSave={handleSaveProvider} initialData={editingProvider} />
             <MobileMoneyModal isOpen={isMobileModalOpen} onClose={() => setIsMobileModalOpen(false)} onSave={handleSaveMobileMoney} providers={providerOptions} />

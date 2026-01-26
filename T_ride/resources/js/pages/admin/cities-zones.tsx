@@ -341,29 +341,29 @@ export default function CitiesZonesPage() {
         >
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                <StatsCard label="Active Cities" value={stats.active_cities.toString()} trend="+3" trendUp={true} icon={<Building size={20} />} />
-                <StatsCard label="Service Zones" value={stats.total_zones.toString()} trend="+12" trendUp={true} icon={<Navigation size={20} />} />
-                <StatsCard label="Countries" value={stats.total_countries.toString()} trend="+1" trendUp={true} icon={<Globe size={20} />} />
-                <StatsCard label="Transportation Hubs" value={transportationHubs.length.toString()} trend="+5" trendUp={true} icon={<Plane size={20} />} />
-                <StatsCard label="Restricted Areas" value={restrictedAreas.length.toString()} trend="+2" trendUp={true} icon={<ShieldAlert size={20} />} />
+                <StatsCard label="Active Cities" value={stats.active_cities.toString()} trend="+3" trendUp={true} icon={<Building size={20} className="text-tride-text" />} iconBg="bg-tride-hover" />
+                <StatsCard label="Service Zones" value={stats.total_zones.toString()} trend="+12" trendUp={true} icon={<Navigation size={20} className="text-tride-text" />} iconBg="bg-tride-hover" />
+                <StatsCard label="Countries" value={stats.total_countries.toString()} trend="+1" trendUp={true} icon={<Globe size={20} className="text-tride-text" />} iconBg="bg-tride-hover" />
+                <StatsCard label="Transportation Hubs" value={transportationHubs.length.toString()} trend="+5" trendUp={true} icon={<Plane size={20} className="text-tride-text" />} iconBg="bg-tride-hover" />
+                <StatsCard label="Restricted Areas" value={restrictedAreas.length.toString()} trend="+2" trendUp={true} icon={<ShieldAlert size={20} className="text-tride-text" />} iconBg="bg-tride-hover" />
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-2xl w-fit flex-wrap">
-                {tabs.map((tab) => (
-                    <Button
-                        key={tab}
-                        variant={activeTab === tab ? "secondary" : "ghost"}
-                        className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white hover:bg-white/5"}
-                        onClick={() => setActiveTab(tab)}
-                    >
-                        {tab}
-                    </Button>
-                ))}
-            </div>
+
 
             {/* Main Content Info */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm min-h-[400px]">
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm min-h-[400px]">
+                <div className="flex gap-1 p-4 border-b border-tride-border flex-wrap">
+                    {tabs.map((tab) => (
+                        <Button
+                            key={tab}
+                            variant={activeTab === tab ? "default" : "ghost"}
+                            onClick={() => setActiveTab(tab)}
+                        >
+                            {tab}
+                        </Button>
+                    ))}
+                </div>
                 {loading ? (
                     <div className="flex items-center justify-center h-96">
                         <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
@@ -463,7 +463,7 @@ function CitiesTab({ cities, onDelete, onStatusToggle, onEdit }: { cities: City[
         <div className="overflow-x-auto">
             <table className="w-full">
                 <thead>
-                    <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                    <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                         <th className="px-6 py-4 font-medium">City</th>
                         <th className="px-6 py-4 font-medium">Country</th>
                         <th className="px-6 py-4 font-medium">Zones</th>
@@ -473,24 +473,24 @@ function CitiesTab({ cities, onDelete, onStatusToggle, onEdit }: { cities: City[
                         <th className="px-6 py-4 font-medium text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-tride-border">
                     {cities.map((city) => (
-                        <tr key={city.id} className="hover:bg-white/5 transition-colors group">
+                        <tr key={city.id} className="hover:bg-tride-hover transition-colors group">
                             <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">
                                         <Building size={16} />
                                     </div>
-                                    <span className="font-semibold text-white">{city.name}</span>
+                                    <span className="font-semibold text-tride-text">{city.name}</span>
                                 </div>
                             </td>
-                            <td className="px-6 py-4 text-white/70">{city.country}</td>
-                            <td className="px-6 py-4 text-white/70">{city.service_zones_count || 0}</td>
-                            <td className="px-6 py-4 text-white/70">{city.currency || '-'}</td>
+                            <td className="px-6 py-4 text-tride-text-muted">{city.country}</td>
+                            <td className="px-6 py-4 text-tride-text-muted">{city.service_zones_count || 0}</td>
+                            <td className="px-6 py-4 text-tride-text-muted">{city.currency || '-'}</td>
                             <td className="px-6 py-4">
                                 <div className="flex gap-1 flex-wrap">
                                     {city.services?.map(s => (
-                                        <span key={s} className="px-2 py-0.5 rounded-full border border-white/10 text-xs text-white/60 bg-white/5">
+                                        <span key={s} className="px-2 py-0.5 rounded-full border border-tride-border text-xs text-tride-text-muted bg-tride-hover">
                                             {s}
                                         </span>
                                     ))}
@@ -551,9 +551,9 @@ function ServiceZonesTab({ zones, cities, onDelete, onStatusToggle, onEdit, onAd
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 h-full min-h-[600px]">
             {/* Map Area */}
-            <div className="lg:col-span-2 border-r border-white/5 bg-white/5 flex flex-col p-6">
+            <div className="lg:col-span-2 border-r border-tride-border bg-tride-card flex flex-col p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <div className="font-semibold text-lg">Zone Map</div>
+                    <div className="font-semibold text-lg text-tride-text">Zone Map</div>
                     <Dropdown 
                         value={selectedCity ? selectedCity.toString() : "all"}
                         onChange={(val) => setSelectedCity(val === "all" ? null : Number(val))}
@@ -565,7 +565,7 @@ function ServiceZonesTab({ zones, cities, onDelete, onStatusToggle, onEdit, onAd
                         className="w-[180px]"
                     />
                 </div>
-                <div className="flex-1 bg-white/5 rounded-2xl border-2 border-dashed border-white/10 flex items-center justify-center text-white/20">
+                <div className="flex-1 bg-tride-hover rounded-2xl border-2 border-dashed border-tride-border flex items-center justify-center text-tride-text-muted">
                     <MapIcon size={48} />
                 </div>
             </div>
@@ -584,15 +584,15 @@ function ServiceZonesTab({ zones, cities, onDelete, onStatusToggle, onEdit, onAd
                 ) : (
                     <div className="space-y-3 max-h-[500px] overflow-y-auto">
                         {filteredZones.map((zone) => (
-                            <div key={zone.id} className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
+                            <div key={zone.id} className="bg-tride-card border border-tride-border p-4 rounded-xl hover:bg-tride-hover transition-colors shadow-sm">
                                 <div className="flex items-center justify-between mb-2">
-                                    <div className="font-medium text-white">{zone.name}</div>
+                                    <div className="font-medium text-tride-text">{zone.name}</div>
                                     <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-bold">
                                         {zone.price_multiplier}x
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <div className="text-xs text-white/50">{zone.city?.name || 'Unknown City'}</div>
+                                    <div className="text-xs text-tride-text-muted">{zone.city?.name || 'Unknown City'}</div>
                                     <div className="flex gap-1">
                                         <button 
                                             onClick={() => onStatusToggle(zone)}
@@ -639,10 +639,10 @@ function AirportsTab({ hubs, onDelete, onStatusToggle, onEdit, onAddHub }: { hub
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-xl font-bold flex items-center gap-2">
+                    <h2 className="text-xl font-bold flex items-center gap-2 text-tride-text">
                         Airports & Transportation Hubs
                     </h2>
-                    <p className="text-white/50 text-sm">Special pickup/dropoff zones with queue management</p>
+                    <p className="text-tride-text-muted text-sm">Special pickup/dropoff zones with queue management</p>
                 </div>
                 <Button onClick={onAddHub}>
                     <Plus size={16} />
@@ -659,7 +659,7 @@ function AirportsTab({ hubs, onDelete, onStatusToggle, onEdit, onAddHub }: { hub
                 <div className="overflow-x-auto -mx-6">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-6 py-4 font-medium">Location</th>
                                 <th className="px-6 py-4 font-medium">Type</th>
                                 <th className="px-6 py-4 font-medium">City</th>
@@ -669,9 +669,9 @@ function AirportsTab({ hubs, onDelete, onStatusToggle, onEdit, onAddHub }: { hub
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {hubs.map((hub) => (
-                                <tr key={hub.id} className="hover:bg-white/5 transition-colors">
+                                <tr key={hub.id} className="hover:bg-tride-hover transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">
@@ -681,13 +681,13 @@ function AirportsTab({ hubs, onDelete, onStatusToggle, onEdit, onAddHub }: { hub
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-2 py-1 rounded-full border border-white/10 text-xs bg-white/5 text-white/70 capitalize">
+                                        <span className="px-2 py-1 rounded-full border border-tride-border text-xs bg-tride-hover text-tride-text-muted capitalize">
                                             {hub.type}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-white/70">{hub.city?.name || 'Unknown'}</td>
-                                    <td className="px-6 py-4 text-white/70">{hub.queue_capacity} drivers</td>
-                                    <td className="px-6 py-4 text-white/70">${Number(hub.pickup_fee).toFixed(2)}</td>
+                                    <td className="px-6 py-4 text-tride-text-muted">{hub.city?.name || 'Unknown'}</td>
+                                    <td className="px-6 py-4 text-tride-text-muted">{hub.queue_capacity} drivers</td>
+                                    <td className="px-6 py-4 text-tride-text-muted">${Number(hub.pickup_fee).toFixed(2)}</td>
                                     <td className="px-6 py-4">
                                         <button 
                                             onClick={() => onStatusToggle(hub)}
@@ -739,8 +739,8 @@ function RestrictedAreasTab({ areas, onDelete, onStatusToggle, onEdit, onAddArea
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                     <h2 className="text-xl font-bold">Restricted Areas</h2>
-                     <p className="text-white/50 text-sm">Areas where service is limited or prohibited</p>
+                     <h2 className="text-xl font-bold text-tride-text">Restricted Areas</h2>
+                     <p className="text-tride-text-muted text-sm">Areas where service is limited or prohibited</p>
                 </div>
                 <Button onClick={onAddArea}>
                     <Plus size={16} />
@@ -757,7 +757,7 @@ function RestrictedAreasTab({ areas, onDelete, onStatusToggle, onEdit, onAddArea
                 <div className="overflow-x-auto -mx-6">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-6 py-4 font-medium">Area Name</th>
                                 <th className="px-6 py-4 font-medium">City</th>
                                 <th className="px-6 py-4 font-medium">Restriction Type</th>
@@ -767,18 +767,18 @@ function RestrictedAreasTab({ areas, onDelete, onStatusToggle, onEdit, onAddArea
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {areas.map((area) => (
-                                <tr key={area.id} className="hover:bg-white/5 transition-colors">
-                                    <td className="px-6 py-4 font-medium">{area.name}</td>
-                                    <td className="px-6 py-4 text-white/70">{area.city?.name || 'Unknown'}</td>
+                                <tr key={area.id} className="hover:bg-tride-hover transition-colors">
+                                    <td className="px-6 py-4 font-medium text-tride-text">{area.name}</td>
+                                    <td className="px-6 py-4 text-tride-text-muted">{area.city?.name || 'Unknown'}</td>
                                     <td className="px-6 py-4">
                                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${getRestrictionTypeStyle(area.restriction_type)}`}>
                                             {formatRestrictionType(area.restriction_type)}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-white/70">{area.reason || '-'}</td>
-                                    <td className="px-6 py-4 text-white/70">{area.effective_period || 'Permanent'}</td>
+                                    <td className="px-6 py-4 text-tride-text-muted">{area.reason || '-'}</td>
+                                    <td className="px-6 py-4 text-tride-text-muted">{area.effective_period || 'Permanent'}</td>
                                     <td className="px-6 py-4">
                                         <button 
                                             onClick={() => onStatusToggle(area)}
@@ -916,21 +916,18 @@ function ExpansionPlanningTab({ plans, onDelete, onEdit, onAddPlan }: { plans: E
     )
 }
 
-function StatsCard({ label, value, trend, trendUp, icon }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode }) {
+function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg?: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-6 rounded-3xl flex flex-col justify-between h-full relative overflow-hidden group hover:border-white/10 transition-colors">
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                     <p className="text-white/50 text-sm font-medium mb-1">{label}</p>
-                     <div className="text-3xl font-bold">{value}</div>
-                </div>
-                <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                    {icon}
+        <div className="bg-tride-card border border-tride-border p-5 rounded-3xl flex items-start justify-between shadow-sm">
+            <div>
+                <p className="text-tride-text-muted text-xs font-medium mb-1">{label}</p>
+                <div className="text-2xl font-bold mb-2 text-tride-text">{value}</div>
+                <div className={`text-xs font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
+                    <span className="text-sm">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
-            
-            <div className={`text-sm font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
-                <span className="text-lg leading-none">{trendUp ? '↗' : '↘'}</span> {trend}
+            <div className={`w-10 h-10 ${iconBg || 'bg-tride-hover'} rounded-xl flex items-center justify-center text-tride-text`}>
+                {icon}
             </div>
         </div>
     )

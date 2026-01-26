@@ -40,7 +40,7 @@ export function DeleteConfirmationModal({
             }
         >
             <div className="space-y-4">
-                 <p className="text-white/70">
+                 <p className="text-tride-text-muted">
                     This action is <span className="text-red-400 font-bold">irreversible</span>. 
                     Please confirm that you want to permanently remove this record from the database.
                  </p>

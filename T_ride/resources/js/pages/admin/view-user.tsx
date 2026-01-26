@@ -75,16 +75,16 @@ export default function ViewUser({ id }: { id: number }) {
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Profile Card */}
-                <div className="bg-white/5 border border-white/5 rounded-3xl p-6 lg:col-span-1 h-fit">
+                <div className="bg-tride-card border border-tride-border rounded-3xl p-6 lg:col-span-1 h-fit">
                     <div className="flex flex-col items-center text-center">
-                        <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-3xl font-bold mb-4 overflow-hidden outline outline-4 outline-white/5">
+                        <div className="w-24 h-24 rounded-full bg-tride-hover flex items-center justify-center text-3xl font-bold mb-4 overflow-hidden outline outline-4 outline-tride-hover text-tride-text-muted">
                             {user.photo ? (
                                 <img src={`/storage/${user.photo}`} alt={user.name} className="w-full h-full object-cover" />
                             ) : (
                                 user.name.charAt(0).toUpperCase()
                             )}
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-1">{user.name}</h2>
+                        <h2 className="text-2xl font-bold text-tride-text mb-1">{user.name}</h2>
                         <div className="flex items-center gap-2 mb-2">
                              <span className="px-3 py-0.5 rounded-full bg-tride-yellow/10 text-tride-yellow text-xs font-bold uppercase tracking-wider border border-tride-yellow/20">
                                 {user.roles && user.roles.length > 0 ? user.roles[0].name : "User"}
@@ -93,7 +93,7 @@ export default function ViewUser({ id }: { id: number }) {
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border capitalize ${
                             user.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/20' : 
                             user.status === 'suspended' ? 'bg-red-500/20 text-red-400 border-red-500/20' : 
-                            'bg-gray-500/20 text-white/50 border-white/10'
+                            'bg-tride-hover text-tride-text-muted border-tride-border'
                         }`}>
                             {user.status}
                         </span>
@@ -116,13 +116,13 @@ export default function ViewUser({ id }: { id: number }) {
                     </div>
 
                     {/* Recent Activity Mockup */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                    <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-tride-text">
                              <Shield size={18} className="text-tride-yellow" />
                              Recent Activity
                         </h3>
                         {/* Placeholder for future rides list */}
-                        <div className="text-center py-8 text-white/40 border border-dashed border-white/10 rounded-xl">
+                        <div className="text-center py-8 text-tride-text-muted border border-dashed border-tride-border rounded-xl">
                             No recent rides found.
                         </div>
                     </div>
@@ -134,22 +134,22 @@ export default function ViewUser({ id }: { id: number }) {
 
 function InfoRow({ icon, label, value }: { icon: any, label: string, value: string }) {
     return (
-        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-            <div className="flex items-center gap-3 text-white/60">
+        <div className="flex items-center justify-between p-3 bg-tride-hover rounded-xl border border-tride-border">
+            <div className="flex items-center gap-3 text-tride-text-muted">
                 {icon}
                 <span className="text-sm">{label}</span>
             </div>
-            <span className="text-sm font-medium text-white/90 truncate max-w-[150px]">{value}</span>
+            <span className="text-sm font-medium text-tride-text truncate max-w-[150px]">{value}</span>
         </div>
     )
 }
 
 function StatBox({ label, value, icon, color, bg }: { label: string, value: string, icon: any, color: string, bg: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
+        <div className="bg-tride-card border border-tride-border rounded-2xl p-5 flex items-center justify-between shadow-sm">
             <div>
-                <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">{label}</p>
-                <p className="text-2xl font-bold">{value}</p>
+                <p className="text-tride-text-muted text-xs font-medium uppercase tracking-wider mb-1">{label}</p>
+                <p className="text-2xl font-bold text-tride-text">{value}</p>
             </div>
             <div className={`p-3 rounded-xl ${bg} ${color}`}>
                 {icon}

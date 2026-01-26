@@ -141,13 +141,13 @@ export default function TypesPage() {
       actions={
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
             <input 
               type="text" 
               placeholder="Search types..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
+              className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
             />
           </div>
           <Button onClick={openCreateModal} className="flex-1 sm:flex-none justify-center">
@@ -158,11 +158,11 @@ export default function TypesPage() {
       }
     >
       {loading ? (
-        <div className="text-white/50 text-center py-12">Loading types...</div>
+        <div className="text-tride-text-muted text-center py-12">Loading types...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTypes.map((type) => (
-            <div key={type.id} className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:border-tride-yellow/30 transition-all duration-300 group relative overflow-hidden">
+            <div key={type.id} className="bg-tride-card border border-tride-border rounded-3xl p-6 hover:border-tride-yellow/30 transition-all duration-300 group relative overflow-hidden">
                 <div className="flex justify-between items-start mb-6">
                 <div className={`w-14 h-14 rounded-2xl bg-blue-500 bg-opacity-20 flex items-center justify-center text-white ring-1 ring-white/10`}>
                     <Users size={24} />
@@ -177,7 +177,7 @@ export default function TypesPage() {
                 </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-2">{type.type_name}</h3>
+                <h3 className="text-xl font-bold mb-2 text-tride-text">{type.type_name}</h3>
                 <div className="flex gap-2 mb-2">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                         type.service_type === 'ride' ? 'bg-blue-500/10 text-blue-400' :
@@ -187,7 +187,7 @@ export default function TypesPage() {
                         {type.service_type}
                     </span>
                 </div>
-                <p className="text-white/50 text-sm mb-6">ID: {type.type_custom_id || type.id}</p>
+                <p className="text-tride-text-muted text-sm mb-6">ID: {type.type_custom_id || type.id}</p>
 
                 <div className="flex items-center justify-between">
                 <button 
@@ -200,7 +200,7 @@ export default function TypesPage() {
                 >
                     {type.status === 'active' ? 'Active' : 'Inactive'}
                 </button>
-                <span className="text-xs text-white/30">
+                <span className="text-xs text-tride-text-muted">
                     {type.created_at ? new Date(type.created_at).toLocaleDateString() : 'N/A'}
                 </span>
                 </div>
@@ -210,9 +210,9 @@ export default function TypesPage() {
             {/* Add New Card Placeholder */}
             <button 
                 onClick={openCreateModal}
-                className="border-2 border-dashed border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center text-white/30 hover:text-tride-yellow hover:border-tride-yellow/50 hover:bg-tride-yellow/5 transition-all duration-300 min-h-[200px]"
+                className="border-2 border-dashed border-tride-border rounded-3xl p-6 flex flex-col items-center justify-center text-tride-text-muted hover:text-tride-yellow hover:border-tride-yellow/50 hover:bg-tride-yellow/5 transition-all duration-300 min-h-[200px]"
             >
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-tride-yellow/20">
+            <div className="w-16 h-16 rounded-full bg-tride-hover flex items-center justify-center mb-4 group-hover:bg-tride-yellow/20">
                 <Plus size={32} />
             </div>
             <span className="font-bold text-lg">Create New Driver Type</span>

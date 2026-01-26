@@ -108,20 +108,20 @@ export function Sidebar({
   return (
     <aside 
       className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-tride-dark border-r border-white/5 flex flex-col p-6 transition-transform duration-300 lg:translate-x-0 lg:static lg:shrink-0",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-tride-dark border-r border-tride-border flex flex-col p-6 transition-all duration-300 lg:translate-x-0 lg:static lg:shrink-0",
         isOpen ? "translate-x-0" : "-translate-x-full",
         className
       )}
     >
       <div className="mb-12 flex justify-between items-center">
-        <h2 className="text-2xl font-black tracking-tighter text-white">
+        <h2 className="text-2xl font-black tracking-tighter text-tride-text">
           T-RIDE <span className="inline-block w-2 h-2 bg-tride-yellow rounded-full ml-0.5"></span>
         </h2>
         
         {/* Mobile Close Button */}
         <button 
           onClick={onClose}
-          className="lg:hidden p-2 text-white/50 hover:text-white transition-colors"
+          className="lg:hidden p-2 text-tride-text-muted hover:text-tride-text transition-colors"
         >
           <X size={24} />
         </button>
@@ -149,7 +149,7 @@ export function Sidebar({
       </nav>
 
       {/* Logout Button */}
-      <div className="mt-auto pt-6 border-t border-white/5">
+      <div className="mt-auto pt-6 border-t border-tride-border">
         <button
           onClick={onLogout}
           className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-300"
@@ -173,7 +173,7 @@ function NavItem({ href, icon, label, active, onClick }: { href: string; icon: R
       href={href}
       onClick={onClick}
       className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-        active ? "bg-tride-yellow text-black font-bold" : "text-white/50 hover:text-white hover:bg-white/5"
+        active ? "bg-tride-yellow text-black font-bold" : "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover"
       }`}
     >
       {icon}

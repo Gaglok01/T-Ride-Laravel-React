@@ -86,15 +86,15 @@ export function Modal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-tride-dark/80 backdrop-blur-md transition-all duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-tride-dark/80 backdrop-blur-md transition-all duration-300"
       onClick={handleBackdropClick}
     >
       <div 
         ref={modalRef}
-        className={`bg-[#1C1C1E] border border-white/10 w-full ${sizeClasses[size]} rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200`}
+        className={`bg-tride-card border border-tride-border w-full ${sizeClasses[size]} rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200`}
       >
         {/* Modal Header */}
-        <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+        <div className="px-8 py-6 border-b border-tride-border flex justify-between items-center bg-tride-hover">
           <div className="flex items-center gap-4">
             {icon && (
               <div className="w-10 h-10 rounded-full bg-tride-yellow/20 flex items-center justify-center text-tride-yellow">
@@ -102,16 +102,16 @@ export function Modal({
               </div>
             )}
             <div>
-              <h2 className="text-xl font-bold text-white">{title}</h2>
+              <h2 className="text-xl font-bold text-tride-text">{title}</h2>
               {description && (
-                <p className="text-sm text-gray-400">{description}</p>
+                <p className="text-sm text-tride-text-muted">{description}</p>
               )}
             </div>
           </div>
           {showCloseButton && (
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
+              className="p-2 hover:bg-tride-hover rounded-full transition-colors text-tride-text-muted hover:text-tride-text"
               aria-label="Close modal"
             >
               <X size={24} />
@@ -129,7 +129,7 @@ export function Modal({
 
         {/* Modal Footer */}
         {footer && (
-          <div className="px-8 py-5 border-t border-white/5 bg-white/5 flex justify-end gap-3">
+          <div className="px-8 py-5 border-t border-tride-border bg-tride-hover flex justify-end gap-3">
             {footer}
           </div>
         )}
@@ -162,7 +162,7 @@ export function ModalButton({
   
   const variantClasses = {
     primary: "bg-tride-yellow text-black font-bold hover:bg-tride-yellow/90 shadow-lg shadow-tride-yellow/20",
-    secondary: "text-gray-400 hover:text-white hover:bg-white/10",
+    secondary: "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover",
     danger: "bg-red-500 text-white font-bold hover:bg-red-600 shadow-lg shadow-red-500/20"
   }
 
@@ -228,13 +228,13 @@ export function ModalInput({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-300">
+      <label className="text-sm font-medium text-tride-text">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted pointer-events-none">
             {icon}
           </div>
         )}
@@ -243,7 +243,7 @@ export function ModalInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`w-full bg-tride-dark border border-white/10 rounded-xl text-white focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-gray-600 ${
+          className={`w-full bg-tride-card border border-tride-border rounded-xl text-tride-text focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-tride-text-muted ${
             icon ? "pl-11 pr-4 py-3" : "px-4 py-3"
           } ${dateInputClasses}`}
         />
@@ -290,7 +290,7 @@ export function ModalSelect({
 
   return (
     <div className="space-y-2" ref={dropdownRef}>
-      <label className="text-sm font-medium text-gray-300">
+      <label className="text-sm font-medium text-tride-text">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
@@ -298,28 +298,28 @@ export function ModalSelect({
         {/* Trigger Button */}
         <div 
             onClick={() => setIsOpen(!isOpen)}
-            className={`w-full bg-tride-dark border ${isOpen ? 'border-tride-yellow ring-1 ring-tride-yellow' : 'border-white/10'} rounded-xl text-white cursor-pointer transition-all hover:border-white/30 flex items-center justify-between ${
+            className={`w-full bg-tride-card border ${isOpen ? 'border-tride-yellow ring-1 ring-tride-yellow' : 'border-tride-border'} rounded-xl text-tride-text cursor-pointer transition-all hover:border-tride-text-muted flex items-center justify-between ${
                 icon ? "pl-11 pr-4 py-3" : "px-4 py-3"
             }`}
         >
             {icon && (
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted pointer-events-none">
                     {icon}
                 </div>
             )}
             
-            <span className={selectedOption ? "text-white" : "text-gray-500"}>
+            <span className={selectedOption ? "text-tride-text" : "text-tride-text-muted"}>
                 {selectedOption ? selectedOption.label : placeholder}
             </span>
 
-            <div className={`transition-transform duration-200 text-gray-500 ${isOpen ? 'rotate-180' : ''}`}>
+            <div className={`transition-transform duration-200 text-tride-text-muted ${isOpen ? 'rotate-180' : ''}`}>
                  <svg className="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </div>
         </div>
 
         {/* Dropdown Menu */}
         {isOpen && (
-            <div className="absolute z-50 w-full mt-2 bg-[#1C1C1E] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto custom-scrollbar">
+            <div className="absolute z-50 w-full mt-2 bg-tride-card border border-tride-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto custom-scrollbar">
                 {options.length > 0 ? (
                     options.map((option) => (
                         <div 
@@ -331,7 +331,7 @@ export function ModalSelect({
                             className={`px-4 py-3 text-sm cursor-pointer transition-colors flex items-center justify-between group ${
                                 option.value.toString() === value.toString() 
                                 ? 'bg-tride-yellow/10 text-tride-yellow' 
-                                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                : 'text-tride-text hover:bg-tride-hover'
                             }`}
                         >
                             <span>{option.label}</span>
@@ -341,7 +341,7 @@ export function ModalSelect({
                         </div>
                     ))
                 ) : (
-                    <div className="px-4 py-3 text-sm text-gray-500 text-center">No options available</div>
+                    <div className="px-4 py-3 text-sm text-tride-text-muted text-center">No options available</div>
                 )}
             </div>
         )}
@@ -370,7 +370,7 @@ export function ModalTextarea({
 }: ModalTextareaProps) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-300">
+      <label className="text-sm font-medium text-tride-text">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
@@ -379,7 +379,7 @@ export function ModalTextarea({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full bg-tride-dark border border-white/10 rounded-xl text-white focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-gray-600 px-4 py-3 resize-none"
+        className="w-full bg-tride-card border border-tride-border rounded-xl text-tride-text focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-tride-text-muted px-4 py-3 resize-none"
       />
     </div>
   )

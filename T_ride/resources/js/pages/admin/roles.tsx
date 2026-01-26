@@ -84,15 +84,15 @@ export default function RolesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {MOCK_ROLES.map(role => (
-          <div key={role.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-tride-yellow/30 transition-colors group">
+          <div key={role.id} className="bg-tride-card border border-tride-border rounded-2xl p-6 hover:border-tride-yellow/30 transition-colors group">
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-tride-yellow/10 flex items-center justify-center text-tride-yellow">
                   <Shield size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-white capitalize">{role.name}</h3>
-                  <p className="text-sm text-gray-400">{role.permissions.length} Permissions</p>
+                  <h3 className="font-bold text-lg text-tride-text capitalize">{role.name}</h3>
+                  <p className="text-sm text-tride-text-muted">{role.permissions.length} Permissions</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -109,15 +109,15 @@ export default function RolesPage() {
             </div>
             
             <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Access Capabilities</p>
+              <p className="text-xs font-medium text-tride-text-muted uppercase tracking-wider mb-2">Access Capabilities</p>
               <div className="flex flex-wrap gap-2">
                 {role.permissions.slice(0, 5).map((permission, index) => (
-                  <span key={index} className="text-xs bg-white/5 text-gray-300 px-2 py-1 rounded-md border border-white/5">
+                  <span key={index} className="text-xs bg-tride-hover text-tride-text-muted px-2 py-1 rounded-md border border-tride-border">
                     {permission}
                   </span>
                 ))}
                 {role.permissions.length > 5 && (
-                  <span className="text-xs bg-white/5 text-gray-400 px-2 py-1 rounded-md border border-white/5">
+                  <span className="text-xs bg-tride-hover text-tride-text-muted px-2 py-1 rounded-md border border-tride-border">
                     +{role.permissions.length - 5} more
                   </span>
                 )}

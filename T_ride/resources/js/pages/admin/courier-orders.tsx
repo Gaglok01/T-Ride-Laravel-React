@@ -220,90 +220,31 @@ export default function CourierOrdersPage() {
             actions={
                 <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
                     <div className="relative w-full md:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                         <input 
                             type="text" 
-                            placeholder="Search orders..." 
+                            placeholder="Search order ID..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full md:w-64"
+                            className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full md:w-64"
                         />
                     </div>
-
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="secondary"
+                            onClick={() => {
+                                if (!showFilters) setTempFilters(appliedFilters)
+                                setShowFilters(!showFilters)
+                            }}
+                            className={showFilters ? "bg-tride-yellow/20 text-tride-yellow border-tride-yellow/50" : ""}
+                        >
+                            <Filter size={18} />
+                            Filters
+                        </Button>
                         <Button variant="secondary" className="gap-2" onClick={handleExport} disabled={isExporting}>
                             <Download size={18} className={isExporting ? "animate-bounce" : ""} />
                             {isExporting ? "Exporting..." : "Export"}
                         </Button>
-                        <div className="relative">
-                            <Button 
-                                variant={showFilters ? "default" : "secondary"} 
-                                onClick={() => {
-                                    if (!showFilters) setTempFilters(appliedFilters)
-                                    setShowFilters(!showFilters)
-                                }}
-                            >
-                                <Filter size={18} />
-                                Filter
-                            </Button>
-
-                            {/* Filter Dropdown Panel */}
-                            {showFilters && (
-                                <div className="absolute right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
-                                    <div className="space-y-5">
-                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                                            <h3 className="font-semibold text-white">Filter Orders</h3>
-                                            <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
-                                                <span className="sr-only">Close</span>
-                                                <X size={18} />
-                                            </button>
-                                        </div>
-                                        
-                                        <div className="space-y-4">
-                                            <ModalSelect
-                                                label="Package Type"
-                                                value={tempFilters.package_type}
-                                                onChange={(val) => setTempFilters({...tempFilters, package_type: val})}
-                                                options={[
-                                                    { label: "All Package Types", value: "All Package Types" },
-                                                    { label: "Small", value: "Small" },
-                                                    { label: "Medium", value: "Medium" },
-                                                    { label: "Large", value: "Large" },
-                                                    { label: "Document", value: "Document" }
-                                                ]}
-                                            />
-
-                                            <ModalInput
-                                                label="Order ID"
-                                                placeholder="e.g. PKG-0021"
-                                                value={tempFilters.order_id}
-                                                onChange={(val) => setTempFilters({...tempFilters, order_id: val})}
-                                                icon={<Search size={16} />}
-                                            />
-                                        </div>
-
-                                        <div className="pt-4 grid grid-cols-2 gap-3">
-                                            <Button 
-                                                onClick={clearFilters}
-                                                variant="secondary"
-                                                className="w-full justify-center"
-                                            >
-                                                <X size={16} />
-                                                Clear
-                                            </Button>
-                                            <Button 
-                                                onClick={applyFilters} 
-                                                variant="default"
-                                                className="w-full justify-center"
-                                            >
-                                                <Check size={16} />
-                                                Apply
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
                         <Button onClick={openCreateModal}>
                             <Plus size={18} className="mr-2" />
                             Create Order
@@ -348,26 +289,76 @@ export default function CourierOrdersPage() {
                 />
             </div>
 
-            {/* Main Content Area */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
-                 {/* Tabs */}
-                <div className="flex gap-1 p-4 border-b border-white/5">
-                    {["All Orders", "Pending", "In Transit", "Delivered", "Cancelled"].map((tab) => (
-                        <Button
-                            key={tab}
-                            variant={activeTab === tab ? "secondary" : "ghost"}
-                            className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
-                            onClick={() => setActiveTab(tab)}
+            {/* Filters Panel */}
+            {showFilters && (
+                <div className="bg-tride-card border border-tride-border rounded-2xl p-5 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 shadow-sm animate-in fade-in slide-in-from-top-2">
+                    <div>
+                        <label className="text-xs font-semibold text-tride-text-muted mb-2 block uppercase tracking-wider">Package Type</label>
+                        <select 
+                            value={tempFilters.package_type}
+                            onChange={(e) => setTempFilters({...tempFilters, package_type: e.target.value})}
+                            className="w-full bg-tride-hover border border-tride-border rounded-xl px-4 py-2.5 text-sm text-tride-text focus:outline-none focus:border-tride-yellow transition-colors"
                         >
-                            {tab}
+                            <option value="All Package Types">All Package Types</option>
+                            <option value="Small">Small</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Large">Large</option>
+                            <option value="Document">Document</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-xs font-semibold text-tride-text-muted mb-2 block uppercase tracking-wider">Order ID</label>
+                        <div className="relative">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" />
+                            <input
+                                type="text"
+                                placeholder="e.g. PKG-0021"
+                                value={tempFilters.order_id}
+                                onChange={(e) => setTempFilters({...tempFilters, order_id: e.target.value})}
+                                className="w-full bg-tride-hover border border-tride-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-tride-text focus:outline-none focus:border-tride-yellow transition-colors"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex items-end gap-2">
+                        <Button 
+                            onClick={clearFilters}
+                            variant="secondary"
+                            className="w-full justify-center"
+                        >
+                            <X size={16} />
+                            Clear
                         </Button>
-                    ))}
+                        <Button 
+                            onClick={applyFilters} 
+                            variant="default"
+                            className="w-full justify-center"
+                        >
+                            <Check size={16} />
+                            Apply
+                        </Button>
+                    </div>
                 </div>
+            )}
+
+            {/* Main Content Area */}
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
+                 {/* Tabs */}
+            <div className="flex gap-1 p-4 border-b border-tride-border flex-wrap">
+                {["All Orders", "Pending", "Assigned", "Picked Up", "In Transit", "Delivered", "Cancelled"].map((tab) => (
+                    <Button
+                        key={tab}
+                        variant={activeTab === tab ? "default" : "ghost"}
+                        onClick={() => setActiveTab(tab)}
+                    >
+                        {tab}
+                    </Button>
+                ))}
+            </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-6 py-4 font-medium">Order ID</th>
                                 <th className="px-6 py-4 font-medium">Sender</th>
                                 <th className="px-6 py-4 font-medium">Recipient</th>
@@ -378,17 +369,22 @@ export default function CourierOrdersPage() {
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-8 text-center text-white/50">Loading orders...</td>
+                                    <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <div className="animate-spin h-4 w-4 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
+                                            Loading orders...
+                                        </div>
+                                    </td>
                                 </tr>
-                            ) : filteredOrders.length === 0 ? (
+                            ) : orders.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-8 text-center text-white/50">No orders found.</td>
+                                    <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">No orders found.</td>
                                 </tr>
                             ) : (
-                                filteredOrders.map((order) => (
+                                orders.map((order) => (
                                     <OrderRow 
                                         key={order.id} 
                                         order={order} 
@@ -446,11 +442,11 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBaseColor }: { labe
     if (iconBaseColor === 'red') iconColors = "bg-red-500/20 text-red-400"
 
     return (
-        <div className="bg-white/5 border border-white/5 p-6 rounded-3xl flex items-start justify-between">
+        <div className="bg-tride-card border border-tride-border p-6 rounded-3xl flex items-start justify-between shadow-sm">
             <div>
-                <p className="text-white/50 text-xs font-medium mb-1">{label}</p>
-                <div className="text-2xl font-bold mb-2">{value}</div>
-                <div className={`text-xs font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
+                <p className="text-tride-text-muted text-xs font-medium mb-1">{label}</p>
+                <div className="text-2xl font-bold mb-2 text-tride-text">{value}</div>
+                <div className={`text-xs font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
                     <span className="text-sm">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
@@ -466,25 +462,25 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBaseColor }: { labe
 function OrderRow({ order, onEdit, onDelete, onToggleStatus }: { order: Order, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void }) {
     let statusStyles = ""
     switch (order.status) {
-        case "Delivered": statusStyles = "bg-white/10 text-white border border-white/10"; break;
+        case "Delivered": statusStyles = "bg-green-500/20 text-green-400 border border-green-500/20"; break;
         case "In Transit": statusStyles = "bg-blue-600 text-white shadow-lg shadow-blue-600/20"; break;
         case "Pending": statusStyles = "bg-yellow-500/20 text-yellow-500 border border-yellow-500/20"; break;
         case "Cancelled": statusStyles = "bg-red-500/20 text-red-500 border border-red-500/20"; break;
-        default: statusStyles = "bg-white/5 text-white/70 border border-white/10";
+        default: statusStyles = "bg-tride-hover text-tride-text-muted border border-tride-border";
     }
     
     return (
-        <tr className="hover:bg-white/5 transition-colors group">
-            <td className="px-6 py-4 font-mono text-sm text-white/70">{order.order_id || `#${order.id}`}</td>
-            <td className="px-6 py-4 font-medium">{order.sender}</td>
-            <td className="px-6 py-4 font-medium">{order.recipient}</td>
+        <tr className="hover:bg-tride-hover transition-colors group">
+            <td className="px-6 py-4 font-mono text-sm text-tride-text-muted">{order.order_id || `#${order.id}`}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{order.sender}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{order.recipient}</td>
             <td className="px-6 py-4">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium text-white/60 bg-white/5">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-xs font-medium text-tride-text bg-tride-card">
                     {order.package_type}
                 </span>
             </td>
-            <td className="px-6 py-4 font-medium">{order.courier}</td>
-            <td className="px-6 py-4 font-medium">${Number(order.fee).toFixed(2)}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{order.courier}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">${Number(order.fee).toFixed(2)}</td>
             <td className="px-6 py-4">
                 <button 
                     onClick={onToggleStatus}

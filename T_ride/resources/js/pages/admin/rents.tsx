@@ -322,13 +322,13 @@ export default function RentPage() {
             actions={
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                      <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search..." 
                             value={searchTerm}
                             onChange={handleSearch}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
+                            className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
                     <div className="flex gap-2">
@@ -354,18 +354,7 @@ export default function RentPage() {
             }
         >
             {/* Navigation Tabs */}
-            <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit">
-                {["Fleet Vehicles", "Active Rentals", "Rent Payments", "Contracts", "Maintenance"].map((tab) => (
-                    <Button
-                        key={tab}
-                        variant={activeTab === tab ? "secondary" : "ghost"}
-                        className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
-                        onClick={() => { setActiveTab(tab); setSearchTerm(""); }}
-                    >
-                        {tab}
-                    </Button>
-                ))}
-            </div>
+
 
             {/* Stats Row - Conditional */}
             {activeTab === "Fleet Vehicles" && (
@@ -452,13 +441,24 @@ export default function RentPage() {
 
 
             {/* Main Content Area */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
+                <div className="flex gap-1 p-4 border-b border-tride-border flex-wrap">
+                    {["Fleet Vehicles", "Active Rentals", "Rent Payments", "Contracts", "Maintenance"].map((tab) => (
+                        <Button
+                            key={tab}
+                            variant={activeTab === tab ? "default" : "ghost"}
+                            onClick={() => { setActiveTab(tab); setSearchTerm(""); }}
+                        >
+                            {tab}
+                        </Button>
+                    ))}
+                </div>
                 <div className="overflow-x-auto">
                     {/* Render different tables based on Tab */}
                     {activeTab === "Fleet Vehicles" ? (
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                     <th className="px-6 py-4 font-medium">Vehicle</th>
                                     <th className="px-6 py-4 font-medium">Plate No.</th>
                                     <th className="px-6 py-4 font-medium">Type</th>
@@ -469,8 +469,8 @@ export default function RentPage() {
                                     <th className="px-6 py-4 font-medium text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {loading && <tr><td colSpan={8} className="px-6 py-4 text-center text-white/40">Loading...</td></tr>}
+                            <tbody className="divide-y divide-tride-border">
+                                {loading && <tr><td colSpan={8} className="px-6 py-4 text-center text-tride-text-muted">Loading...</td></tr>}
                                 {!loading && vehicles.map((vehicle) => (
                                     <VehicleRow
                                         key={vehicle.id}
@@ -488,13 +488,13 @@ export default function RentPage() {
                                         onToggleStatus={() => openStatusModal(vehicle)}
                                     />
                                 ))}
-                                {!loading && vehicles.length === 0 && <tr><td colSpan={8} className="px-6 py-4 text-center text-white/40">No vehicles found.</td></tr>}
+                                {!loading && vehicles.length === 0 && <tr><td colSpan={8} className="px-6 py-4 text-center text-tride-text-muted">No vehicles found.</td></tr>}
                             </tbody>
                         </table>
                     ) : (activeTab === "Active Rentals" || activeTab === "Contracts") ? (
                          <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                     <th className="px-6 py-4 font-medium">Contract ID</th>
                                     <th className="px-6 py-4 font-medium">Driver</th>
                                     <th className="px-6 py-4 font-medium">Vehicle</th>
@@ -504,28 +504,28 @@ export default function RentPage() {
                                     <th className="px-6 py-4 font-medium text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {loading && <tr><td colSpan={7} className="px-6 py-4 text-center text-white/40">Loading...</td></tr>}
+                            <tbody className="divide-y divide-tride-border">
+                                {loading && <tr><td colSpan={7} className="px-6 py-4 text-center text-tride-text-muted">Loading...</td></tr>}
                                 {!loading && rentals.map((rental) => (
-                                    <tr key={rental.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4 font-mono text-sm">{rental.contract_id || `#RENT-${rental.id}`}</td>
-                                        <td className="px-6 py-4 font-medium">{rental.driver?.name}</td>
-                                        <td className="px-6 py-4 font-medium">{rental.vehicle?.name} ({rental.vehicle?.plate_number})</td>
-                                        <td className="px-6 py-4">{rental.start_date || 'N/A'}</td>
-                                        <td className="px-6 py-4">{rental.end_date || 'N/A'}</td>
-                                        <td className="px-6 py-4"><span className="bg-white/10 px-2 py-1 rounded text-xs">{rental.status}</span></td>
+                                        <tr key={rental.id} className="hover:bg-tride-hover transition-colors">
+                                        <td className="px-6 py-4 font-mono text-sm text-tride-text-muted">{rental.contract_id || `#RENT-${rental.id}`}</td>
+                                        <td className="px-6 py-4 font-medium text-tride-text">{rental.driver?.name}</td>
+                                        <td className="px-6 py-4 font-medium text-tride-text">{rental.vehicle?.name} ({rental.vehicle?.plate_number})</td>
+                                        <td className="px-6 py-4 text-tride-text-muted">{rental.start_date || 'N/A'}</td>
+                                        <td className="px-6 py-4 text-tride-text-muted">{rental.end_date || 'N/A'}</td>
+                                        <td className="px-6 py-4"><span className="bg-tride-hover px-2 py-1 rounded text-xs text-tride-text">{rental.status}</span></td>
                                         <td className="px-6 py-4 text-right">
                                             <IconButton tooltip="View"><Eye size={16} /></IconButton>
                                         </td>
                                     </tr>
                                 ))}
-                                {!loading && rentals.length === 0 && <tr><td colSpan={7} className="px-6 py-4 text-center text-white/40">No records found.</td></tr>}
+                                {!loading && rentals.length === 0 && <tr><td colSpan={7} className="px-6 py-4 text-center text-tride-text-muted">No records found.</td></tr>}
                             </tbody>
                         </table>
                     ) : activeTab === "Rent Payments" ? (
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                     <th className="px-6 py-4 font-medium">Date</th>
                                     <th className="px-6 py-4 font-medium">Transaction ID</th>
                                     <th className="px-6 py-4 font-medium">Driver</th>
@@ -534,25 +534,25 @@ export default function RentPage() {
                                     <th className="px-6 py-4 font-medium">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
-                                 {loading && <tr><td colSpan={6} className="px-6 py-4 text-center text-white/40">Loading...</td></tr>}
+                            <tbody className="divide-y divide-tride-border">
+                                 {loading && <tr><td colSpan={6} className="px-6 py-4 text-center text-tride-text-muted">Loading...</td></tr>}
                                  {!loading && payments.map((payment) => (
-                                     <tr key={payment.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4">{payment.date || 'N/A'}</td>
-                                        <td className="px-6 py-4 font-mono text-sm">{payment.transaction_id || `TXN-${payment.id}`}</td>
-                                        <td className="px-6 py-4 font-medium">{payment.rental?.driver?.name || 'Unknown'}</td>
-                                        <td className="px-6 py-4">{payment.rental?.vehicle?.name || 'Unknown'}</td>
-                                        <td className="px-6 py-4 font-bold text-green-400">${payment.amount}</td>
-                                        <td className="px-6 py-4"><span className="bg-white/10 px-2 py-1 rounded text-xs">{payment.status}</span></td>
+                                     <tr key={payment.id} className="hover:bg-tride-hover transition-colors">
+                                        <td className="px-6 py-4 text-tride-text-muted">{payment.date || 'N/A'}</td>
+                                        <td className="px-6 py-4 font-mono text-sm text-tride-text-muted">{payment.transaction_id || `TXN-${payment.id}`}</td>
+                                        <td className="px-6 py-4 font-medium text-tride-text">{payment.rental?.driver?.name || 'Unknown'}</td>
+                                        <td className="px-6 py-4 text-tride-text-muted">{payment.rental?.vehicle?.name || 'Unknown'}</td>
+                                        <td className="px-6 py-4 font-bold text-green-500">${payment.amount}</td>
+                                        <td className="px-6 py-4"><span className="bg-tride-hover px-2 py-1 rounded text-xs text-tride-text">{payment.status}</span></td>
                                      </tr>
                                  ))}
-                                 {!loading && payments.length === 0 && <tr><td colSpan={6} className="px-6 py-4 text-center text-white/40">No payments found.</td></tr>}
+                                 {!loading && payments.length === 0 && <tr><td colSpan={6} className="px-6 py-4 text-center text-tride-text-muted">No payments found.</td></tr>}
                             </tbody>
                         </table>
                     ) : activeTab === "Maintenance" ? (
                          <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                     <th className="px-6 py-4 font-medium">Date</th>
                                     <th className="px-6 py-4 font-medium">Vehicle</th>
                                     <th className="px-6 py-4 font-medium">Description</th>
@@ -560,15 +560,15 @@ export default function RentPage() {
                                     <th className="px-6 py-4 font-medium">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
-                                 {loading && <tr><td colSpan={5} className="px-6 py-4 text-center text-white/40">Loading...</td></tr>}
+                            <tbody className="divide-y divide-tride-border">
+                                 {loading && <tr><td colSpan={5} className="px-6 py-4 text-center text-tride-text-muted">Loading...</td></tr>}
                                  {!loading && maintenance.map((record) => (
-                                     <tr key={record.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4">{record.date || 'N/A'}</td>
-                                        <td className="px-6 py-4 font-medium">{record.vehicle?.name || 'Unknown'} ({record.vehicle?.plate_number})</td>
-                                        <td className="px-6 py-4">{record.description}</td>
-                                        <td className="px-6 py-4 text-red-300">-${record.cost}</td>
-                                        <td className="px-6 py-4"><span className="bg-white/10 px-2 py-1 rounded text-xs">{record.status}</span></td>
+                                     <tr key={record.id} className="hover:bg-tride-hover transition-colors">
+                                        <td className="px-6 py-4 text-tride-text-muted">{record.date || 'N/A'}</td>
+                                        <td className="px-6 py-4 font-medium text-tride-text">{record.vehicle?.name || 'Unknown'} ({record.vehicle?.plate_number})</td>
+                                        <td className="px-6 py-4 text-tride-text-muted">{record.description}</td>
+                                        <td className="px-6 py-4 text-red-500">-${record.cost}</td>
+                                        <td className="px-6 py-4"><span className="bg-tride-hover px-2 py-1 rounded text-xs text-tride-text">{record.status}</span></td>
                                      </tr>
                                  ))}
                                  {!loading && maintenance.length === 0 && <tr><td colSpan={5} className="px-6 py-4 text-center text-white/40">No records found.</td></tr>}
@@ -615,15 +615,15 @@ export default function RentPage() {
 
 function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-5 rounded-3xl flex items-start justify-between">
+        <div className="bg-tride-card border border-tride-border p-6 rounded-3xl flex items-start justify-between shadow-sm">
             <div>
-                <p className="text-white/50 text-xs font-medium mb-1">{label}</p>
-                <div className="text-2xl font-bold mb-2">{value}</div>
-                <div className={`text-xs font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
-                    <span className="text-sm">{trendUp ? '↗' : '↘'}</span> {trend}
+                <p className="text-tride-text-muted text-sm font-medium mb-1">{label}</p>
+                <div className="text-3xl font-bold text-tride-text mb-2">{value}</div>
+                <div className={`text-sm font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
+                    <span className="text-lg">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
-            <div className={`w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center`}>
+            <div className={`w-12 h-12 ${iconBg} rounded-2xl flex items-center justify-center`}>
                 {icon}
             </div>
         </div>
@@ -634,33 +634,33 @@ function VehicleRow({ id, vehicleName, vehicleSubtext, plate, type, rentedTo, ra
     let statusStyles = ""
     const normalizedStatus = status.toLowerCase()
 
-    if (normalizedStatus === 'rented') statusStyles = "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-    else if (normalizedStatus === 'available') statusStyles = "bg-white/10 text-white/70 border border-white/10"
+    if (normalizedStatus === 'rented') statusStyles = "bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/20"
+    else if (normalizedStatus === 'available') statusStyles = "bg-green-500/20 text-green-400 border border-green-500/20"
     else if (normalizedStatus === 'maintenance') statusStyles = "bg-red-500/20 text-red-500 border border-red-500/20"
-    else statusStyles = "bg-white/5 text-white/70 border border-white/10"
+    else statusStyles = "bg-tride-hover text-tride-text-muted border border-tride-border"
 
     return (
-        <tr className="hover:bg-white/5 transition-colors group">
+        <tr className="hover:bg-tride-hover transition-colors group">
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                        <Car size={18} className="text-white/40" />
+                    <div className="w-10 h-10 rounded-xl bg-tride-hover flex items-center justify-center">
+                        <Car size={18} className="text-tride-text-muted" />
                     </div>
                     <div>
-                        <div className="font-medium text-white">{vehicleName}</div>
-                        <div className="text-xs text-white/40 font-mono">{vehicleSubtext}</div>
+                        <div className="font-medium text-tride-text">{vehicleName}</div>
+                        <div className="text-xs text-tride-text-muted font-mono">{vehicleSubtext}</div>
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4 font-mono text-sm">{plate}</td>
+            <td className="px-6 py-4 font-mono text-sm text-tride-text">{plate}</td>
             <td className="px-6 py-4">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium text-white/60">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-xs font-medium text-tride-text-muted">
                     {type}
                 </span>
             </td>
-            <td className="px-6 py-4 font-medium">{rentedTo}</td>
-            <td className="px-6 py-4 font-medium">{rate}</td>
-            <td className="px-6 py-4 font-medium text-red-400">{due !== '—' ? due : <span className="text-white/20">—</span>}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{rentedTo}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{rate}</td>
+            <td className="px-6 py-4 font-medium text-red-400">{due !== '—' ? due : <span className="text-tride-text-muted">—</span>}</td>
             <td className="px-6 py-4">
                 <button 
                     onClick={onToggleStatus}

@@ -290,13 +290,13 @@ export default function DriversPage() {
       actions={
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
             <div className="relative w-full md:w-auto">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                 <input 
                     type="text" 
                     placeholder="Search drivers..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full md:w-64"
+                    className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full md:w-64"
                 />
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -317,11 +317,11 @@ export default function DriversPage() {
                     
                     {/* Filter Dropdown Panel */}
                     {showFilters && (
-                        <div className="absolute top-full right-0 mt-3 w-80 bg-[#1A1A1A] border border-white/10 rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="absolute top-full right-0 mt-3 w-80 bg-tride-card border border-tride-border rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
                             <div className="space-y-5">
-                                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                                    <h3 className="font-semibold text-white">Filter Drivers</h3>
-                                    <button onClick={() => setShowFilters(false)} className="text-white/40 hover:text-white transition-colors">
+                                <div className="flex items-center justify-between border-b border-tride-border pb-3">
+                                    <h3 className="font-semibold text-tride-text">Filter Drivers</h3>
+                                    <button onClick={() => setShowFilters(false)} className="text-tride-text-muted hover:text-tride-text transition-colors">
                                         <span className="sr-only">Close</span>
                                         <X size={18} />
                                     </button>
@@ -392,22 +392,21 @@ export default function DriversPage() {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatsCard label="Total Drivers" value={drivers.length.toString()} trend="+6.2%" trendUp={true} icon={<Car size={24} />} />
-        <StatsCard label="Online Now" value="0" trend="+0%" trendUp={true} icon={<div className="w-6 h-6 rounded-full border-2 border-green-500 relative flex items-center justify-center"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div></div>} />
-        <StatsCard label="Pending Docs" value="0" trend="-0%" trendUp={false} icon={<FileText size={24} />} />
-        <StatsCard label="Avg Rating" value="0.0" trend="+0.0" trendUp={true} icon={<Star size={24} />} />
+        <StatsCard label="Total Drivers" value={drivers.length.toString()} trend="+6.2%" trendUp={true} icon={<Car size={24} className="text-blue-500" />} iconBg="bg-blue-500/10" />
+        <StatsCard label="Online Now" value="0" trend="+0%" trendUp={true} icon={<div className="w-6 h-6 rounded-full border-2 border-green-500 relative flex items-center justify-center"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div></div>} iconBg="bg-green-500/10" />
+        <StatsCard label="Pending Docs" value="0" trend="-0%" trendUp={false} icon={<FileText size={24} className="text-orange-500" />} iconBg="bg-orange-500/10" />
+        <StatsCard label="Avg Rating" value="0.0" trend="+0.0" trendUp={true} icon={<Star size={24} className="text-yellow-500" />} iconBg="bg-yellow-500/10" />
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+      <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit flex-wrap">
+        <div className="flex gap-1 p-4 border-b border-tride-border flex-wrap">
 
             {["All Drivers", ...types.map(t => t.type_name)].map((tab) => (
                 <Button
                     key={tab}
-                    variant={activeTab === tab ? "secondary" : "ghost"}
-                    className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                    variant={activeTab === tab ? "default" : "ghost"}
                     onClick={() => setActiveTab(tab)}
                 >
                     {tab}
@@ -419,7 +418,7 @@ export default function DriversPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+              <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                 <th className="px-6 py-4 font-medium">Driver</th>
                 <th className="px-6 py-4 font-medium">Type</th>
                 <th className="px-6 py-4 font-medium">Vehicle</th>
@@ -430,14 +429,14 @@ export default function DriversPage() {
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-tride-border">
                 {loading ? (
                     <tr>
-                        <td colSpan={8} className="text-center py-8 text-white/50">Loading drivers...</td>
+                        <td colSpan={8} className="text-center py-8 text-tride-text-muted">Loading drivers...</td>
                     </tr>
                 ) : filteredDrivers.length === 0 ? (
                     <tr>
-                        <td colSpan={8} className="text-center py-8 text-white/50">No drivers found.</td>
+                        <td colSpan={8} className="text-center py-8 text-tride-text-muted">No drivers found.</td>
                     </tr>
                 ) : (
                     filteredDrivers.map(driver => (
@@ -485,17 +484,17 @@ export default function DriversPage() {
   )
 }
 
-function StatsCard({ label, value, trend, trendUp, icon }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode }) {
+function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg?: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-6 rounded-3xl flex items-start justify-between">
+        <div className="bg-tride-card border border-tride-border p-6 rounded-3xl flex items-start justify-between shadow-sm">
             <div>
-                <p className="text-white/50 text-sm font-medium mb-1">{label}</p>
-                <div className="text-3xl font-bold mb-2">{value}</div>
-                <div className={`text-sm font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
+                <p className="text-tride-text-muted text-sm font-medium mb-1">{label}</p>
+                <div className="text-3xl font-bold text-tride-text mb-2">{value}</div>
+                <div className={`text-sm font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
                     <span className="text-lg">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white">
+            <div className={`w-12 h-12 ${iconBg || 'bg-tride-hover'} rounded-2xl flex items-center justify-center text-tride-text`}>
                 {icon}
             </div>
         </div>
@@ -506,10 +505,10 @@ function StatsCard({ label, value, trend, trendUp, icon }: { label: string, valu
 
 function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Driver, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void }) {
     return (
-        <tr className="hover:bg-white/5 transition-colors group">
+        <tr className="hover:bg-tride-hover transition-colors group">
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-lg font-bold overflow-hidden">
+                    <div className="w-10 h-10 bg-tride-hover rounded-full flex items-center justify-center text-lg font-bold text-tride-text overflow-hidden">
                         {driver.image ? (
                              <img src={`/storage/${driver.image}`} alt={driver.name} className="w-full h-full object-cover" />
                         ) : (
@@ -517,18 +516,18 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
                         )}
                     </div>
                     <div>
-                        <div className="font-bold">{driver.name}</div>
-                        <div className="text-xs text-white/50">{driver.driver_id}</div>
+                        <div className="font-bold text-tride-text">{driver.name}</div>
+                        <div className="text-xs text-tride-text-muted">{driver.driver_id}</div>
                     </div>
                 </div>
             </td>
             <td className="px-6 py-4">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-xs font-medium text-tride-text">
                     {driver.type?.type_name || 'Unknown'}
                 </span>
             </td>
-            <td className="px-6 py-4 text-sm text-white/70">{driver.vehicle_model || '-'}</td>
-            <td className="px-6 py-4 font-mono text-sm">{driver.trips}</td>
+            <td className="px-6 py-4 text-sm text-tride-text-muted">{driver.vehicle_model || '-'}</td>
+            <td className="px-6 py-4 font-mono text-sm text-tride-text">{driver.trips}</td>
             <td className="px-6 py-4">
                 <div className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
                     <Star size={14} fill="currentColor" /> {Number(driver.rating || 0).toFixed(1)}

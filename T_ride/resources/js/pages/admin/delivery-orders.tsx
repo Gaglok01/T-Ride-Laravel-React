@@ -138,13 +138,13 @@ export default function DeliveryOrdersPage() {
             actions={
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                     <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search orders..." 
                             value={searchTerm}
                             onChange={handleSearch}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
+                            className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
                     <Button onClick={handleRefresh} variant="default" className="flex-1 sm:flex-none justify-center">
@@ -199,32 +199,31 @@ export default function DeliveryOrdersPage() {
             </div>
 
             {/* Filter Tabs - Dynamic Categories */}
-            <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit overflow-x-auto scrollbar-hide max-w-full">
-                <Button
-                    variant={activeTab === 'all' ? "secondary" : "ghost"}
-                    className={activeTab === 'all' ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
-                    onClick={() => handleTabChange('all')}
-                >
-                    All Orders
-                </Button>
-                {categories.map((category) => (
-                    <Button
-                        key={category.id}
-                        variant={activeTab === category.id ? "secondary" : "ghost"}
-                        className={activeTab === category.id ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
-                        onClick={() => handleTabChange(category.id)}
-                    >
-                        {category.name}
-                    </Button>
-                ))}
-            </div>
+
 
             {/* Main Content Area */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
+                <div className="flex gap-1 p-4 border-b border-tride-border flex-wrap">
+                    <Button
+                        variant={activeTab === 'all' ? "default" : "ghost"}
+                        onClick={() => handleTabChange('all')}
+                    >
+                        All Orders
+                    </Button>
+                    {categories.map((category) => (
+                        <Button
+                            key={category.id}
+                            variant={activeTab === category.id ? "default" : "ghost"}
+                            onClick={() => handleTabChange(category.id)}
+                        >
+                            {category.name}
+                        </Button>
+                    ))}
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-6 py-4 font-medium">Order ID</th>
                                 <th className="px-6 py-4 font-medium">Customer</th>
                                 <th className="px-6 py-4 font-medium">Vendor</th>
@@ -235,10 +234,10 @@ export default function DeliveryOrdersPage() {
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-8 text-center text-white/40">
+                                    <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">
                                         <div className="flex items-center justify-center gap-2">
                                             <div className="animate-spin h-4 w-4 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
                                             Loading orders...
@@ -247,7 +246,7 @@ export default function DeliveryOrdersPage() {
                                 </tr>
                             ) : orders.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-8 text-center text-white/40">No orders found.</td>
+                                    <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">No orders found.</td>
                                 </tr>
                             ) : (
                                 orders.map((order) => (
@@ -269,8 +268,8 @@ export default function DeliveryOrdersPage() {
 
                  {/* Pagination */}
                  {pagination && pagination.last_page > 1 && (
-                    <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between">
-                        <div className="text-sm text-white/50">
+                    <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
+                        <div className="text-sm text-tride-text-muted">
                             Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} orders
                         </div>
                         <div className="flex items-center gap-2">
@@ -279,7 +278,7 @@ export default function DeliveryOrdersPage() {
                                 size="sm"
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={pagination.current_page === 1}
-                                className="disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
                             >
                                 <ChevronLeft size={16} className="mr-1" /> Previous
                             </Button>
@@ -288,7 +287,7 @@ export default function DeliveryOrdersPage() {
                                 size="sm"
                                 onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
                                 disabled={pagination.current_page === pagination.last_page}
-                                className="disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
                             >
                                 Next <ChevronRight size={16} className="ml-1" />
                             </Button>
@@ -302,11 +301,11 @@ export default function DeliveryOrdersPage() {
 
 function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-5 rounded-3xl flex items-start justify-between">
+        <div className="bg-tride-card border border-tride-border p-5 rounded-3xl flex items-start justify-between shadow-sm">
             <div>
-                <p className="text-white/50 text-xs font-medium mb-1">{label}</p>
-                <div className="text-2xl font-bold mb-2">{value}</div>
-                <div className={`text-xs font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
+                <p className="text-tride-text-muted text-xs font-medium mb-1">{label}</p>
+                <div className="text-2xl font-bold mb-2 text-tride-text">{value}</div>
+                <div className={`text-xs font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
                     <span className="text-sm">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
@@ -330,13 +329,13 @@ function OrderRow({ id, customer, vendor, items, driver, total, status }: any) {
     const displayStatus = status.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 
     return (
-        <tr className="hover:bg-white/5 transition-colors group">
-            <td className="px-6 py-4 font-mono text-sm text-white/70">{id}</td>
-            <td className="px-6 py-4 font-medium">{customer}</td>
-            <td className="px-6 py-4 font-medium">{vendor}</td>
-            <td className="px-6 py-4 text-white/60">{items}</td>
-            <td className="px-6 py-4 font-medium">{driver}</td>
-            <td className="px-6 py-4 font-medium text-white/90">{total}</td>
+        <tr className="hover:bg-tride-hover transition-colors group">
+            <td className="px-6 py-4 font-mono text-sm text-tride-text-muted">{id}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{customer}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{vendor}</td>
+            <td className="px-6 py-4 text-tride-text-muted">{items}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{driver}</td>
+            <td className="px-6 py-4 font-medium text-tride-text">{total}</td>
             <td className="px-6 py-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles}`}>
                     {displayStatus}

@@ -16,9 +16,9 @@ const buttonVariants = cva(
         outline:
           "border-2 border-tride-yellow text-tride-yellow hover:bg-tride-yellow hover:text-black focus-visible:ring-tride-yellow",
         secondary:
-          "bg-white/10 text-white border border-white/10 hover:bg-white/20 focus-visible:ring-white/50",
+          "bg-tride-hover text-tride-text border border-tride-border hover:bg-tride-card focus-visible:ring-tride-yellow/50",
         ghost: 
-          "text-gray-400 hover:text-white hover:bg-white/10 focus-visible:ring-white/50",
+          "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover focus-visible:ring-tride-yellow/50",
         link: 
           "text-tride-yellow underline-offset-4 hover:underline focus-visible:ring-tride-yellow",
       },
@@ -93,7 +93,7 @@ function IconButton({
 }: IconButtonProps) {
   
   const variantClasses = {
-    default: "text-gray-400 hover:text-white hover:bg-white/10",
+    default: "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover",
     danger: "text-red-500/50 hover:text-red-500 hover:bg-red-500/10",
     success: "text-green-500/50 hover:text-green-500 hover:bg-green-500/10"
   }

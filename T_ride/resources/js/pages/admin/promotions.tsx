@@ -177,13 +177,13 @@ export default function PromotionsPage() {
             actions={
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                      <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search code..." 
                             value={searchTerm}
                             onChange={handleSearch}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
+                            className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
                     <div className="flex gap-2">
@@ -236,11 +236,11 @@ export default function PromotionsPage() {
             </div>
 
             {/* Main Content Area */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-6 py-4 font-medium">Code</th>
                                 <th className="px-6 py-4 font-medium">Type</th>
                                 <th className="px-6 py-4 font-medium">Value</th>
@@ -251,10 +251,10 @@ export default function PromotionsPage() {
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-8 text-center text-white/40">
+                                    <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">
                                         <div className="flex items-center justify-center gap-2">
                                             <div className="animate-spin h-4 w-4 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
                                             Loading promotions...
@@ -263,7 +263,7 @@ export default function PromotionsPage() {
                                 </tr>
                             ) : promos.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-8 text-center text-white/40">No promotions found.</td>
+                                    <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">No promotions found.</td>
                                 </tr>
                             ) : (
                                 promos.map((promo) => (
@@ -282,8 +282,8 @@ export default function PromotionsPage() {
 
                 {/* Pagination */}
                  {pagination && pagination.last_page > 1 && (
-                    <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between">
-                        <div className="text-sm text-white/50">
+                    <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
+                        <div className="text-sm text-tride-text-muted">
                             Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} promotions
                         </div>
                         <div className="flex items-center gap-2">
@@ -332,11 +332,11 @@ export default function PromotionsPage() {
 
 function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-6 rounded-3xl flex items-start justify-between">
+        <div className="bg-tride-card border border-tride-border p-6 rounded-3xl flex items-start justify-between shadow-sm">
             <div>
-                <p className="text-white/50 text-sm font-medium mb-1">{label}</p>
-                <div className="text-3xl font-bold mb-2">{value}</div>
-                <div className={`text-sm font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
+                <p className="text-tride-text-muted text-sm font-medium mb-1">{label}</p>
+                <div className="text-3xl font-bold mb-2 text-tride-text">{value}</div>
+                <div className={`text-sm font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
                     <span className="text-lg">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
@@ -359,19 +359,19 @@ function PromoRow({ promo, onEdit, onDelete, onToggleStatus }: { promo: Promotio
     const isExpired = promo.status === "expired"
     
     return (
-        <tr className="hover:bg-white/5 transition-colors group">
-            <td className="px-6 py-4 font-medium font-mono text-white tracking-wide">{promo.code}</td>
+        <tr className="hover:bg-tride-hover transition-colors group">
+            <td className="px-6 py-4 font-medium font-mono text-tride-text tracking-wide">{promo.code}</td>
             <td className="px-6 py-4">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium text-white/70 capitalize">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-xs font-medium text-tride-text-muted capitalize bg-tride-card">
                     {promo.type}
                 </span>
             </td>
-            <td className="px-6 py-4 font-bold">
+            <td className="px-6 py-4 font-bold text-tride-text">
                 {isPercentage ? `${promo.value}%` : `$${promo.value}`}
             </td>
-            <td className="px-6 py-4 text-white/70">{promo.current_uses?.toLocaleString() || 0}</td>
-            <td className="px-6 py-4 text-white/70">{promo.max_uses.toLocaleString()}</td>
-            <td className="px-6 py-4 text-white/70">
+            <td className="px-6 py-4 text-tride-text-muted">{promo.current_uses?.toLocaleString() || 0}</td>
+            <td className="px-6 py-4 text-tride-text-muted">{promo.max_uses.toLocaleString()}</td>
+            <td className="px-6 py-4 text-tride-text-muted">
                 {formatDate(promo.valid_until)}
             </td>
             <td className="px-6 py-4">
@@ -380,13 +380,13 @@ function PromoRow({ promo, onEdit, onDelete, onToggleStatus }: { promo: Promotio
                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
                         : isExpired 
                             ? 'bg-red-500/20 text-red-500 border border-red-500/20'
-                            : 'bg-white/10 text-white/50 border border-white/10'
+                            : 'bg-tride-hover text-tride-text-muted border border-tride-border'
                 }`}>
                     {promo.status}
                 </span>
             </td>
             <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2 text-white/70">
+                <div className="flex items-center justify-end gap-2 text-tride-text-muted">
                      {!isExpired && (
                         <IconButton 
                             tooltip={promo.status === 'active' ? 'Pause' : 'Activate'} 

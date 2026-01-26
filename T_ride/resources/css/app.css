@@ -63,6 +63,10 @@
     --color-tride-yellow: var(--tride-yellow);
     --color-tride-dark: var(--tride-dark);
     --color-tride-card: var(--tride-card);
+    --color-tride-text: var(--tride-text);
+    --color-tride-text-muted: var(--tride-text-muted);
+    --color-tride-border: var(--tride-border);
+    --color-tride-hover: var(--tride-hover);
 }
 
 :root {
@@ -100,11 +104,21 @@
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
     --tride-yellow: #F8B803;
-    --tride-dark: #0F0F0F;
-    --tride-card: #1A1A1A;
+    --tride-dark: #F5F5F7;
+    --tride-card: #FFFFFF;
+    --tride-text: #1A1A1A;
+    --tride-text-muted: #6B7280;
+    --tride-border: #E5E7EB;
+    --tride-hover: #F3F4F6;
 }
 
 .dark {
+    --tride-dark: #0F0F0F;
+    --tride-card: #1A1A1A;
+    --tride-text: #FFFFFF;
+    --tride-text-muted: rgba(255, 255, 255, 0.5);
+    --tride-border: rgba(255, 255, 255, 0.05);
+    --tride-hover: rgba(255, 255, 255, 0.05);
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.145 0 0);
@@ -155,11 +169,11 @@
 }
 
 .custom-datepicker-popper .react-datepicker {
-    background-color: #1A1A1A !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--tride-card) !important;
+    border: 1px solid var(--tride-border) !important;
     border-radius: 1rem !important;
     font-family: inherit !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
     overflow: hidden;
 }
 
@@ -171,12 +185,12 @@
 
 .custom-datepicker-popper .react-datepicker__day-names {
     padding: 0.5rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--tride-hover);
+    border-bottom: 1px solid var(--tride-border);
 }
 
 .custom-datepicker-popper .react-datepicker__day-name {
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: var(--tride-text-muted) !important;
     font-weight: 500 !important;
     font-size: 0.75rem !important;
     width: 2.25rem !important;
@@ -190,7 +204,7 @@
 }
 
 .custom-datepicker-popper .react-datepicker__day {
-    color: white !important;
+    color: var(--tride-text) !important;
     width: 2.25rem !important;
     line-height: 2.25rem !important;
     margin: 0.125rem !important;
@@ -199,7 +213,7 @@
 }
 
 .custom-datepicker-popper .react-datepicker__day:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--tride-hover) !important;
 }
 
 .custom-datepicker-popper .react-datepicker__day--selected,
@@ -220,7 +234,8 @@
 }
 
 .custom-datepicker-popper .react-datepicker__day--disabled {
-    color: rgba(255, 255, 255, 0.2) !important;
+    color: var(--tride-text-muted) !important;
+    opacity: 0.4 !important;
     cursor: not-allowed !important;
 }
 
@@ -229,9 +244,29 @@
 }
 
 .custom-datepicker-popper .react-datepicker__day--outside-month {
-    color: rgba(255, 255, 255, 0.3) !important;
+    color: var(--tride-text-muted) !important;
+    opacity: 0.6 !important;
 }
 
 .custom-datepicker-popper .react-datepicker__triangle {
     display: none !important;
+}
+
+/* Custom scrollbar styles for light and dark modes */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--tride-hover);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--tride-text-muted);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--tride-text);
 }

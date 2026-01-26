@@ -183,13 +183,13 @@ export default function VendorsPage() {
             actions={
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                     <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search vendors..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
+                            className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
                     <Button onClick={openCreateModal} className="flex-1 sm:flex-none justify-center gap-2">
@@ -240,13 +240,13 @@ export default function VendorsPage() {
 
 
             {/* Main Content Area */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
+            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
                 
                  {/* Tabs */}
-                 <div className="flex gap-1 p-4 border-b border-white/5 overflow-x-auto scrollbar-hide">
+                 <div className="flex gap-1 p-4 border-b border-tride-border overflow-x-auto scrollbar-hide">
                     <Button 
-                        variant={selectedCategory === "All" ? "secondary" : "ghost"}
-                        className={selectedCategory === "All" ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                        variant={selectedCategory === "All" ? "default" : "ghost"}
+                        className={selectedCategory === "All" ? "" : ""}
                         onClick={() => setSelectedCategory("All")}
                     >
                         All Vendors
@@ -254,8 +254,8 @@ export default function VendorsPage() {
                     {categories.map(category => (
                         <Button 
                             key={category.id} 
-                            variant={selectedCategory === category.id ? "secondary" : "ghost"}
-                            className={selectedCategory === category.id ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                            variant={selectedCategory === category.id ? "default" : "ghost"}
+                            className={selectedCategory === category.id ? "" : ""}
                             onClick={() => setSelectedCategory(category.id)}
                         >
                             {category.name}
@@ -267,7 +267,7 @@ export default function VendorsPage() {
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                                 <th className="px-6 py-4 font-medium">Vendor</th>
                                 <th className="px-6 py-4 font-medium">Category</th>
                                 <th className="px-6 py-4 font-medium">Orders</th>
@@ -278,10 +278,10 @@ export default function VendorsPage() {
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-tride-border">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={8} className="text-center py-8 text-white/50">
+                                    <td colSpan={8} className="text-center py-8 text-tride-text-muted">
                                         <div className="flex items-center justify-center gap-2">
                                             <div className="animate-spin h-5 w-5 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
                                             Loading vendors...
@@ -290,7 +290,7 @@ export default function VendorsPage() {
                                 </tr>
                             ) : filteredVendors.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="text-center py-8 text-white/50">
+                                    <td colSpan={8} className="text-center py-8 text-tride-text-muted">
                                         No vendors found.
                                     </td>
                                 </tr>
@@ -344,11 +344,11 @@ export default function VendorsPage() {
 
 function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg: string }) {
     return (
-        <div className="bg-white/5 border border-white/5 p-6 rounded-3xl flex items-start justify-between">
+        <div className="bg-tride-card border border-tride-border p-6 rounded-3xl flex items-start justify-between shadow-sm">
             <div>
-                <p className="text-white/50 text-sm font-medium mb-1">{label}</p>
-                <div className="text-3xl font-bold mb-2">{value}</div>
-                <div className={`text-sm font-medium ${trendUp ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
+                <p className="text-tride-text-muted text-sm font-medium mb-1">{label}</p>
+                <div className="text-3xl font-bold text-tride-text mb-2">{value}</div>
+                <div className={`text-sm font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
                     <span className="text-lg">{trendUp ? '↗' : '↘'}</span> {trend}
                 </div>
             </div>
@@ -368,41 +368,41 @@ interface VendorRowProps {
 
 function VendorRow({ vendor, onEdit, onDelete, onToggleStatus }: VendorRowProps) {
     return (
-        <tr className="hover:bg-white/5 transition-colors group">
+        <tr className="hover:bg-tride-hover transition-colors group">
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-lg font-bold overflow-hidden">
+                    <div className="w-10 h-10 bg-tride-hover rounded-2xl flex items-center justify-center text-lg font-bold overflow-hidden text-tride-text">
                         {vendor.logo ? (
                             <img src={`/storage/${vendor.logo}`} alt={vendor.name} className="w-full h-full object-cover" />
                         ) : (
-                            <Store size={18} className="text-white/50" />
+                            <Store size={18} className="text-tride-text-muted" />
                         )}
                     </div>
                     <div>
-                        <div className="font-bold">{vendor.name}</div>
-                        <div className="text-xs text-white/50">{vendor.address}</div>
+                        <div className="font-bold text-tride-text">{vendor.name}</div>
+                        <div className="text-xs text-tride-text-muted">{vendor.address}</div>
                     </div>
                 </div>
             </td>
             <td className="px-6 py-4">
-                <span className="px-3 py-1 rounded-full border border-white/10 text-xs font-medium text-white/70">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-xs font-medium text-tride-text-muted">
                     {vendor.category?.name || "Uncategorized"}
                 </span>
             </td>
-            <td className="px-6 py-4 font-mono text-sm">{vendor.total_orders || 0}</td>
-            <td className="px-6 py-4 font-mono text-sm">${Number(vendor.total_revenue || 0).toFixed(2)}</td>
+            <td className="px-6 py-4 font-mono text-sm text-tride-text">{vendor.total_orders || 0}</td>
+            <td className="px-6 py-4 font-mono text-sm text-tride-text">${Number(vendor.total_revenue || 0).toFixed(2)}</td>
             <td className="px-6 py-4">
                 <div className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
                     <Star size={14} fill="currentColor" /> {Number(vendor.rating || 0).toFixed(1)}
                 </div>
             </td>
-            <td className="px-6 py-4 text-white/70">{vendor.commission_rate}%</td>
+            <td className="px-6 py-4 text-tride-text-muted">{vendor.commission_rate}%</td>
             <td className="px-6 py-4">
                 <button
                     onClick={onToggleStatus}
                     className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg transition-all ${
                         vendor.is_open 
-                            ? 'bg-blue-600 text-white shadow-blue-600/20 hover:bg-blue-500' 
+                            ? 'bg-blue-500/20 text-blue-400 shadow-none border border-blue-500/20 hover:bg-blue-500/30' 
                             : 'bg-red-500/20 text-red-400 shadow-none border border-red-500/20 hover:bg-red-500/30'
                     }`}
                 >

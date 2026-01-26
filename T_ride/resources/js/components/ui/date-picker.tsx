@@ -41,9 +41,9 @@ export function ModalDatePicker({
                 type="button"
                 onClick={onClick}
                 ref={ref}
-                className="w-full bg-tride-dark border border-white/10 rounded-xl text-white focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-gray-600 pl-11 pr-4 py-3 text-left flex items-center"
+                className="w-full bg-tride-card border border-tride-border rounded-xl text-tride-text focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-tride-text-muted pl-11 pr-4 py-3 text-left flex items-center"
             >
-                <span className={value ? "text-white" : "text-gray-500"}>
+                <span className={value ? "text-tride-text" : "text-tride-text-muted"}>
                     {value || placeholder}
                 </span>
             </button>
@@ -53,12 +53,12 @@ export function ModalDatePicker({
 
     return (
         <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-tride-text">
                 {label}
                 {required && <span className="text-red-400 ml-1">*</span>}
             </label>
             <div className="relative custom-datepicker">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted pointer-events-none z-10">
                     <Calendar size={16} />
                 </div>
                 <DatePicker
@@ -80,23 +80,23 @@ export function ModalDatePicker({
                         prevMonthButtonDisabled,
                         nextMonthButtonDisabled,
                     }) => (
-                        <div className="flex items-center justify-between px-4 py-3 bg-[#1A1A1A] border-b border-white/10">
+                        <div className="flex items-center justify-between px-4 py-3 bg-tride-card border-b border-tride-border">
                             <button
                                 onClick={decreaseMonth}
                                 disabled={prevMonthButtonDisabled}
                                 type="button"
-                                className="p-1.5 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors disabled:opacity-30"
+                                className="p-1.5 rounded-lg hover:bg-tride-hover text-tride-text-muted hover:text-tride-text transition-colors disabled:opacity-30"
                             >
                                 <ChevronLeft size={18} />
                             </button>
-                            <span className="text-white font-semibold">
+                            <span className="text-tride-text font-semibold">
                                 {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                             </span>
                             <button
                                 onClick={increaseMonth}
                                 disabled={nextMonthButtonDisabled}
                                 type="button"
-                                className="p-1.5 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors disabled:opacity-30"
+                                className="p-1.5 rounded-lg hover:bg-tride-hover text-tride-text-muted hover:text-tride-text transition-colors disabled:opacity-30"
                             >
                                 <ChevronRight size={18} />
                             </button>

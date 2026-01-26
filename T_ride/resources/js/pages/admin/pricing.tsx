@@ -149,12 +149,12 @@ export default function PricingPage() {
             }
         >
             {/* Tabs */}
-            <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-2xl w-fit">
+            <div className="flex gap-1 mb-8 bg-tride-card p-1 rounded-2xl w-fit border border-tride-border">
                 {tabs.map(tab => (
                     <Button 
                         key={tab}
-                        variant={activeTab === tab ? "secondary" : "ghost"}
-                        className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                        variant={activeTab === tab ? "default" : "ghost"}
+                        className={activeTab === tab ? "" : ""}
                         onClick={() => setActiveTab(tab)}
                     >
                         {tab}
@@ -254,16 +254,16 @@ function RidePricingTab({ zones, onEdit, onRefresh }: { zones: PricingZone[], on
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {zones.length === 0 ? (
-                <div className="col-span-2 bg-white/5 border border-white/5 rounded-3xl p-12 text-center text-white/50">
+                <div className="col-span-2 bg-tride-card border border-tride-border rounded-3xl p-12 text-center text-tride-text-muted">
                     No pricing zones configured yet. Add your first zone to get started.
                 </div>
             ) : (
                 zones.map(zone => (
-                    <div key={zone.id} className="bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <div key={zone.id} className="bg-tride-card border border-tride-border rounded-3xl p-6 shadow-sm">
                         <div className="flex items-start justify-between mb-6">
                             <div>
-                                <h3 className="text-lg font-bold text-white">City: {zone.name}</h3>
-                                <p className="text-sm text-white/50">{zone.description || "Default pricing for this region"}</p>
+                                <h3 className="text-lg font-bold text-tride-text">City: {zone.name}</h3>
+                                <p className="text-sm text-tride-text-muted">{zone.description || "Default pricing for this region"}</p>
                             </div>
                         </div>
 
@@ -286,16 +286,16 @@ function RidePricingTab({ zones, onEdit, onRefresh }: { zones: PricingZone[], on
             )}
 
             {/* Vehicle Types Card */}
-            <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+            <div className="bg-tride-card border border-tride-border rounded-3xl p-6 shadow-sm">
                 <div className="mb-6">
-                    <h3 className="text-lg font-bold text-white">Vehicle Types</h3>
-                    <p className="text-sm text-white/50">Multipliers by vehicle type</p>
+                    <h3 className="text-lg font-bold text-tride-text">Vehicle Types</h3>
+                    <p className="text-sm text-tride-text-muted">Multipliers by vehicle type</p>
                 </div>
 
                 <div className="space-y-3">
                     {(zones[0]?.vehicle_multipliers?.length > 0 ? zones[0].vehicle_multipliers : defaultMultipliers).map((m, i) => (
-                        <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
-                            <span className="text-white">{m.vehicle_type}</span>
+                        <div key={i} className="flex items-center justify-between bg-tride-hover rounded-xl px-4 py-3">
+                            <span className="text-tride-text">{m.vehicle_type}</span>
                             <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                                 {Number(m.multiplier).toFixed(1)}x
                             </span>
@@ -309,9 +309,9 @@ function RidePricingTab({ zones, onEdit, onRefresh }: { zones: PricingZone[], on
 
 function PriceItem({ label, value }: { label: string, value: string }) {
     return (
-        <div className="bg-white/5 rounded-xl p-4">
-            <p className="text-xs text-white/50 mb-1">{label}</p>
-            <p className="text-xl font-bold text-white">{value}</p>
+        <div className="bg-tride-hover rounded-xl p-4">
+            <p className="text-xs text-tride-text-muted mb-1">{label}</p>
+            <p className="text-xl font-bold text-tride-text">{value}</p>
         </div>
     )
 }
@@ -320,26 +320,26 @@ function PriceItem({ label, value }: { label: string, value: string }) {
 
 function CourierPricingTab({ packages, onEdit, onRefresh }: { packages: PackagePricing[], onEdit: (pkg: PackagePricing) => void, onRefresh: () => void }) {
     const getPackageIcon = (type: string) => {
-        return <Package size={32} className="text-white/30" />
+        return <Package size={32} className="text-tride-text-muted" />
     }
 
     return (
         <div>
-            <h3 className="text-xl font-bold text-white mb-6">Package Pricing</h3>
+            <h3 className="text-xl font-bold text-tride-text mb-6">Package Pricing</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {packages.length === 0 ? (
-                    <div className="col-span-4 bg-white/5 border border-white/5 rounded-3xl p-12 text-center text-white/50">
+                    <div className="col-span-4 bg-tride-card border border-tride-border rounded-3xl p-12 text-center text-tride-text-muted">
                         No package pricing configured yet.
                     </div>
                 ) : (
                     packages.map(pkg => (
-                        <div key={pkg.id} className="bg-white/5 border border-white/5 rounded-3xl p-6 text-center">
-                            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <div key={pkg.id} className="bg-tride-card border border-tride-border rounded-3xl p-6 text-center shadow-sm">
+                            <div className="w-16 h-16 bg-tride-hover rounded-2xl flex items-center justify-center mx-auto mb-4 text-tride-text-muted">
                                 {getPackageIcon(pkg.package_type)}
                             </div>
-                            <p className="text-white/70 text-sm mb-2">{pkg.package_type}</p>
-                            <p className="text-2xl font-bold text-white mb-1">${Number(pkg.base_price).toFixed(0)}</p>
-                            <p className="text-sm text-white/50 mb-4">${Number(pkg.per_km).toFixed(2)}/km</p>
+                            <p className="text-tride-text-muted text-sm mb-2">{pkg.package_type}</p>
+                            <p className="text-2xl font-bold text-tride-text mb-1">${Number(pkg.base_price).toFixed(0)}</p>
+                            <p className="text-sm text-tride-text-muted mb-4">${Number(pkg.per_km).toFixed(2)}/km</p>
                             <Button 
                                 variant="secondary" 
                                 size="sm"
@@ -359,11 +359,11 @@ function CourierPricingTab({ packages, onEdit, onRefresh }: { packages: PackageP
 
 function DeliveryFeesTab({ fees, onEdit, onRefresh }: { fees: DeliveryFee[], onEdit: (fee: DeliveryFee) => void, onRefresh: () => void }) {
     return (
-        <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden">
+        <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                        <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                             <th className="px-6 py-4 font-medium">Name</th>
                             <th className="px-6 py-4 font-medium">Base Fee</th>
                             <th className="px-6 py-4 font-medium">Per KM</th>
@@ -373,20 +373,20 @@ function DeliveryFeesTab({ fees, onEdit, onRefresh }: { fees: DeliveryFee[], onE
                             <th className="px-6 py-4 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-tride-border">
                         {fees.length === 0 ? (
                             <tr>
-                                <td colSpan={7} className="px-6 py-8 text-center text-white/50">
+                                <td colSpan={7} className="px-6 py-8 text-center text-tride-text-muted">
                                     No delivery fees configured yet.
                                 </td>
                             </tr>
                         ) : (
                             fees.map(fee => (
-                                <tr key={fee.id} className="hover:bg-white/5 transition-colors group">
+                                <tr key={fee.id} className="hover:bg-tride-hover transition-colors group">
                                     <td className="px-6 py-4">
                                         <div>
-                                            <p className="font-medium text-white">{fee.name}</p>
-                                            <p className="text-xs text-white/50">{fee.description}</p>
+                                            <p className="font-medium text-tride-text">{fee.name}</p>
+                                            <p className="text-xs text-tride-text-muted">{fee.description}</p>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 font-mono">${Number(fee.base_fee).toFixed(2)}</td>
@@ -399,7 +399,7 @@ function DeliveryFeesTab({ fees, onEdit, onRefresh }: { fees: DeliveryFee[], onE
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                                             fee.status === 'active' 
                                                 ? 'bg-blue-600 text-white' 
-                                                : 'bg-white/10 text-white/50'
+                                                : 'bg-tride-hover text-tride-text-muted border border-tride-border'
                                         }`}>
                                             {fee.status}
                                         </span>
@@ -432,11 +432,11 @@ function SurgeRulesTab({ rules, onEdit, onRefresh }: { rules: SurgeRule[], onEdi
     }
 
     return (
-        <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden">
+        <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                        <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                             <th className="px-6 py-4 font-medium">Rule Name</th>
                             <th className="px-6 py-4 font-medium">Multiplier</th>
                             <th className="px-6 py-4 font-medium">Trigger</th>
@@ -445,20 +445,20 @@ function SurgeRulesTab({ rules, onEdit, onRefresh }: { rules: SurgeRule[], onEdi
                             <th className="px-6 py-4 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-tride-border">
                         {rules.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-white/50">
+                                <td colSpan={6} className="px-6 py-8 text-center text-tride-text-muted">
                                     No surge rules configured yet.
                                 </td>
                             </tr>
                         ) : (
                             rules.map(rule => (
-                                <tr key={rule.id} className="hover:bg-white/5 transition-colors group">
+                                <tr key={rule.id} className="hover:bg-tride-hover transition-colors group">
                                     <td className="px-6 py-4">
                                         <div>
-                                            <p className="font-medium text-white">{rule.name}</p>
-                                            <p className="text-xs text-white/50">{rule.description}</p>
+                                            <p className="font-medium text-tride-text">{rule.name}</p>
+                                            <p className="text-xs text-tride-text-muted">{rule.description}</p>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -466,8 +466,8 @@ function SurgeRulesTab({ rules, onEdit, onRefresh }: { rules: SurgeRule[], onEdi
                                             {Number(rule.multiplier).toFixed(1)}x
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 capitalize text-white/70">{rule.trigger_type}</td>
-                                    <td className="px-6 py-4 text-white/70">
+                                    <td className="px-6 py-4 capitalize text-tride-text-muted">{rule.trigger_type}</td>
+                                    <td className="px-6 py-4 text-tride-text-muted">
                                         {rule.trigger_type === 'time' && rule.start_time && rule.end_time 
                                             ? `${rule.start_time} - ${rule.end_time}` 
                                             : rule.trigger_type === 'weather' && rule.weather_condition
@@ -484,7 +484,7 @@ function SurgeRulesTab({ rules, onEdit, onRefresh }: { rules: SurgeRule[], onEdi
                                             className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                                                 rule.status === 'active' 
                                                     ? 'bg-blue-600 text-white hover:bg-blue-500' 
-                                                    : 'bg-white/10 text-white/50 hover:bg-white/20'
+                                                    : 'bg-tride-hover text-tride-text-muted hover:bg-tride-border border border-tride-border'
                                             }`}
                                         >
                                             {rule.status}
@@ -630,20 +630,20 @@ function PricingZoneModal({ isOpen, onClose, initialData, onSave }: { isOpen: bo
                     <ModalInput label="Min Fare ($)" value={minFare} onChange={setMinFare} type="number" placeholder="5.00" required />
                 </div>
 
-                <div className="pt-4 border-t border-white/10">
-                    <p className="text-sm font-medium text-gray-300 mb-3">Vehicle Type Multipliers</p>
+                <div className="pt-4 border-t border-tride-border">
+                    <p className="text-sm font-medium text-tride-text mb-3">Vehicle Type Multipliers</p>
                     <div className="grid grid-cols-2 gap-3">
                         {multipliers.map((m, i) => (
-                            <div key={i} className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
-                                <span className="text-sm text-white flex-1">{m.vehicle_type}</span>
+                            <div key={i} className="flex items-center gap-3 bg-tride-hover rounded-xl p-3">
+                                <span className="text-sm text-tride-text flex-1">{m.vehicle_type}</span>
                                 <input 
                                     type="number" 
                                     step="0.1"
                                     value={m.multiplier}
                                     onChange={(e) => updateMultiplier(i, e.target.value)}
-                                    className="w-20 bg-tride-dark border border-white/10 rounded-lg px-3 py-1.5 text-white text-center text-sm"
+                                    className="w-20 bg-tride-card border border-tride-border rounded-lg px-3 py-1.5 text-tride-text text-center text-sm"
                                 />
-                                <span className="text-white/50 text-sm">x</span>
+                                <span className="text-tride-text-muted text-sm">x</span>
                             </div>
                         ))}
                     </div>

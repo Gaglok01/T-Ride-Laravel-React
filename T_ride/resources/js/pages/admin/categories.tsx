@@ -127,13 +127,13 @@ export default function CategoriesPage() {
             actions={
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                     <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search categories..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
+                            className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
                     <Button onClick={openCreateModal} className="flex-1 sm:flex-none justify-center">
@@ -145,13 +145,13 @@ export default function CategoriesPage() {
         >
              {/* Main Content Area */}
              {loading ? (
-                <div className="text-white/50 text-center py-12">Loading categories...</div>
+                <div className="text-tride-text-muted text-center py-12">Loading categories...</div>
              ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredCategories.map((category) => (
-                         <div key={category.id} className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:border-tride-yellow/30 transition-all duration-300 group relative overflow-hidden">
+                         <div key={category.id} className="bg-tride-card border border-tride-border rounded-3xl p-6 hover:border-tride-yellow/30 transition-all duration-300 group relative overflow-hidden shadow-sm">
                             <div className="flex justify-between items-start mb-6">
-                                <div className={`w-14 h-14 rounded-2xl bg-blue-500 bg-opacity-20 flex items-center justify-center text-white ring-1 ring-white/10`}>
+                                <div className={`w-14 h-14 rounded-2xl bg-tride-hover flex items-center justify-center text-tride-text ring-1 ring-tride-border`}>
                                      {category.icon ? (
                                         (category.icon.startsWith('http') || category.icon.includes('/')) ?
                                         <img src={category.icon} alt={category.name} className="w-8 h-8 object-contain" />
@@ -170,8 +170,8 @@ export default function CategoriesPage() {
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-bold mb-1">{category.name}</h3>
-                            <p className="text-white/50 text-sm mb-6">{category.slug}</p>
+                            <h3 className="text-xl font-bold mb-1 text-tride-text">{category.name}</h3>
+                            <p className="text-tride-text-muted text-sm mb-6">{category.slug}</p>
 
                             <div className="flex items-center justify-between">
                                 <button 
@@ -182,12 +182,12 @@ export default function CategoriesPage() {
                                     className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                                         category.status 
                                             ? 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20' 
-                                            : 'bg-gray-500/10 text-gray-400 border-gray-500/20 hover:bg-gray-500/20'
+                                            : 'bg-gray-500/10 text-tride-text-muted border-gray-500/20 hover:bg-gray-500/20'
                                     }`}
                                 >
                                     {category.status ? 'Active' : 'Inactive'}
                                 </button>
-                                <span className="text-xs text-white/30">
+                                <span className="text-xs text-tride-text-muted">
                                     {formatDate(category.created_at)}
                                 </span>
                             </div>
@@ -197,9 +197,9 @@ export default function CategoriesPage() {
                     {/* Add New Card Placeholder */}
                     <button 
                         onClick={openCreateModal}
-                        className="border-2 border-dashed border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center text-white/30 hover:text-tride-yellow hover:border-tride-yellow/50 hover:bg-tride-yellow/5 transition-all duration-300 min-h-[200px]"
+                        className="border-2 border-dashed border-tride-border rounded-3xl p-6 flex flex-col items-center justify-center text-tride-text-muted hover:text-tride-yellow hover:border-tride-yellow/50 hover:bg-tride-yellow/5 transition-all duration-300 min-h-[200px]"
                     >
-                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-tride-yellow/20">
+                        <div className="w-16 h-16 rounded-full bg-tride-card flex items-center justify-center mb-4 group-hover:bg-tride-yellow/20">
                             <Plus size={32} />
                         </div>
                         <span className="font-bold text-lg">Create New Category</span>

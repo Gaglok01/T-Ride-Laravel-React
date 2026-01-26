@@ -64,7 +64,7 @@ export default function ViewCity({ id }: { id: number }) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column: City Profile */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <div className="bg-tride-card border border-tride-card/20 rounded-3xl p-6">
                         <div className="aspect-video w-full bg-blue-500/10 rounded-2xl mb-6 flex items-center justify-center border border-blue-500/20">
                             <Building size={64} className="text-blue-400" />
                         </div>
@@ -72,7 +72,7 @@ export default function ViewCity({ id }: { id: number }) {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h2 className="text-2xl font-bold text-white">{city.name}</h2>
-                                <p className="text-white/50 flex items-center gap-2">
+                                <p className="text-tride-text flex items-center gap-2">
                                     <Globe size={14} />
                                     {city.country}
                                 </p>
@@ -80,18 +80,18 @@ export default function ViewCity({ id }: { id: number }) {
                             <StatusBadge status={city.status} />
                         </div>
 
-                        <div className="space-y-3 pt-4 border-t border-white/5">
+                        <div className="space-y-3 pt-4 border-t border-tride-card/20">
                             <InfoRow label="Currency" value={city.currency || '-'} />
                             <InfoRow label="Timezone" value={city.timezone || '-'} />
                             <div className="py-1">
-                                <span className="text-white/40 text-sm block mb-1">Services</span>
+                                <span className="text-tride-text/40 text-sm block mb-1">Services</span>
                                 <div className="flex flex-wrap gap-1">
                                     {city.services && city.services.map((service, index) => (
-                                        <span key={index} className="px-2 py-0.5 bg-white/10 rounded-full text-xs text-white/70 border border-white/5">
+                                        <span key={index} className="px-2 py-0.5 bg-tride-card/10 rounded-full text-xs text-tride-text/70 border border-tride-card/20">
                                             {service}
                                         </span>
                                     ))}
-                                    {(!city.services || city.services.length === 0) && <span className="text-white/30 text-sm">-</span>}
+                                    {(!city.services || city.services.length === 0) && <span className="text-tride-text/30 text-sm">-</span>}
                                 </div>
                             </div>
                         </div>
@@ -117,12 +117,12 @@ export default function ViewCity({ id }: { id: number }) {
                 {/* Right Column: Details & Associated Data */}
                 <div className="lg:col-span-2">
                     {/* Tabs */}
-                    <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-2xl w-fit flex-wrap">
+                    <div className="flex gap-1 mb-6 bg-tride-card p-1 rounded-2xl w-fit flex-wrap">
                         {["Overview", "Service Zones", "Transportation Hubs", "Restricted Areas"].map((tab) => (
                             <Button
                                 key={tab}
-                                variant={activeTab === tab ? "secondary" : "ghost"}
-                                className={activeTab === tab ? "bg-white/10 text-white shadow-lg" : "text-white/60 hover:text-white"}
+                                variant={activeTab === tab ? "default" : "ghost"}
+                                className={activeTab === tab ? "" : ""}
                                 onClick={() => setActiveTab(tab)}
                             >
                                 {tab}
@@ -130,41 +130,41 @@ export default function ViewCity({ id }: { id: number }) {
                         ))}
                     </div>
 
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6 min-h-[400px]">
+                    <div className="bg-tride-card border border-tride-card/20 rounded-3xl p-6 min-h-[400px]">
                         {activeTab === "Overview" && (
                             <div className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
-                                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <div className="bg-tride-card/10 rounded-2xl p-6 border border-tride-card/20">
+                                        <h3 className="text-lg font-bold text-tride-text mb-4 flex items-center gap-2">
                                             <Navigation size={20} className="text-blue-400" />
                                             Service Coverage
                                         </h3>
                                         <div className="space-y-4">
-                                            <p className="text-white/60 text-sm">
+                                            <p className="text-tride-text-muted text-sm">
                                                 This city has {city.service_zones?.length || 0} active service zones defined.
                                                 Service zones determine pricing multipliers and service availability.
                                             </p>
-                                            <div className="flex items-center gap-2 text-sm text-white/40">
+                                            <div className="flex items-center gap-2 text-sm text-tride-text-muted">
                                                 <CheckCircle size={14} className="text-green-400" />
                                                 <span>Operational since {city.created_at ? new Date(city.created_at).getFullYear() : 'Unknown'}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
-                                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <div className="bg-tride-hover rounded-2xl p-6 border border-white/5">
+                                        <h3 className="text-lg font-bold text-tride-text mb-4 flex items-center gap-2">
                                             <ShieldAlert size={20} className="text-red-400" />
                                             Restrictions
                                         </h3>
                                         <div className="space-y-4">
-                                            <p className="text-white/60 text-sm">
+                                            <p className="text-tride-text-muted text-sm">
                                                 There are {city.restricted_areas?.length || 0} restricted areas in this city where service is limited or prohibited.
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="h-64 bg-white/5 rounded-2xl border-2 border-dashed border-white/10 flex items-center justify-center flex-col text-white/30">
+                                <div className="h-64 bg-tride-hover rounded-2xl border-2 border-dashed border-white/10 flex items-center justify-center flex-col text-tride-text-muted">
                                     <Map size={48} className="mb-2 opacity-50" />
                                     <p>Map Preview Placeholder</p>
                                 </div>
@@ -199,12 +199,12 @@ export default function ViewCity({ id }: { id: number }) {
 
                         {activeTab === "Transportation Hubs" && (
                             <div className="space-y-4">
-                                <h3 className="text-lg font-bold text-white mb-4">Airports & Stations</h3>
+                                <h3 className="text-lg font-bold text-tride-text mb-4">Airports & Stations</h3>
                                 {city.transportation_hubs && city.transportation_hubs.length > 0 ? (
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
                                             <thead>
-                                                <tr className="border-b border-white/5 text-left text-white/40 text-sm">
+                                                <tr className="border-b border-white/5 text-left text-tride-text-muted text-sm">
                                                     <th className="px-4 py-3 font-medium">Name</th>
                                                     <th className="px-4 py-3 font-medium">Type</th>
                                                     <th className="px-4 py-3 font-medium">Pickup Fee</th>
@@ -215,14 +215,14 @@ export default function ViewCity({ id }: { id: number }) {
                                             <tbody className="divide-y divide-white/5">
                                                 {city.transportation_hubs.map((hub) => (
                                                     <tr key={hub.id} className="hover:bg-white/5 transition-colors">
-                                                        <td className="px-4 py-3 font-medium text-white">{hub.name}</td>
+                                                        <td className="px-4 py-3 font-medium text-tride-text">{hub.name}</td>
                                                         <td className="px-4 py-3">
                                                             <span className="capitalize px-2 py-0.5 rounded-full bg-white/10 text-xs text-white/70 border border-white/5">
                                                                 {hub.type}
                                                             </span>
                                                         </td>
-                                                        <td className="px-4 py-3 text-white/70">${hub.pickup_fee}</td>
-                                                        <td className="px-4 py-3 text-white/70">{hub.queue_capacity}</td>
+                                                        <td className="px-4 py-3 text-tride-text-muted">${hub.pickup_fee}</td>
+                                                        <td className="px-4 py-3 text-tride-text-muted">{hub.queue_capacity}</td>
                                                         <td className="px-4 py-3">
                                                             <StatusBadge status={hub.status} small />
                                                         </td>
@@ -283,7 +283,7 @@ export default function ViewCity({ id }: { id: number }) {
 
 function StatusBadge({ status, small = false }: { status: string, small?: boolean }) {
     const normalized = status?.toLowerCase() || 'inactive'
-    let styles = "bg-white/10 text-white/50 border-white/10"
+    let styles = "bg-tride-card/10 text-tride-text/50 border-tride-card/20"
     
     if (normalized === 'active') styles = "bg-green-500/20 text-green-400 border-green-500/20"
     else if (normalized === 'inactive') styles = "bg-red-500/20 text-red-400 border-red-500/20"
@@ -302,18 +302,18 @@ function StatusBadge({ status, small = false }: { status: string, small?: boolea
 function InfoRow({ label, value }: { label: string, value: string }) {
     return (
         <div className="flex justify-between items-center py-1">
-            <span className="text-white/40 text-sm">{label}</span>
-            <span className="text-sm font-medium text-white">{value}</span>
+            <span className="text-tride-text/40 text-sm">{label}</span>
+            <span className="text-sm font-medium text-tride-text">{value}</span>
         </div>
     )
 }
 
 function StatCard({ label, value, icon, bg }: any) {
     return (
-        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+        <div className="bg-tride-card border border-tride-card/20 rounded-2xl p-4 flex items-center justify-between">
             <div>
-                <p className="text-white/40 text-xs font-medium uppercase mb-1">{label}</p>
-                <p className="text-xl font-bold text-white">{value}</p>
+                <p className="text-tride-text/40 text-xs font-medium uppercase mb-1">{label}</p>
+                <p className="text-xl font-bold text-tride-text">{value}</p>
             </div>
             <div className={`p-2 rounded-xl ${bg}`}>
                 {icon}
@@ -324,11 +324,11 @@ function StatCard({ label, value, icon, bg }: any) {
 
 function EmptyState({ message, icon }: { message: string, icon: React.ReactNode }) {
     return (
-        <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10 flex flex-col items-center justify-center">
-            <div className="opacity-50 mb-3 text-white/40">
+        <div className="text-center py-12 bg-tride-card/10 rounded-2xl border border-dashed border-tride-card/20 flex flex-col items-center justify-center">
+            <div className="opacity-50 mb-3 text-tride-text/40">
                 {icon}
             </div>
-            <p className="text-white/40">{message}</p>
+            <p className="text-tride-text/40">{message}</p>
         </div>
     )
 }
