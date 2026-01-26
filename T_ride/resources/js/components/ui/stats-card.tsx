@@ -24,14 +24,14 @@ export function StatsCard({
             trend === "Now"
               ? "bg-blue-500/10 text-blue-500"
               : trend.startsWith("+")
-                ? "bg-white/5 text-white"
+                ? "bg-white/5 text-tride-text"
                 : "bg-red-500/10 text-red-500"
           }`}
         >
           {trend}
         </span>
       </div>
-      <p className="text-xs text-white/50 font-medium mb-1">{title}</p>
+      <p className="text-xs text-tride-text font-medium mb-1">{title}</p>
       <h3 className="text-2xl font-bold">{value}</h3>
     </div>
   )

@@ -16,14 +16,13 @@ export function EarningsChart({ data }: { data: any[] }) {
       <h3 className="text-lg font-bold mb-10">Weekly Earnings Overview</h3>
 
       <div className="relative h-64">
-        {/* Y-Axis labels & Grid lines */}
         <div className="absolute inset-0 flex flex-col justify-between">
           {gridLabels.map((label) => (
             <div key={label} className="relative flex items-center w-full">
-              <span className="absolute -left-2 text-[11px] text-white/40 font-medium w-12 text-right pr-3 -translate-y-px">
+              <span className="absolute -left-2 text-[11px] text-tride-text font-medium w-12 text-right pr-3 -translate-y-px">
                 ${Math.round(label)}
               </span>
-              <div className="flex-1 border-t border-dashed border-white/10 ml-12"></div>
+              <div className="flex-1 border-t border-dashed border-tride-text ml-12"></div>
             </div>
           ))}
         </div>
@@ -36,7 +35,7 @@ export function EarningsChart({ data }: { data: any[] }) {
                 className="w-full bg-tride-yellow transition-all duration-500 group-hover:opacity-80"
                 style={{ height: `${(item.earnings / maxEarnings) * 100}%` }}
               ></div>
-              <span className="absolute -bottom-8 text-[11px] text-white/40 font-medium">{item.name}</span>
+              <span className="absolute -bottom-8 text-[11px] text-tride-text font-medium">{item.name}</span>
             </div>
           ))}
         </div>

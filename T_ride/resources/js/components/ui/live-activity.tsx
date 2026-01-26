@@ -26,7 +26,7 @@ export function LiveActivity({ activities }: { activities: any[] }) {
         ))}
       </div>
 
-      <button className="w-full mt-6 py-4 rounded-2xl border border-white/10 text-xs font-bold text-white/50 hover:bg-white/5 hover:text-white transition-all">
+      <button className="w-full mt-6 py-4 rounded-2xl border border-tride-hover text-xs font-bold text-tride-text hover:bg-tride-hover hover:text-tride-text transition-all">
         View All Live Trips
       </button>
     </div>
