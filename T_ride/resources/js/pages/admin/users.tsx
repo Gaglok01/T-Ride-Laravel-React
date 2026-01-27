@@ -364,7 +364,7 @@ export default function UsersPage() {
                             className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-nowrap">
                         <div className="relative">
                             <Button 
                                 variant={showFilters ? "default" : "secondary"} 
