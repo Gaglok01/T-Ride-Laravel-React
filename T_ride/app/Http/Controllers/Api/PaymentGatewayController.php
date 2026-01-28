@@ -439,6 +439,8 @@ class PaymentGatewayController extends Controller
             ], 422);
         }
 
+        $provider = PaymentProvider::findOrFail($request->payment_provider_id);
+
         $transaction = PaymentTransaction::create([
             'transaction_id' => 'TXN-' . Str::random(12),
             'reference' => 'REF-' . Str::random(10),
@@ -453,16 +455,91 @@ class PaymentGatewayController extends Controller
             'metadata' => $request->metadata
         ]);
 
-        // Simulate transaction processing
-        $transaction->update([
-            'status' => 'success',
-            'processed_at' => now()
-        ]);
+        try {
+            if (Str::lower($provider->name) === 'stripe') {
+                $stripeSecret = $provider->secret_key ?? ($provider->credentials['secret_key'] ?? null);
+                
+                if (!$stripeSecret) {
+                    throw new \Exception('Stripe secret key not configured for this provider.');
+                }
 
-        // Update provider stats
-        $provider = PaymentProvider::find($request->payment_provider_id);
-        $provider->increment('transaction_count');
-        $provider->increment('total_processed', $request->amount);
+                \Stripe\Stripe::setApiKey($stripeSecret);
+
+                if ($request->type === 'payment') {
+                    $paymentData = [
+                        'amount' => (int)($request->amount * 100), // Stripe expects cents
+                        'currency' => Str::lower($request->currency),
+                        'description' => $request->description ?? 'T-Ride Payment',
+                        'metadata' => array_merge($request->metadata ?? [], ['transaction_ref' => $transaction->reference]),
+                    ];
+
+                    if ($request->payment_method) {
+                        $paymentData['payment_method'] = $request->payment_method;
+                        $paymentData['confirm'] = true;
+                        $paymentData['automatic_payment_methods'] = [
+                            'enabled' => true,
+                            'allow_redirects' => 'never',
+                        ];
+                    }
+
+                    $paymentIntent = \Stripe\PaymentIntent::create($paymentData);
+
+                    if ($paymentIntent->status === 'succeeded' || $paymentIntent->status === 'requires_action') {
+                        $status = ($paymentIntent->status === 'succeeded') ? 'success' : 'pending';
+                        $transaction->update([
+                            'status' => $status,
+                            'processed_at' => ($status === 'success') ? now() : null,
+                            'transaction_id' => $paymentIntent->id,
+                            'metadata' => array_merge($transaction->metadata ?? [], ['client_secret' => $paymentIntent->client_secret])
+                        ]);
+                    } else {
+                        $transaction->update(['status' => 'failed']);
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Stripe payment failed: ' . $paymentIntent->status
+                        ], 400);
+                    }
+                } elseif ($request->type === 'refund') {
+                    $refund = \Stripe\Refund::create([
+                        'payment_intent' => $request->metadata['payment_intent_id'] ?? null,
+                        'amount' => (int)($request->amount * 100),
+                    ]);
+                    
+                    $transaction->update([
+                        'status' => 'success',
+                        'processed_at' => now(),
+                        'transaction_id' => $refund->id
+                    ]);
+                }
+            } else {
+                // Simulate transaction processing for other providers
+                $transaction->update([
+                    'status' => 'success',
+                    'processed_at' => now()
+                ]);
+            }
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            $transaction->update([
+                'status' => 'failed', 
+                'metadata' => array_merge((array)$transaction->metadata, ['error' => $e->getMessage()])
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Stripe API Error: ' . $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            $transaction->update(['status' => 'failed']);
+            return response()->json([
+                'status' => false,
+                'message' => 'Payment processing error: ' . $e->getMessage()
+            ], 500);
+        }
+
+        // Update provider stats on success
+        if ($transaction->status === 'success') {
+            $provider->increment('transaction_count');
+            $provider->increment('total_processed', $request->amount);
+        }
 
         return response()->json([
             'status' => true,

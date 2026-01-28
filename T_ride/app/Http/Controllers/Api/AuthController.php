@@ -63,6 +63,10 @@ class AuthController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
+        if (!$user->hasRole('admin')) {
+            return response()->json(['message' => 'Access denied. Only administrators can login.'], 403);
+        }
+
         Otp::where('identifier', $request->identifier)->delete();
 
         $otpCode = rand(100000, 999999);
@@ -120,6 +124,10 @@ class AuthController extends Controller
         $user = User::where('email', $request->identifier)
             ->orWhere('phone_number', $request->identifier)
             ->first();
+
+        if (!$user || !$user->hasRole('admin')) {
+            return response()->json(['message' => 'Access denied.'], 403);
+        }
 
         $token = $user->createToken('login_token')->accessToken;
 
