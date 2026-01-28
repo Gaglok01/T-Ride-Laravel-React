@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\CityZoneController;
 use App\Http\Controllers\Api\CommissionController;
+use App\Http\Controllers\Api\ReferralController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -244,6 +245,51 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/commission-earnings', [CommissionController::class, 'getEarnings']);
         Route::post('/commission-earnings', [CommissionController::class, 'storeEarning']);
         Route::delete('/commission-earnings/{id}', [CommissionController::class, 'deleteEarning']);
+
+        // Referral Program Management
+        Route::get('/referrals/stats', [ReferralController::class, 'getStats']);
+        
+        // Campaigns
+        Route::get('/referral-campaigns', [ReferralController::class, 'getCampaigns']);
+        Route::get('/referral-campaigns/{id}', [ReferralController::class, 'showCampaign']);
+        Route::post('/referral-campaigns', [ReferralController::class, 'storeCampaign']);
+
+        // Single View Routes
+        Route::get('/referrers/{id}', [ReferralController::class, 'showReferrer']);
+        Route::get('/referral-codes/{id}', [ReferralController::class, 'showReferralCode']);
+        Route::put('/referral-campaigns/{id}', [ReferralController::class, 'updateCampaign']);
+        Route::delete('/referral-campaigns/{id}', [ReferralController::class, 'deleteCampaign']);
+
+        // Rules
+        Route::get('/referral-rules', [ReferralController::class, 'getRules']);
+        Route::post('/referral-rules', [ReferralController::class, 'storeRule']);
+        Route::put('/referral-rules/{id}', [ReferralController::class, 'updateRule']);
+        Route::patch('/referral-rules/{id}/status', [ReferralController::class, 'toggleRuleStatus']);
+        Route::delete('/referral-rules/{id}', [ReferralController::class, 'deleteRule']);
+
+        // Tiers
+        Route::get('/referrer-tiers', [ReferralController::class, 'getTiers']);
+        Route::post('/referrer-tiers', [ReferralController::class, 'storeTier']);
+        Route::put('/referrer-tiers/{id}', [ReferralController::class, 'updateTier']);
+        Route::delete('/referrer-tiers/{id}', [ReferralController::class, 'deleteTier']);
+
+        // Top Referrers & Recent
+        Route::get('/top-referrers', [ReferralController::class, 'getTopReferrers']);
+        Route::get('/recent-referrals', [ReferralController::class, 'getRecentReferrals']);
+
+        // Referral Codes
+        Route::get('/referral-codes', [ReferralController::class, 'getReferralCodes']);
+        Route::post('/referral-codes', [ReferralController::class, 'generateReferralCode']);
+
+        // Analytics
+        Route::get('/referral-analytics', [ReferralController::class, 'getAnalytics']);
+        Route::get('/referral-performance', [ReferralController::class, 'getPerformanceData']);
+        Route::get('/referral-funnel', [ReferralController::class, 'getConversionFunnel']);
+
+        // Settings
+        Route::get('/referral-settings', [ReferralController::class, 'getSettings']);
+        Route::put('/referral-settings', [ReferralController::class, 'updateSettings']);
+        Route::patch('/referral-settings/limit', [ReferralController::class, 'updateLimit']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);

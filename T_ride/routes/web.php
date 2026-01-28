@@ -119,6 +119,22 @@ Route::get('/admin/commission-management', function () {
     return Inertia::render('admin/commission-management');
 })->name('admin.commission-management');
 
+Route::get('/admin/referral-program', function () {
+    return Inertia::render('admin/referral-program');
+})->name('admin.referral-program');
+
+Route::get('/admin/referral-campaigns/{id}', function ($id) {
+    return Inertia::render('admin/view-campaign', ['id' => $id]);
+})->name('admin.view-campaign');
+
+Route::get('/admin/referrers/{id}', function ($id) {
+    return Inertia::render('admin/view-referrer', ['id' => $id]);
+})->name('admin.view-referrer');
+
+Route::get('/admin/referral-codes/{id}', function ($id) {
+    return Inertia::render('admin/view-referral-code', ['id' => $id]);
+})->name('admin.view-referral-code');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

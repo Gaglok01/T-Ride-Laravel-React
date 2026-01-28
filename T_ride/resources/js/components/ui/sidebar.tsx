@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState } from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent, Menu } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent, Menu, Gift } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Sidebar Context for useSidebar hook
@@ -139,6 +139,7 @@ export function Sidebar({
         <NavItem onClick={handleNavClick} href="/admin/cities-zones" icon={<Map size={20} />} label="Cities & Zones" active={isActive("/admin/cities-zones")} />
         <NavItem onClick={handleNavClick} href="/admin/commission-management" icon={<Percent size={20} />} label="Commissions" active={isActive("/admin/commission-management")} />
         <NavItem onClick={handleNavClick} href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
+        <NavItem onClick={handleNavClick} href="/admin/referral-program" icon={<Gift size={20} />} label="Referral Program" active={isActive("/admin/referral-program")} />
         <NavItem onClick={handleNavClick} href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
         <NavItem onClick={handleNavClick} href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
         <NavItem onClick={handleNavClick} href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
