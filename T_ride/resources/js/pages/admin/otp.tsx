@@ -187,8 +187,8 @@ export default function AdminOTP() {
     <>
       <Head title="Verify OTP - T-RIDE Admin" />
       
-      <div className="min-h-screen bg-tride-dark flex items-center justify-center p-6">
-        <div className="absolute inset-0 overflow-hidden">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-foreground">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 right-0 w-96 h-96 bg-tride-yellow/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-tride-yellow/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
           <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-tride-yellow/3 rounded-full blur-2xl" />
@@ -196,13 +196,13 @@ export default function AdminOTP() {
 
         <div className="relative w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-5xl font-black tracking-tighter text-white mb-2">
+            <h1 className="text-5xl font-black tracking-tighter text-foreground mb-2">
               T-RIDE <span className="inline-block w-3 h-3 bg-tride-yellow rounded-full ml-1"></span>
             </h1>
-            <p className="text-gray-400 text-sm">Security Verification</p>
+            <p className="text-muted-foreground text-sm">Security Verification</p>
           </div>
 
-          <div className="bg-tride-card rounded-3xl p-8 shadow-2xl border border-white/5 backdrop-blur-sm">
+          <div className="bg-card rounded-3xl p-8 shadow-2xl border border-border backdrop-blur-sm">
             <div className="text-center mb-8">
               <div className="relative w-20 h-20 mx-auto mb-4">
                 <div className="absolute inset-0 bg-tride-yellow/10 rounded-2xl" />
@@ -217,7 +217,7 @@ export default function AdminOTP() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="3"
-                    className="text-white/10"
+                    className="text-muted-foreground/10"
                   />
                   <circle
                     cx="40"
@@ -233,8 +233,8 @@ export default function AdminOTP() {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Enter Verification Code</h2>
-              <p className="text-gray-400 text-sm">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Enter Verification Code</h2>
+              <p className="text-muted-foreground text-sm">
                 We've sent a 6-digit code to
                 <br />
                 <span className="text-tride-yellow font-medium">{maskEmail(email)}</span>
@@ -247,11 +247,11 @@ export default function AdminOTP() {
                 {formatTime(timeLeft)}
               </span>
               {isExpired && (
-                <span className="text-red-400 text-sm ml-2 animate-pulse">Expired!</span>
+                <span className="text-destructive text-sm ml-2 animate-pulse">Expired!</span>
               )}
             </div>
 
-            <div className="w-full h-1.5 bg-white/10 rounded-full mb-8 overflow-hidden">
+            <div className="w-full h-1.5 bg-muted rounded-full mb-8 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-1000 ease-linear ${
                   isExpired ? "bg-red-500" : timeLeft <= 60 ? "bg-orange-500" : "bg-tride-yellow"
@@ -261,7 +261,7 @@ export default function AdminOTP() {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm text-center mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 text-destructive text-sm text-center mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
                 {error}
               </div>
             )}
@@ -280,9 +280,9 @@ export default function AdminOTP() {
                   onPaste={handlePaste}
                   disabled={isExpired}
                   className={`w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all duration-300 outline-none
-                    ${digit ? "border-tride-yellow bg-tride-yellow/10 text-white" : "border-white/20 bg-white/5 text-white"}
+                    ${digit ? "border-tride-yellow bg-tride-yellow/10 text-foreground" : "border-border bg-secondary/50 text-foreground"}
                     ${isExpired ? "opacity-50 cursor-not-allowed" : "focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20"}
-                    placeholder-gray-600
+                    placeholder-muted-foreground
                   `}
                   placeholder="•"
                 />
@@ -319,7 +319,7 @@ export default function AdminOTP() {
               className={`w-full py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2
                 ${(isExpired || timeLeft <= 4 * 60) 
                   ? "text-tride-yellow hover:bg-tride-yellow/10 cursor-pointer" 
-                  : "text-gray-600 cursor-not-allowed"
+                  : "text-muted-foreground cursor-not-allowed"
                 }
               `}
             >
@@ -342,7 +342,7 @@ export default function AdminOTP() {
             <div className="mt-6 text-center">
               <button
                 onClick={() => router.visit("/admin/login")}
-                className="text-gray-500 hover:text-gray-300 text-sm transition-colors flex items-center justify-center gap-2 mx-auto"
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors flex items-center justify-center gap-2 mx-auto"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Login
@@ -351,7 +351,7 @@ export default function AdminOTP() {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-xs">
+            <p className="text-muted-foreground text-xs">
               🔒 Your security is our priority. Never share your OTP with anyone.
             </p>
           </div>

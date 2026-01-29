@@ -13,8 +13,9 @@ export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
   const { appearance, updateAppearance } = useAppearance()
 
   const getNextTheme = (): Appearance => {
-    const themes: Appearance[] = ["light", "dark", "system"]
+    const themes: Appearance[] = ["light", "dark"]
     const currentIndex = themes.indexOf(appearance)
+    if (currentIndex === -1) return "light"
     return themes[(currentIndex + 1) % themes.length]
   }
 
@@ -44,7 +45,6 @@ export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
     const themes: { value: Appearance; icon: React.ReactNode; label: string }[] = [
       { value: "light", icon: <Sun size={16} />, label: "Light" },
       { value: "dark", icon: <Moon size={16} />, label: "Dark" },
-      { value: "system", icon: <Monitor size={16} />, label: "System" },
     ]
 
     return (
@@ -83,7 +83,7 @@ export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
           {getCurrentIcon()}
         </button>
         <div className="absolute right-0 top-full mt-2 py-2 w-36 bg-tride-card border border-[var(--tride-border)] rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-          {["light", "dark", "system"].map((theme) => (
+          {["light", "dark"].map((theme) => (
             <button
               key={theme}
               onClick={() => updateAppearance(theme as Appearance)}
@@ -130,18 +130,9 @@ export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
           size={20}
           className={cn(
             "absolute inset-0 transition-all duration-300",
-            appearance === "dark"
+            appearance === "dark" 
               ? "opacity-100 rotate-0 scale-100"
               : "opacity-0 -rotate-90 scale-0"
-          )}
-        />
-        <Monitor
-          size={20}
-          className={cn(
-            "absolute inset-0 transition-all duration-300",
-            appearance === "system"
-              ? "opacity-100 rotate-0 scale-100"
-              : "opacity-0 rotate-90 scale-0"
           )}
         />
       </div>

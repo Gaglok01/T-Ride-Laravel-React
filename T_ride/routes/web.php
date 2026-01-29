@@ -43,6 +43,10 @@ Route::get('/admin/roles', function () {
     return Inertia::render('admin/roles');
 })->name('admin.roles');
 
+Route::get('/admin/reports', function () {
+    return Inertia::render('admin/reports');
+})->name('admin.reports');
+
 Route::get('/admin/vendors', function () {
     return Inertia::render('admin/vendors');
 })->name('admin.vendors');

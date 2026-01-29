@@ -74,19 +74,19 @@ export default function AdminRegister() {
 
         <div className="relative w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-5xl font-black tracking-tighter text-white mb-2">
+            <h1 className="text-5xl font-black tracking-tighter text-tride-text mb-2">
               T-RIDE <span className="inline-block w-3 h-3 bg-tride-yellow rounded-full ml-1"></span>
             </h1>
-            <p className="text-gray-400 text-sm">Admin Registration</p>
+            <p className="text-tride-text-muted text-sm">Admin Registration</p>
           </div>
 
-          <div className="bg-tride-card rounded-3xl p-8 shadow-2xl border border-white/5 backdrop-blur-sm">
+          <div className="bg-tride-card rounded-3xl p-8 shadow-2xl border border-tride-border backdrop-blur-sm">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-tride-yellow/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <UserPlus className="w-8 h-8 text-tride-yellow" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Create Account</h2>
-              <p className="text-gray-400 text-sm">Join the admin team</p>
+              <h2 className="text-2xl font-bold text-tride-text mb-2">Create Account</h2>
+              <p className="text-tride-text-muted text-sm">Join the admin team</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -97,12 +97,12 @@ export default function AdminRegister() {
               )}
 
               <div className="space-y-2">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300">
+                <label htmlFor="name" className="block text-sm font-medium text-tride-text-muted">
                   Full Name
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <User className="w-5 h-5 text-gray-500 group-focus-within:text-tride-yellow transition-colors" />
+                    <User className="w-5 h-5 text-tride-text-muted group-focus-within:text-tride-yellow transition-colors" />
                   </div>
                   <input
                     id="name"
@@ -110,19 +110,19 @@ export default function AdminRegister() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="John Doe"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-4 bg-tride-hover border border-tride-border rounded-xl text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
                     autoComplete="name"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                <label htmlFor="email" className="block text-sm font-medium text-tride-text-muted">
                   Email Address
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="w-5 h-5 text-gray-500 group-focus-within:text-tride-yellow transition-colors" />
+                    <Mail className="w-5 h-5 text-tride-text-muted group-focus-within:text-tride-yellow transition-colors" />
                   </div>
                   <input
                     id="email"
@@ -130,19 +130,19 @@ export default function AdminRegister() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@tride.com"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-4 bg-tride-hover border border-tride-border rounded-xl text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
                     autoComplete="email"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
+                <label htmlFor="phone" className="block text-sm font-medium text-tride-text-muted">
                   Phone Number
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Phone className="w-5 h-5 text-gray-500 group-focus-within:text-tride-yellow transition-colors" />
+                    <Phone className="w-5 h-5 text-tride-text-muted group-focus-within:text-tride-yellow transition-colors" />
                   </div>
                   <input
                     id="phone"
@@ -150,19 +150,19 @@ export default function AdminRegister() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+1234567890"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-4 bg-tride-hover border border-tride-border rounded-xl text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
                     autoComplete="tel"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                <label htmlFor="password" className="block text-sm font-medium text-tride-text-muted">
                   Password
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-gray-500 group-focus-within:text-tride-yellow transition-colors" />
+                    <Lock className="w-5 h-5 text-tride-text-muted group-focus-within:text-tride-yellow transition-colors" />
                   </div>
                   <input
                     id="password"
@@ -170,13 +170,13 @@ export default function AdminRegister() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Create a password"
-                    className="w-full pl-12 pr-12 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
+                    className="w-full pl-12 pr-12 py-4 bg-tride-hover border border-tride-border rounded-xl text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-tride-yellow transition-colors"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-tride-text-muted hover:text-tride-yellow transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -211,7 +211,7 @@ export default function AdminRegister() {
             <div className="mt-8 text-center">
               <button
                 onClick={() => router.visit("/admin/login")}
-                className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
+                className="text-tride-text-muted hover:text-tride-text text-sm transition-colors"
               >
                 Already have an account? Sign In
               </button>
