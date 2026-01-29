@@ -130,16 +130,18 @@ export default function AdminOTP() {
     setError("")
 
     try {
-      const res=
-      await authService.verifyOtp({
+      const res = await authService.verifyOtp({
         identifier: email,
         otp: otpString
       })
       console.log("res", res)
       
-      sessionStorage.removeItem("adminEmail")
-      
-      router.visit("/admin")
+      if (res.success) {
+          sessionStorage.removeItem("adminEmail")
+          router.visit("/admin")
+      } else {
+          setError(res.message || "Invalid OTP. Please try again.")
+      }
     } catch (error: any) {
       setIsVerifying(false)
       
@@ -155,14 +157,18 @@ export default function AdminOTP() {
     setError("")
 
     try {
-      // Call the login API again to resend OTP
-      await authService.login({ identifier: email })
+      // Use forgotPassword to resend OTP since we don't have the password for login()
+      const res = await authService.forgotPassword({ email })
       
-      // Reset OTP input and timer
-      setOtp(["", "", "", "", "", ""])
-      setTimeLeft(5 * 60)
-      setIsExpired(false)
-      inputRefs.current[0]?.focus()
+      if (res.success) {
+          // Reset OTP input and timer
+          setOtp(["", "", "", "", "", ""])
+          setTimeLeft(5 * 60)
+          setIsExpired(false)
+          inputRefs.current[0]?.focus()
+      } else {
+          setError(res.message || "Failed to resend OTP.")
+      }
       
       setIsResending(false)
     } catch (error: any) {

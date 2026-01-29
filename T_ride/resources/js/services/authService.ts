@@ -2,6 +2,7 @@ import axiosInstance from '@/lib/axios';
 
 export interface LoginRequest {
     identifier: string;
+    password?: string;
 }
 
 export interface VerifyOtpRequest {
@@ -10,17 +11,21 @@ export interface VerifyOtpRequest {
 }
 
 export interface AuthResponse {
+    success: boolean;
     message: string;
-    token?: string;
-    user?: {
-        id: number;
-        name: string;
-        email: string;
-        phone_number: string;
+    data?: {
+        token?: string;
+        user?: {
+            id: number;
+            name: string;
+            email: string;
+            phone_number: string;
+        };
     };
 }
 
-export interface OtpResponse {
+export interface BaseResponse {
+    success: boolean;
     message: string;
 }
 
@@ -38,23 +43,14 @@ class AuthService {
      */
     async register(data: RegisterRequest): Promise<AuthResponse> {
         const response = await axiosInstance.post<AuthResponse>('/register', data);
-        
-        // Store token and user data if registration is successful (auto-login usually)
-        if (response.data.token) {
-            localStorage.setItem('auth_token', response.data.token);
-        }
-        if (response.data.user) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-        }
-        
         return response.data;
     }
 
     /**
      * Send OTP to user's email or phone
      */
-    async login(data: LoginRequest): Promise<OtpResponse> {
-        const response = await axiosInstance.post<OtpResponse>('/login', data);
+    async login(data: LoginRequest): Promise<BaseResponse> {
+        const response = await axiosInstance.post<BaseResponse>('/login', data);
         return response.data;
     }
 
@@ -65,11 +61,11 @@ class AuthService {
         const response = await axiosInstance.post<AuthResponse>('/verify-otp', data);
         
         // Store token and user data if authentication is successful
-        if (response.data.token) {
-            localStorage.setItem('auth_token', response.data.token);
+        if (response.data.success && response.data.data?.token) {
+            localStorage.setItem('auth_token', response.data.data.token);
         }
-        if (response.data.user) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
+        if (response.data.success && response.data.data?.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.data.user));
         }
         
         return response.data;
@@ -102,6 +98,22 @@ class AuthService {
      */
     isAuthenticated(): boolean {
         return !!localStorage.getItem('auth_token');
+    }
+
+    /**
+     * Send password reset link
+     */
+    async forgotPassword(data: { email: string }): Promise<BaseResponse> {
+        const response = await axiosInstance.post<BaseResponse>('/forgot-password', data);
+        return response.data;
+    }
+
+    /**
+     * Reset password with OTP
+     */
+    async resetPassword(data: { email: string, otp: string, password: string, password_confirmation: string }): Promise<BaseResponse> {
+        const response = await axiosInstance.post<BaseResponse>('/reset-password', data);
+        return response.data;
     }
 }
 

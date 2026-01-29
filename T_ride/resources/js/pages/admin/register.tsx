@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Head, router } from "@inertiajs/react"
 import { Mail, Lock, User, Phone, Eye, EyeOff, UserPlus } from "lucide-react"
 import authService from "@/services/authService"
+import { PasswordInput } from "@/components/ui/password-input"
 
 export default function AdminRegister() {
   const [name, setName] = useState("")
@@ -17,7 +18,6 @@ export default function AdminRegister() {
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -51,8 +51,12 @@ export default function AdminRegister() {
         role: "admin"
       })
       console.log("response", response)
-      // Navigate to login page
-      router.visit("/admin/login")
+      
+      if (response.success) {
+          router.visit("/admin/login")
+      } else {
+          setError(response.message || "Registration failed.")
+      }
     } catch (error: any) {
       setIsLoading(false)
       
@@ -160,27 +164,14 @@ export default function AdminRegister() {
                 <label htmlFor="password" className="block text-sm font-medium text-tride-text-muted">
                   Password
                 </label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-tride-text-muted group-focus-within:text-tride-yellow transition-colors" />
-                  </div>
-                  <input
+                <PasswordInput
                     id="password"
-                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Create a password"
-                    className="w-full pl-12 pr-12 py-4 bg-tride-hover border border-tride-border rounded-xl text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow focus:ring-2 focus:ring-tride-yellow/20 transition-all duration-300"
                     autoComplete="new-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-tride-text-muted hover:text-tride-yellow transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
+                    icon={Lock}
+                />
               </div>
 
               <button

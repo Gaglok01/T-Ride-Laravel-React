@@ -43,16 +43,20 @@ class AuthController extends Controller
         $token = $user->createToken('register_token')->accessToken;
 
         return response()->json([
+            'success' => true,
             'message' => 'Registration successful',
-            'token'   => $token,
-            'user'    => $user
+            'data'    => [
+                'token' => $token,
+                'user'  => $user
+            ]
         ], 201);
     }
 
     public function login(Request $request)
     {
         $request->validate([
-            'identifier' => 'required'
+            'identifier' => 'required',
+            'password' => 'required'
         ]);
 
         $user = User::where('email', $request->identifier)
@@ -60,11 +64,24 @@ class AuthController extends Controller
             ->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials'
+            ], 401);
         }
 
         if (!$user->hasRole('admin')) {
-            return response()->json(['message' => 'Access denied. Only administrators can login.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied. Only administrators can login.'
+            ], 403);
         }
 
         Otp::where('identifier', $request->identifier)->delete();
@@ -81,25 +98,10 @@ class AuthController extends Controller
             Mail::to($request->identifier)->send(new OtpMail($otpCode));
         }
 
-        if (preg_match('/^\+?[1-9]\d{7,14}$/', $request->identifier)) {
-
-            // $twilio = new Client(
-            //     config('services.twilio.sid'),
-            //     config('services.twilio.token')
-            // );
-
-            // $twilio->messages->create(
-            //     $request->identifier,
-            //     [
-            //         'from' => config('services.twilio.from'),
-            //         'body' => "Your login OTP is {$otpCode}"
-            //     ]
-            // );
-        }
-
         return response()->json([
-            'message' => 'OTP sent successfully'
-        ]);
+            'success' => true,
+            'message' => 'OTP sent successfully. Please check your email.',
+        ], 200);
     }
 
     public function verifyOtp(Request $request)
@@ -116,7 +118,10 @@ class AuthController extends Controller
             ->first();
 
         if (!$otp) {
-            return response()->json(['message' => 'Invalid or expired OTP'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP'
+            ], 401);
         }
 
         $otp->update(['is_used' => true]);
@@ -126,16 +131,22 @@ class AuthController extends Controller
             ->first();
 
         if (!$user || !$user->hasRole('admin')) {
-            return response()->json(['message' => 'Access denied.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied.'
+            ], 403);
         }
 
         $token = $user->createToken('login_token')->accessToken;
 
         return response()->json([
+            'success' => true,
             'message' => 'Login successful',
-            'token'   => $token,
-            'user'    => $user
-        ]);
+            'data' => [
+                'token' => $token,
+                'user'  => $user
+            ]
+        ], 200);
     }
 
     public function logout(Request $request)
@@ -143,7 +154,83 @@ class AuthController extends Controller
         $request->user()->token()->revoke();
 
         return response()->json([
+            'success' => true,
             'message' => 'Logged out successfully'
+        ], 200);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => true, // Keep true to prevent enumeration, or false if you prefer explicit error
+                'message' => 'If your email exists in our system, you will receive a password reset link.'
+            ], 200);
+        }
+
+        // Generate OTP/Token
+        $otpCode = rand(100000, 999999);
+
+        // Delete old OTPs
+        Otp::where('identifier', $request->email)->delete();
+
+        Otp::create([
+            'identifier' => $request->email,
+            'otp'        => $otpCode,
+            'expires_at' => now()->addMinutes(15)
         ]);
+
+        // Send Email
+        Mail::to($request->email)->send(new OtpMail($otpCode));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sent successfully to your email.'
+        ], 200);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required',
+            'password' => 'required|min:6|confirmed'
+        ]);
+
+        $otp = Otp::where('identifier', $request->email)
+            ->where('otp', $request->otp)
+            ->where('is_used', false)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$otp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP'
+            ], 400); // Bad Request
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        $user->password = bcrypt($request->password);
+        $user->save();
+
+        $otp->update(['is_used' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset successfully. You can now login.'
+        ], 200);
     }
 }

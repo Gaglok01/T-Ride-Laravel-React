@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { X } from "lucide-react"
+import { X, Eye, EyeOff } from "lucide-react"
 
 export interface ModalProps {
   /** Whether the modal is open */
@@ -221,10 +221,15 @@ export function ModalInput({
   required = false,
   icon
 }: ModalInputProps) {
-  // Additional classes for date inputs to style the native calendar picker
+  const [showPassword, setShowPassword] = useState(false)
+  
+  // Additional classes for date inputs
   const dateInputClasses = type === "date" 
     ? "[&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
     : ""
+
+  const isPassword = type === "password"
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type
 
   return (
     <div className="space-y-2">
@@ -239,14 +244,24 @@ export function ModalInput({
           </div>
         )}
         <input
-          type={type}
+          type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className={`w-full bg-tride-card border border-tride-border rounded-xl text-tride-text focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-tride-text-muted ${
-            icon ? "pl-11 pr-4 py-3" : "px-4 py-3"
-          } ${dateInputClasses}`}
+            icon ? "pl-11" : "pl-4"
+          } ${isPassword ? "pr-12" : "pr-4"} py-3 ${dateInputClasses}`}
         />
+        
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-tride-text-muted hover:text-tride-text transition-colors"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        )}
       </div>
     </div>
   )

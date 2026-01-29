@@ -1,23 +1,23 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Head, router } from "@inertiajs/react"
-import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react"
+import { Mail, ArrowLeft, Send } from "lucide-react"
 import authService from "@/services/authService"
-import { PasswordInput } from "@/components/ui/password-input"
 
-export default function AdminLogin() {
+export default function AdminForgotPassword() {
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setSuccess("")
     
-    if (!email || !password) {
-      setError("Please fill in all fields")
+    if (!email) {
+      setError("Please enter your email address")
       return
     }
     
@@ -29,25 +29,26 @@ export default function AdminLogin() {
     setIsLoading(true)
     
     try {
-      const response = await authService.login({ identifier: email, password })
-      console.log("response", response)
+      const response = await authService.forgotPassword({ email })
       
       if (response.success) {
-          sessionStorage.setItem("adminEmail", email)
-          router.visit("/admin/otp")
+          setSuccess(response.message || "OTP Sent! Redirecting to reset page...")
+          router.visit(`/admin/reset-password?email=${encodeURIComponent(email)}`)
       } else {
-          setError(response.message || "Failed to send OTP.")
+          setError(response.message || "Failed to send reset link.")
       }
+      
     } catch (error: any) {
-      setIsLoading(false)
-      const errorMessage = error.response?.data?.message || "Failed to send OTP. Please try again."
+      const errorMessage = error.response?.data?.message || "Failed to send reset link. Please try again."
       setError(errorMessage)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
     <>
-      <Head title="Admin Login - T-RIDE" />
+      <Head title="Forgot Password - T-RIDE" />
       
       <div className="min-h-screen bg-tride-dark flex items-center justify-center p-6">
         <div className="absolute inset-0 overflow-hidden">
@@ -61,22 +62,28 @@ export default function AdminLogin() {
             <h1 className="text-5xl font-black tracking-tighter text-tride-text mb-2">
               T-RIDE <span className="inline-block w-3 h-3 bg-tride-yellow rounded-full ml-1"></span>
             </h1>
-            <p className="text-tride-text-muted text-sm">Admin Control Panel</p>
+            <p className="text-tride-text-muted text-sm">Admin Password Recovery</p>
           </div>
 
           <div className="bg-tride-card rounded-3xl p-8 shadow-2xl border border-tride-border backdrop-blur-sm">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-tride-yellow/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <LogIn className="w-8 h-8 text-tride-yellow" />
+                <Mail className="w-8 h-8 text-tride-yellow" />
               </div>
-              <h2 className="text-2xl font-bold text-tride-text mb-2">Welcome Back</h2>
-              <p className="text-tride-text-muted text-sm">Sign in to access the admin dashboard</p>
+              <h2 className="text-2xl font-bold text-tride-text mb-2">Forgot Password?</h2>
+              <p className="text-tride-text-muted text-sm">Enter your email and we'll send you a link to reset your password</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm text-center animate-in fade-in slide-in-from-top-2 duration-300">
                   {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-green-400 text-sm text-center animate-in fade-in slide-in-from-top-2 duration-300">
+                  {success}
                 </div>
               )}
 
@@ -100,37 +107,6 @@ export default function AdminLogin() {
                 </div>
               </div>
 
-                <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-tride-text-muted">
-                  Password
-                </label>
-                <PasswordInput
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    autoComplete="current-password"
-                    icon={Lock}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <div className="w-5 h-5 border border-tride-border rounded-md flex items-center justify-center group-hover:border-tride-yellow transition-colors">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-3 h-3 bg-tride-yellow rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity" />
-                  </div>
-                  <span className="text-tride-text-muted group-hover:text-tride-text transition-colors">Remember me</span>
-                </label>
-                <button 
-                  type="button" 
-                  onClick={() => router.visit("/admin/forgot-password")}
-                  className="text-tride-yellow hover:text-tride-yellow/80 font-medium transition-colors"
-                >
-                  Forgot password?
-                </button>
-              </div>
-
               <button
                 type="submit"
                 disabled={isLoading}
@@ -143,12 +119,12 @@ export default function AdminLogin() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Signing in...
+                      Sending Link...
                     </>
                   ) : (
                     <>
-                      Sign In
-                      <LogIn className="w-5 h-5" />
+                      Email Password Reset Link
+                      <Send className="w-5 h-5" />
                     </>
                   )}
                 </span>
@@ -158,19 +134,11 @@ export default function AdminLogin() {
 
             <div className="mt-8 text-center">
               <button
-                onClick={() => router.visit("/")}
-                className="text-tride-text-muted hover:text-tride-text text-sm transition-colors"
+                onClick={() => router.visit("/admin/login")}
+                className="text-tride-text-muted hover:text-tride-text text-sm transition-colors flex items-center justify-center gap-2 mx-auto"
               >
-                ← Back to Portal Selection
-              </button>
-            </div>
-
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => router.visit("/admin/register")}
-                className="text-tride-yellow hover:text-tride-yellow/80 text-sm font-medium transition-colors"
-              >
-                Don't have an account? Create one
+                <ArrowLeft className="w-4 h-4" />
+                Back to Login
               </button>
             </div>
           </div>

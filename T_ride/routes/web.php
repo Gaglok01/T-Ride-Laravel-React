@@ -15,6 +15,14 @@ Route::get('/admin/login', function () {
     return Inertia::render('admin/login');
 })->name('admin.login');
 
+Route::get('/admin/forgot-password', function () {
+    return Inertia::render('admin/forgot-password');
+})->name('admin.forgot-password');
+
+Route::get('/admin/reset-password', function () {
+    return Inertia::render('admin/reset-password');
+})->name('admin.reset-password');
+
 Route::get('/admin/register', function () {
     return Inertia::render('admin/register');
 })->name('admin.register');
