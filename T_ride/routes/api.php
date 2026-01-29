@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\CityZoneController;
 use App\Http\Controllers\Api\CommissionController;
 use App\Http\Controllers\Api\ReferralController;
+use App\Http\Controllers\Api\PricingController;
+use App\Http\Controllers\Api\DispatchController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -118,33 +120,33 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/delivery-orders/{id}', [DeliveryOrderController::class, 'show']);
 
         // Pricing Management
-        Route::get('/pricing-zones', [\App\Http\Controllers\Api\PricingController::class, 'getPricingZones']);
-        Route::post('/pricing-zones', [\App\Http\Controllers\Api\PricingController::class, 'storePricingZone']);
-        Route::put('/pricing-zones/{id}', [\App\Http\Controllers\Api\PricingController::class, 'updatePricingZone']);
-        Route::delete('/pricing-zones/{id}', [\App\Http\Controllers\Api\PricingController::class, 'deletePricingZone']);
+        Route::get('/pricing-zones', [PricingController::class, 'getPricingZones']);
+        Route::post('/pricing-zones', [PricingController::class, 'storePricingZone']);
+        Route::put('/pricing-zones/{id}', [PricingController::class, 'updatePricingZone']);
+        Route::delete('/pricing-zones/{id}', [PricingController::class, 'deletePricingZone']);
 
-        Route::get('/package-pricing', [\App\Http\Controllers\Api\PricingController::class, 'getPackagePricing']);
-        Route::post('/package-pricing', [\App\Http\Controllers\Api\PricingController::class, 'storePackagePricing']);
-        Route::put('/package-pricing/{id}', [\App\Http\Controllers\Api\PricingController::class, 'updatePackagePricing']);
+        Route::get('/package-pricing', [PricingController::class, 'getPackagePricing']);
+        Route::post('/package-pricing', [PricingController::class, 'storePackagePricing']);
+        Route::put('/package-pricing/{id}', [PricingController::class, 'updatePackagePricing']);
 
-        Route::get('/delivery-fees', [\App\Http\Controllers\Api\PricingController::class, 'getDeliveryFees']);
-        Route::post('/delivery-fees', [\App\Http\Controllers\Api\PricingController::class, 'storeDeliveryFee']);
-        Route::put('/delivery-fees/{id}', [\App\Http\Controllers\Api\PricingController::class, 'updateDeliveryFee']);
-        Route::delete('/delivery-fees/{id}', [\App\Http\Controllers\Api\PricingController::class, 'deleteDeliveryFee']);
+        Route::get('/delivery-fees', [PricingController::class, 'getDeliveryFees']);
+        Route::post('/delivery-fees', [PricingController::class, 'storeDeliveryFee']);
+        Route::put('/delivery-fees/{id}', [PricingController::class, 'updateDeliveryFee']);
+        Route::delete('/delivery-fees/{id}', [PricingController::class, 'deleteDeliveryFee']);
 
-        Route::get('/surge-rules', [\App\Http\Controllers\Api\PricingController::class, 'getSurgeRules']);
-        Route::post('/surge-rules', [\App\Http\Controllers\Api\PricingController::class, 'storeSurgeRule']);
-        Route::put('/surge-rules/{id}', [\App\Http\Controllers\Api\PricingController::class, 'updateSurgeRule']);
-        Route::patch('/surge-rules/{id}/status', [\App\Http\Controllers\Api\PricingController::class, 'toggleSurgeRuleStatus']);
-        Route::delete('/surge-rules/{id}', [\App\Http\Controllers\Api\PricingController::class, 'deleteSurgeRule']);
+        Route::get('/surge-rules', [PricingController::class, 'getSurgeRules']);
+        Route::post('/surge-rules', [PricingController::class, 'storeSurgeRule']);
+        Route::put('/surge-rules/{id}', [PricingController::class, 'updateSurgeRule']);
+        Route::patch('/surge-rules/{id}/status', [PricingController::class, 'toggleSurgeRuleStatus']);
+        Route::delete('/surge-rules/{id}', [PricingController::class, 'deleteSurgeRule']);
 
         // Dispatch Management
-        Route::get('/dispatch/stats', [\App\Http\Controllers\Api\DispatchController::class, 'getStats']);
-        Route::get('/dispatch/pending-orders', [\App\Http\Controllers\Api\DispatchController::class, 'getPendingOrders']);
-        Route::get('/dispatch/available-drivers', [\App\Http\Controllers\Api\DispatchController::class, 'getAvailableDrivers']);
-        Route::post('/dispatch/assign-driver', [\App\Http\Controllers\Api\DispatchController::class, 'assignDriver']);
-        Route::post('/dispatch/manual-booking', [\App\Http\Controllers\Api\DispatchController::class, 'createManualBooking']);
-        Route::get('/dispatch/manual-bookings', [\App\Http\Controllers\Api\DispatchController::class, 'getManualBookings']);
+        Route::get('/dispatch/stats', [DispatchController::class, 'getStats']);
+        Route::get('/dispatch/pending-orders', [DispatchController::class, 'getPendingOrders']);
+        Route::get('/dispatch/available-drivers', [DispatchController::class, 'getAvailableDrivers']);
+        Route::post('/dispatch/assign-driver', [DispatchController::class, 'assignDriver']);
+        Route::post('/dispatch/manual-booking', [DispatchController::class, 'createManualBooking']);
+        Route::get('/dispatch/manual-bookings', [DispatchController::class, 'getManualBookings']);
 
         // Payment Gateway Management
         Route::get('/payment-gateway/dashboard', [PaymentGatewayController::class, 'getDashboardStats']);

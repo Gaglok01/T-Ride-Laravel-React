@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client;
 use App\Mail\OtpMail;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -70,7 +71,7 @@ class AuthController extends Controller
             ], 404);
         }
 
-        if (!\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+        if (!Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid credentials'
