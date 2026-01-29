@@ -18,6 +18,7 @@
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
         "spatie/laravel-permission": "^6.24",
+        "stripe/stripe-php": "^19.2",
         "twilio/sdk": "^8.10"
     },
     "require-dev": {
