@@ -9,6 +9,15 @@ export function AdminDashboard() {
   const [data, setData] = useState<{
     stats: any[],
     earningsChart: any[],
+    earningsSummary: {
+      this_week: number;
+      week_change: number;
+      this_month: number;
+      month_change: number;
+      this_quarter: number;
+      quarter_change: number;
+      all_time: number;
+    } | null,
     liveActivity: any[]
   } | null>(null)
 
@@ -53,7 +62,7 @@ export function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <EarningsChart data={data?.earningsChart || []} />
+          <EarningsChart data={data?.earningsChart || []} summary={data?.earningsSummary || undefined} />
         </div>
         <div>
           <LiveActivity activities={data?.liveActivity || []} />

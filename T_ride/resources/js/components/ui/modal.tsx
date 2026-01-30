@@ -4,27 +4,16 @@ import { useEffect, useRef, useState } from "react"
 import { X, Eye, EyeOff } from "lucide-react"
 
 export interface ModalProps {
-  /** Whether the modal is open */
   isOpen: boolean
-  /** Function to close the modal */
   onClose: () => void
-  /** Modal title */
   title: string
-  /** Optional subtitle/description */
   description?: string
-  /** Icon to show in header (ReactNode) */
   icon?: React.ReactNode
-  /** Modal content */
   children: React.ReactNode
-  /** Footer content (buttons etc.) */
   footer?: React.ReactNode
-  /** Modal size: 'sm' | 'md' | 'lg' | 'xl' | 'full' */
   size?: "sm" | "md" | "lg" | "xl" | "full"
-  /** Whether to close on backdrop click */
   closeOnBackdrop?: boolean
-  /** Whether to show close button */
   showCloseButton?: boolean
-  /** Custom max height for body content */
   maxBodyHeight?: string
 }
 
@@ -51,7 +40,6 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
 
-  // Handle escape key to close modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -63,7 +51,6 @@ export function Modal({
     return () => document.removeEventListener("keydown", handleEscape)
   }, [isOpen, onClose])
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
@@ -75,7 +62,6 @@ export function Modal({
     }
   }, [isOpen])
 
-  // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (closeOnBackdrop && e.target === e.currentTarget) {
       onClose()
@@ -93,7 +79,6 @@ export function Modal({
         ref={modalRef}
         className={`bg-tride-card border border-tride-border w-full ${sizeClasses[size]} rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200`}
       >
-        {/* Modal Header */}
         <div className="px-8 py-6 border-b border-tride-border flex justify-between items-center bg-tride-hover">
           <div className="flex items-center gap-4">
             {icon && (
@@ -119,7 +104,6 @@ export function Modal({
           )}
         </div>
 
-        {/* Modal Body */}
         <div 
           className="p-8 overflow-y-auto custom-scrollbar"
           style={{ maxHeight: maxBodyHeight }}
@@ -127,7 +111,6 @@ export function Modal({
           {children}
         </div>
 
-        {/* Modal Footer */}
         {footer && (
           <div className="px-8 py-5 border-t border-tride-border bg-tride-hover flex justify-end gap-3">
             {footer}
@@ -138,7 +121,6 @@ export function Modal({
   )
 }
 
-// Reusable Modal Button Components
 interface ModalButtonProps {
   children: React.ReactNode
   onClick?: () => void
@@ -185,7 +167,6 @@ export function ModalButton({
   )
 }
 
-// Error Alert Component for Modals
 interface ModalErrorProps {
   message: string
 }
@@ -201,7 +182,6 @@ export function ModalError({ message }: ModalErrorProps) {
   )
 }
 
-// Input Field Component for Modals
 interface ModalInputProps {
   label: string
   value: string
@@ -223,7 +203,6 @@ export function ModalInput({
 }: ModalInputProps) {
   const [showPassword, setShowPassword] = useState(false)
   
-  // Additional classes for date inputs
   const dateInputClasses = type === "date" 
     ? "[&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
     : ""
@@ -267,7 +246,6 @@ export function ModalInput({
   )
 }
 
-// Custom Select Field Component for Modals
 interface ModalSelectProps {
   label: string
   value: string | number
@@ -290,7 +268,6 @@ export function ModalSelect({
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -310,7 +287,6 @@ export function ModalSelect({
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
       <div className="relative">
-        {/* Trigger Button */}
         <div 
             onClick={() => setIsOpen(!isOpen)}
             className={`w-full bg-tride-card border ${isOpen ? 'border-tride-yellow ring-1 ring-tride-yellow' : 'border-tride-border'} rounded-xl text-tride-text cursor-pointer transition-all hover:border-tride-text-muted flex items-center justify-between ${
@@ -332,7 +308,6 @@ export function ModalSelect({
             </div>
         </div>
 
-        {/* Dropdown Menu */}
         {isOpen && (
             <div className="absolute z-50 w-full mt-2 bg-tride-card border border-tride-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto custom-scrollbar">
                 {options.length > 0 ? (
@@ -365,7 +340,6 @@ export function ModalSelect({
   )
 }
 
-// Textarea Field Component for Modals
 interface ModalTextareaProps {
   label: string
   value: string

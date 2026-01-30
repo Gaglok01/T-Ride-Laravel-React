@@ -1,43 +1,73 @@
-export function EarningsChart({ data }: { data: any[] }) {
+interface EarningsChartProps {
+  data: any[];
+  summary?: {
+    this_week: number;
+    week_change: number;
+    this_month: number;
+    month_change: number;
+    this_quarter: number;
+    quarter_change: number;
+    all_time: number;
+  };
+}
+
+export function EarningsChart({ data, summary }: EarningsChartProps) {
   // Find max value to scale the bars correctly
   const maxEarnings = Math.max(...data.map(item => item.earnings), 100);
-  
-  // Create labels based on max value
-  const gridLabels = [
-    maxEarnings,
-    maxEarnings * 0.75,
-    maxEarnings * 0.5,
-    maxEarnings * 0.25,
-    0
-  ];
 
   return (
-    <div className="bg-tride-card border border-white/5 p-8 rounded-[32px] h-full">
-      <h3 className="text-lg font-bold mb-10">Weekly Earnings Overview</h3>
+    <div className="bg-tride-card border border-tride-border p-6 rounded-3xl h-full">
+      <h3 className="text-lg font-semibold mb-6 text-tride-text">Weekly Earnings Overview</h3>
 
-      <div className="relative h-64">
-        <div className="absolute inset-0 flex flex-col justify-between">
-          {gridLabels.map((label) => (
-            <div key={label} className="relative flex items-center w-full">
-              <span className="absolute -left-2 text-[11px] text-tride-text font-medium w-12 text-right pr-3 -translate-y-px">
-                ${Math.round(label)}
-              </span>
-              <div className="flex-1 border-t border-dashed border-tride-text ml-12"></div>
+      {/* Bar Chart - Referral Performance Style */}
+      <div className="h-64 flex items-end justify-between gap-2 px-4 pb-4">
+        {data.map((item, i) => {
+          const heightPercent = maxEarnings > 0 ? (item.earnings / maxEarnings) * 100 : 0;
+          return (
+            <div key={i} className="flex-1 flex flex-col justify-end group h-full">
+              <div 
+                className="w-full bg-tride-yellow/20 rounded-t-lg group-hover:bg-tride-yellow transition-colors relative"
+                style={{ height: `${Math.max(heightPercent, 5)}%` }}
+              >
+                <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-tride-text text-tride-card text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity pointer-events-none z-10">
+                  ${item.earnings.toLocaleString()}
+                </div>
+              </div>
+              <div className="text-[10px] text-tride-text-muted text-center mt-1">
+                {item.name}
+              </div>
             </div>
-          ))}
+          );
+        })}
+      </div>
+
+      {/* Summary Boxes - Referral Performance Style */}
+      <div className="grid grid-cols-4 gap-4 mt-6">
+        <div className="bg-tride-hover/50 p-4 rounded-2xl text-center hover:bg-tride-hover transition-colors">
+          <div className="text-xs text-tride-text-muted mb-1">This Week</div>
+          <div className="text-xl font-bold text-tride-text">${summary?.this_week?.toLocaleString() || 0}</div>
+          <div className={`text-xs font-medium ${(summary?.week_change || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {(summary?.week_change || 0) >= 0 ? '+' : ''}{summary?.week_change || 0}%
+          </div>
         </div>
- 
-        {/* Chart Bars */}
-        <div className="absolute inset-0 left-12 flex items-end justify-between px-4">
-          {data.map((item) => (
-            <div key={item.name} className="flex-1 flex flex-col items-center group max-w-[50px] relative h-full justify-end">
-              <div
-                className="w-full bg-tride-yellow transition-all duration-500 group-hover:opacity-80"
-                style={{ height: `${(item.earnings / maxEarnings) * 100}%` }}
-              ></div>
-              <span className="absolute -bottom-8 text-[11px] text-tride-text font-medium">{item.name}</span>
-            </div>
-          ))}
+        <div className="bg-tride-hover/50 p-4 rounded-2xl text-center hover:bg-tride-hover transition-colors">
+          <div className="text-xs text-tride-text-muted mb-1">This Month</div>
+          <div className="text-xl font-bold text-tride-text">${summary?.this_month?.toLocaleString() || 0}</div>
+          <div className={`text-xs font-medium ${(summary?.month_change || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {(summary?.month_change || 0) >= 0 ? '+' : ''}{summary?.month_change || 0}%
+          </div>
+        </div>
+        <div className="bg-tride-hover/50 p-4 rounded-2xl text-center hover:bg-tride-hover transition-colors">
+          <div className="text-xs text-tride-text-muted mb-1">This Quarter</div>
+          <div className="text-xl font-bold text-tride-text">${summary?.this_quarter?.toLocaleString() || 0}</div>
+          <div className={`text-xs font-medium ${(summary?.quarter_change || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {(summary?.quarter_change || 0) >= 0 ? '+' : ''}{summary?.quarter_change || 0}%
+          </div>
+        </div>
+        <div className="bg-tride-hover/50 p-4 rounded-2xl text-center hover:bg-tride-hover transition-colors">
+          <div className="text-xs text-tride-text-muted mb-1">All Time</div>
+          <div className="text-xl font-bold text-tride-text">${summary?.all_time?.toLocaleString() || 0}</div>
+          <div className="text-xs text-green-500 font-medium">Total</div>
         </div>
       </div>
     </div>

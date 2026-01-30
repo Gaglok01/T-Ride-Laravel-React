@@ -45,6 +45,62 @@ class DashboardController extends Controller
             ];
         }
 
+        // Earnings Summary - Same as Referral Performance design
+        $thisWeekStart = Carbon::now()->startOfWeek();
+        $lastWeekStart = Carbon::now()->subWeek()->startOfWeek();
+        $lastWeekEnd = Carbon::now()->subWeek()->endOfWeek();
+        
+        $thisMonthStart = Carbon::now()->startOfMonth();
+        $lastMonthStart = Carbon::now()->subMonth()->startOfMonth();
+        $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
+        
+        $thisQuarterStart = Carbon::now()->firstOfQuarter();
+        $lastQuarterStart = Carbon::now()->subQuarter()->firstOfQuarter();
+        $lastQuarterEnd = Carbon::now()->subQuarter()->lastOfQuarter();
+
+        // Calculate This Week
+        $thisWeekRide = Ride::where('created_at', '>=', $thisWeekStart)->sum('fare');
+        $thisWeekDelivery = DeliveryOrder::where('created_at', '>=', $thisWeekStart)->sum('total_amount');
+        $thisWeekTotal = $thisWeekRide + $thisWeekDelivery;
+
+        // Calculate Last Week
+        $lastWeekRide = Ride::whereBetween('created_at', [$lastWeekStart, $lastWeekEnd])->sum('fare');
+        $lastWeekDelivery = DeliveryOrder::whereBetween('created_at', [$lastWeekStart, $lastWeekEnd])->sum('total_amount');
+        $lastWeekTotal = $lastWeekRide + $lastWeekDelivery;
+        $weekChange = $lastWeekTotal > 0 ? round((($thisWeekTotal - $lastWeekTotal) / $lastWeekTotal) * 100, 1) : 0;
+
+        // Calculate This Month
+        $thisMonthRide = Ride::where('created_at', '>=', $thisMonthStart)->sum('fare');
+        $thisMonthDelivery = DeliveryOrder::where('created_at', '>=', $thisMonthStart)->sum('total_amount');
+        $thisMonthTotal = $thisMonthRide + $thisMonthDelivery;
+
+        // Calculate Last Month
+        $lastMonthRide = Ride::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->sum('fare');
+        $lastMonthDelivery = DeliveryOrder::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->sum('total_amount');
+        $lastMonthTotal = $lastMonthRide + $lastMonthDelivery;
+        $monthChange = $lastMonthTotal > 0 ? round((($thisMonthTotal - $lastMonthTotal) / $lastMonthTotal) * 100, 1) : 0;
+
+        // Calculate This Quarter
+        $thisQuarterRide = Ride::where('created_at', '>=', $thisQuarterStart)->sum('fare');
+        $thisQuarterDelivery = DeliveryOrder::where('created_at', '>=', $thisQuarterStart)->sum('total_amount');
+        $thisQuarterTotal = $thisQuarterRide + $thisQuarterDelivery;
+
+        // Calculate Last Quarter
+        $lastQuarterRide = Ride::whereBetween('created_at', [$lastQuarterStart, $lastQuarterEnd])->sum('fare');
+        $lastQuarterDelivery = DeliveryOrder::whereBetween('created_at', [$lastQuarterStart, $lastQuarterEnd])->sum('total_amount');
+        $lastQuarterTotal = $lastQuarterRide + $lastQuarterDelivery;
+        $quarterChange = $lastQuarterTotal > 0 ? round((($thisQuarterTotal - $lastQuarterTotal) / $lastQuarterTotal) * 100, 1) : 0;
+
+        $earningsSummary = [
+            'this_week' => (float) $thisWeekTotal,
+            'week_change' => (float) $weekChange,
+            'this_month' => (float) $thisMonthTotal,
+            'month_change' => (float) $monthChange,
+            'this_quarter' => (float) $thisQuarterTotal,
+            'quarter_change' => (float) $quarterChange,
+            'all_time' => (float) $totalRevenue,
+        ];
+
         // Live activity (last 8 recent activities)
         $recentRides = Ride::with(['rider', 'driver'])
             ->latest()
@@ -88,6 +144,7 @@ class DashboardController extends Controller
                     ['title' => 'Pending Work', 'value' => (string)$pendingBookings, 'trend' => '-2', 'icon' => 'issue'],
                 ],
                 'earningsChart' => $earningsChart,
+                'earningsSummary' => $earningsSummary,
                 'liveActivity' => $liveActivity
             ]
         ]);

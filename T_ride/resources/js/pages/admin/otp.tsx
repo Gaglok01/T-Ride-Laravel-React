@@ -15,14 +15,12 @@ export default function AdminOTP() {
   const [email, setEmail] = useState("")
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (authService.isAuthenticated()) {
       router.visit("/admin")
     }
   }, [])
 
-  // Get email from sessionStorage
   useEffect(() => {
     const storedEmail = sessionStorage.getItem("adminEmail")
     if (storedEmail) {
@@ -57,7 +55,6 @@ export default function AdminOTP() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-  // Get timer color based on time remaining
   const getTimerColor = () => {
     if (isExpired) return "text-red-500"
     if (timeLeft <= 60) return "text-orange-500"
@@ -65,12 +62,10 @@ export default function AdminOTP() {
     return "text-green-500"
   }
 
-  // Get progress percentage
   const getProgress = () => {
     return (timeLeft / (5 * 60)) * 100
   }
 
-  // Handle OTP input change
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return
 
@@ -145,23 +140,19 @@ export default function AdminOTP() {
     } catch (error: any) {
       setIsVerifying(false)
       
-      // Handle error response
       const errorMessage = error.response?.data?.message || "Invalid OTP. Please try again."
       setError(errorMessage)
     }
   }
 
-  // Resend OTP
   const handleResend = async () => {
     setIsResending(true)
     setError("")
 
     try {
-      // Use forgotPassword to resend OTP since we don't have the password for login()
       const res = await authService.forgotPassword({ email })
       
       if (res.success) {
-          // Reset OTP input and timer
           setOtp(["", "", "", "", "", ""])
           setTimeLeft(5 * 60)
           setIsExpired(false)
@@ -174,13 +165,11 @@ export default function AdminOTP() {
     } catch (error: any) {
       setIsResending(false)
       
-      // Handle error response
       const errorMessage = error.response?.data?.message || "Failed to resend OTP. Please try again."
       setError(errorMessage)
     }
   }
 
-  // Mask email for display
   const maskEmail = (email: string) => {
     if (!email) return ""
     const [localPart, domain] = email.split("@")
