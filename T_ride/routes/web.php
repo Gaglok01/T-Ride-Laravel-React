@@ -147,6 +147,23 @@ Route::get('/admin/referral-codes/{id}', function ($id) {
     return Inertia::render('admin/view-referral-code', ['id' => $id]);
 })->name('admin.view-referral-code');
 
+Route::get('/admin/vendors/{id}', function ($id) {
+    return Inertia::render('admin/view-vendor', ['id' => $id]);
+})->name('admin.view-vendor');
+
+// Vendor Routes
+Route::get('/vendor', function () {
+    return Inertia::render('vendor/dashboard');
+})->name('vendor.dashboard');
+
+Route::get('/vendor/products', function () {
+    return Inertia::render('vendor/products');
+})->name('vendor.products');
+
+Route::get('/vendor/settings', function () {
+    return Inertia::render('vendor/settings');
+})->name('vendor.settings');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

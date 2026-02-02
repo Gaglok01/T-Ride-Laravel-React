@@ -133,7 +133,14 @@ export default function AdminOTP() {
       
       if (res.success) {
           sessionStorage.removeItem("adminEmail")
-          router.visit("/admin")
+          
+          // Redirect based on user role
+          const userRole = authService.getUserRole()
+          if (userRole === 'vendor') {
+            router.visit("/vendor")
+          } else {
+            router.visit("/admin")
+          }
       } else {
           setError(res.message || "Invalid OTP. Please try again.")
       }

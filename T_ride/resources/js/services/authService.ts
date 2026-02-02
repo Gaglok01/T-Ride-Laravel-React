@@ -20,6 +20,7 @@ export interface AuthResponse {
             name: string;
             email: string;
             phone_number: string;
+            roles?: { id: number; name: string }[];
         };
     };
 }
@@ -91,6 +92,28 @@ class AuthService {
     getUser() {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
+    }
+
+    /**
+     * Get the user's primary role
+     */
+    getUserRole(): string | null {
+        const user = this.getUser();
+        if (user && user.roles && user.roles.length > 0) {
+            return user.roles[0].name;
+        }
+        return null;
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    hasRole(roleName: string): boolean {
+        const user = this.getUser();
+        if (user && user.roles) {
+            return user.roles.some((role: { name: string }) => role.name === roleName);
+        }
+        return false;
     }
 
     /**

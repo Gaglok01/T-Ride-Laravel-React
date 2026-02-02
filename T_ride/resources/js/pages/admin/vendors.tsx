@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Search, Plus, Eye, Edit, Store, CheckCircle, Clock, DollarSign, Star, Trash2 } from "lucide-react"
+import { router } from "@inertiajs/react"
 import { Button, IconButton } from "@/components/ui/button"
 import { VendorModal } from "@/components/admin/VendorModal"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
@@ -299,6 +300,7 @@ export default function VendorsPage() {
                                     <VendorRow 
                                         key={vendor.id} 
                                         vendor={vendor}
+                                        onView={() => router.visit(`/admin/vendors/${vendor.id}`)}
                                         onEdit={() => openEditModal(vendor)}
                                         onDelete={() => confirmDelete(vendor)}
                                         onToggleStatus={() => openStatusModal(vendor)}
@@ -361,12 +363,13 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
 
 interface VendorRowProps {
     vendor: Vendor
+    onView: () => void
     onEdit: () => void
     onDelete: () => void
     onToggleStatus: () => void
 }
 
-function VendorRow({ vendor, onEdit, onDelete, onToggleStatus }: VendorRowProps) {
+function VendorRow({ vendor, onView, onEdit, onDelete, onToggleStatus }: VendorRowProps) {
     return (
         <tr className="hover:bg-tride-hover transition-colors group">
             <td className="px-6 py-4">
@@ -411,6 +414,9 @@ function VendorRow({ vendor, onEdit, onDelete, onToggleStatus }: VendorRowProps)
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2">
+                    <IconButton tooltip="View" onClick={onView}>
+                        <Eye size={16} />
+                    </IconButton>
                     <IconButton tooltip="Edit" onClick={onEdit}>
                         <Edit size={16} />
                     </IconButton>

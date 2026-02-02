@@ -78,10 +78,11 @@ class AuthController extends Controller
             ], 401);
         }
 
-        if (!$user->hasRole('admin')) {
+        // Allow admin and vendor roles to login
+        if (!$user->hasRole('admin') && !$user->hasRole('vendor')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Access denied. Only administrators can login.'
+                'message' => 'Access denied. Only administrators and vendors can login.'
             ], 403);
         }
 
@@ -131,7 +132,8 @@ class AuthController extends Controller
             ->orWhere('phone_number', $request->identifier)
             ->first();
 
-        if (!$user || !$user->hasRole('admin')) {
+        // Allow admin and vendor roles
+        if (!$user || (!$user->hasRole('admin') && !$user->hasRole('vendor'))) {
             return response()->json([
                 'success' => false,
                 'message' => 'Access denied.'
@@ -140,12 +142,26 @@ class AuthController extends Controller
 
         $token = $user->createToken('login_token')->accessToken;
 
+        // Get user roles for frontend redirection
+        $roles = $user->roles->map(function($role) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
             'data' => [
                 'token' => $token,
-                'user'  => $user
+                'user'  => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone_number' => $user->phone_number,
+                    'roles' => $roles
+                ]
             ]
         ], 200);
     }

@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\CommissionController;
 use App\Http\Controllers\Api\ReferralController;
 use App\Http\Controllers\Api\PricingController;
 use App\Http\Controllers\Api\DispatchController;
+use App\Http\Controllers\Api\ProductController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -294,7 +295,30 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/referral-settings', [ReferralController::class, 'getSettings']);
         Route::put('/referral-settings', [ReferralController::class, 'updateSettings']);
         Route::patch('/referral-settings/limit', [ReferralController::class, 'updateLimit']);
+
+        // Product Management (Admin)
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::get('/products/{id}', [ProductController::class, 'show']);
+        Route::put('/products/{id}', [ProductController::class, 'update']);
+        Route::patch('/products/{id}/status', [ProductController::class, 'toggleStatus']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    });
+
+    // Vendor Routes
+    Route::prefix('vendor')->middleware('role:vendor')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [ProductController::class, 'getVendorDashboardStats']);
+        
+        // Products
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::get('/products/{id}', [ProductController::class, 'show']);
+        Route::put('/products/{id}', [ProductController::class, 'update']);
+        Route::patch('/products/{id}/status', [ProductController::class, 'toggleStatus']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+

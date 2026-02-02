@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { Store, MapPin, Percent, Image, Plus, Pencil, Layers } from "lucide-react"
+import { Store, MapPin, Percent, Image, Plus, Pencil, Layers, Mail, Phone, Lock } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
+import { PasswordInput } from "@/components/ui/password-input"
 
 interface Category {
     id: number
@@ -15,6 +16,8 @@ interface VendorData {
     commission_rate: number | string
     logo?: string
     is_open?: boolean
+    email?: string
+    phone_number?: string
 }
 
 interface VendorModalProps {
@@ -35,6 +38,9 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
     const [categoryId, setCategoryId] = useState("")
     const [commissionRate, setCommissionRate] = useState("")
     const [logo, setLogo] = useState<File | null>(null)
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [phoneNumber, setPhoneNumber] = useState("")
 
     // Reset/Populate form when modal opens
     useEffect(() => {
@@ -45,12 +51,18 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
                 setCategoryId(initialData.category_id?.toString() || "")
                 setCommissionRate(initialData.commission_rate?.toString() || "")
                 setLogo(null)
+                setEmail(initialData.email || "")
+                setPhoneNumber(initialData.phone_number || "")
+                setPassword("")
             } else {
                 setName("")
                 setAddress("")
                 setCategoryId("")
                 setCommissionRate("")
                 setLogo(null)
+                setEmail("")
+                setPassword("")
+                setPhoneNumber("")
             }
             setError("")
             setLoading(false)
@@ -63,6 +75,12 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
             return
         }
 
+        // For new vendor, email and password are required
+        if (!initialData && (!email || !password || !phoneNumber)) {
+            setError("Email, password and phone number are required for new vendor.")
+            return
+        }
+
         setLoading(true)
         setError("")
 
@@ -72,6 +90,13 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
             formData.append("address", address)
             formData.append("category_id", categoryId)
             formData.append("commission_rate", commissionRate)
+            
+            // Add login credentials for new vendor
+            if (!initialData) {
+                formData.append("email", email)
+                formData.append("password", password)
+                formData.append("phone_number", phoneNumber)
+            }
             
             if (logo) {
                 formData.append("logo", logo)
@@ -108,7 +133,7 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
             isOpen={isOpen}
             onClose={onClose}
             title={initialData ? "Edit Vendor" : "Add New Vendor"}
-            description={initialData ? "Update vendor details." : "Register a new vendor partner."}
+            description={initialData ? "Update vendor details." : "Register a new vendor partner with login credentials."}
             icon={initialData ? <Pencil size={20} /> : <Plus size={20} />}
             size="lg"
             footer={
@@ -149,6 +174,45 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
                         icon={<Layers size={16} />}
                     />
                 </div>
+
+                {/* Login Credentials - Only for new vendor */}
+                {!initialData && (
+                    <>
+                        <div className="border-t border-tride-border pt-4 mt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <ModalInput
+                                    label="Email Address"
+                                    icon={<Mail size={16} />}
+                                    type="email"
+                                    placeholder="vendor@example.com"
+                                    value={email}
+                                    onChange={setEmail}
+                                    required
+                                />
+                                <ModalInput
+                                    label="Phone Number"
+                                    icon={<Phone size={16} />}
+                                    placeholder="+1234567890"
+                                    value={phoneNumber}
+                                    onChange={setPhoneNumber}
+                                    required
+                                />
+                            </div>
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Password <span className="text-red-400">*</span>
+                                </label>
+                                <PasswordInput
+                                    id="vendor-password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter password for vendor login"
+                                    icon={Lock}
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 <ModalInput
                     label="Address"
@@ -212,3 +276,4 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
         </Modal>
     )
 }
+
