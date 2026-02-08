@@ -91,4 +91,20 @@ class RideController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Ride status updated', 'data' => $ride]);
     }
+
+    public function show($id)
+    {
+        $ride = Ride::with(['rider', 'driver', 'vehicleType'])->find($id);
+        
+        if (!$ride) {
+            // Try Custom ID
+            $ride = Ride::with(['rider', 'driver', 'vehicleType'])->where('ride_custom_id', $id)->first();
+        }
+
+        if (!$ride) {
+            return response()->json(['status' => false, 'message' => 'Ride not found'], 404);
+        }
+
+        return response()->json(['status' => true, 'data' => $ride]);
+    }
 }

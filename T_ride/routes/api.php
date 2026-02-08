@@ -113,6 +113,7 @@ Route::middleware('auth:api')->group(function () {
         // Ride Management
         Route::get('/rides/stats', [RideController::class, 'getStats']);
         Route::get('/rides', [RideController::class, 'index']);
+        Route::get('/rides/{id}', [RideController::class, 'show']);
         Route::put('/rides/{id}/status', [RideController::class, 'updateStatus']);
 
         // Delivery Order Management

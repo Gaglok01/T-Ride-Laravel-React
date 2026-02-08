@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Link } from "@inertiajs/react"
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Filter, Calendar, Eye, CarFront, CheckCircle, Activity, XCircle, DollarSign, Search, ChevronLeft, ChevronRight, Download } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
@@ -60,7 +61,7 @@ export default function RidesPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await axios.get('/api/admin/rides/stats')
+            const res = await axios.get('/admin/rides/stats')
             if (res.data.status) {
                 setStats(res.data.data)
             }
@@ -86,7 +87,7 @@ export default function RidesPage() {
             else if (activeTab === "Cancelled") params.status = "cancelled"
             // "All Rides" sends no status param (or status=all if controller defaults)
 
-            const res = await axios.get('/api/admin/rides', { params })
+            const res = await axios.get('/admin/rides', { params })
 
             if (res.data.status) {
                 setRides(res.data.data.data)
@@ -115,7 +116,7 @@ export default function RidesPage() {
             else if (activeTab === "In Progress") params.status = "in_progress"
             else if (activeTab === "Cancelled") params.status = "cancelled"
 
-            const response = await axios.get("/api/admin/rides", { params })
+            const response = await axios.get("/admin/rides", { params })
 
             let exportData: Ride[] = []
             if (response.data.status && Array.isArray(response.data.data)) {
@@ -394,14 +395,16 @@ function RideRow({ id, rider, driver, from, to, fare, payment, status }: any) {
                 </span>
             </td>
             <td className="px-6 py-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyles}`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-block ${statusStyles}`}>
                     {displayStatus}
                 </span>
             </td>
             <td className="px-6 py-4 text-right">
-                <IconButton tooltip="View">
-                    <Eye size={16} />
-                </IconButton>
+                <Link href={`/admin/rides/${id}`}>
+                    <IconButton tooltip="View">
+                        <Eye size={16} />
+                    </IconButton>
+                </Link>
             </td>
         </tr>
     )

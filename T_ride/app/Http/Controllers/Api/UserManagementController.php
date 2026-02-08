@@ -21,18 +21,19 @@ class UserManagementController extends Controller
     {
         // Top Cards Stats
         $stats = [
-            'total_users'    => User::role(['rider', 'customer'])->count(),
-            'active_users'   => User::role(['rider', 'customer'])->where('status', 'active')->count(),
-            'suspended'      => User::role(['rider', 'customer'])->where('status', 'suspended')->count(),
-            'pending'        => User::role(['rider', 'customer'])->where('status', 'pending')->count(),
-            'new_today'      => User::role(['rider', 'customer'])->whereDate('created_at', Carbon::today())->count(),
+            'total_users'    => User::count(),
+            'active_users'   => User::where('status', 'active')->count(),
+            'suspended'      => User::where('status', 'suspended')->count(),
+            'pending'        => User::where('status', 'pending')->count(),
+            'new_today'      => User::whereDate('created_at', Carbon::today())->count(),
         ];
 
         $query = User::with('roles');
         
-        $query->whereHas('roles', function($q) {
-            $q->whereIn('name', ['rider', 'customer']);
-        });
+        // Removed role restriction to show all users by default
+        // $query->whereHas('roles', function($q) {
+        //     $q->whereIn('name', ['rider', 'customer']);
+        // });
 
         // Search Logic
         if ($request->has('search') && !empty($request->search)) {

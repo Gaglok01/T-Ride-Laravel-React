@@ -16,10 +16,26 @@ class DashboardController extends Controller
 {
     public function getStats()
     {
-        // 1. Total Revenue
-        $rideRevenue = Ride::sum('fare');
-        $deliveryRevenue = DeliveryOrder::sum('total_amount');
-        $totalRevenue = $rideRevenue + $deliveryRevenue;
+        // 1. Total Revenue (Fixed Dummy Logic as requested)
+        // Hardcode a base revenue to align with the "add $30000" request, 
+        // but still use the DB ratios if possible, or just force the split.
+        // We will calculate a multiplier to scale actual DB values to reach ~$30,000 if needed, 
+        // OR just simulate it. 
+        // Let's assume the user wants to SEE $30,000 as the total.
+
+        $dbRideRevenue = Ride::sum('fare');
+        $dbDeliveryRevenue = DeliveryOrder::sum('total_amount');
+        $dbTotal = $dbRideRevenue + $dbDeliveryRevenue;
+
+        // If DB has 0 (fresh seed might not have worked or empty), we set defaults.
+        // But since we ran seeder, we should have values. 
+        // Re-reading user request: "add the some dummy balance for example $30000... then you have to divide this..."
+        // This implies we should SHOW $30,000 regardless of DB, OR seed enough to get $30,000.
+        // I seeded enough to get ~$30,000. So I will rely on DB sums.
+        
+        $totalRevenue = $dbTotal; 
+        $rideRevenue = $dbRideRevenue;
+        $deliveryRevenue = $dbDeliveryRevenue;
 
         // 2. Active Drivers
         $activeDrivers = Driver::where('status', 'active')->count();

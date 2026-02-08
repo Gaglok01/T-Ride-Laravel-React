@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Link } from "@inertiajs/react"
 import { AdminLayout } from "@/layouts/admin-layout"
 import { ShoppingBag, Clock, Truck, CheckSquare, DollarSign, RefreshCw, Eye, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
@@ -63,7 +64,7 @@ export default function DeliveryOrdersPage() {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get('/api/admin/categories')
+            const res = await axios.get('/admin/categories')
             if (res.data.status) {
                 setCategories(res.data.data)
             }
@@ -74,7 +75,7 @@ export default function DeliveryOrdersPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await axios.get('/api/admin/delivery-orders/stats')
+            const res = await axios.get('/admin/delivery-orders/stats')
             if (res.data.status) {
                 setStats(res.data.data)
             }
@@ -98,7 +99,7 @@ export default function DeliveryOrdersPage() {
                 params.category_id = activeTab
             }
 
-            const res = await axios.get('/api/admin/delivery-orders', { params })
+            const res = await axios.get('/admin/delivery-orders', { params })
             
             if (res.data.status) {
                 setOrders(res.data.data.data)
@@ -253,6 +254,7 @@ export default function DeliveryOrdersPage() {
                                     <OrderRow
                                         key={order.id}
                                         id={order.order_code}
+                                        dbId={order.id}
                                         customer={order.customer?.name || 'Unknown'}
                                         vendor={order.vendor?.name || 'Unknown'}
                                         items={`${order.total_items} items`}
@@ -316,7 +318,7 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
     )
 }
 
-function OrderRow({ id, customer, vendor, items, driver, total, status }: any) {
+function OrderRow({ id, dbId, customer, vendor, items, driver, total, status }: any) {
     let statusStyles = ""
     const normalizedStatus = status.toLowerCase()
 
@@ -342,9 +344,11 @@ function OrderRow({ id, customer, vendor, items, driver, total, status }: any) {
                 </span>
             </td>
             <td className="px-6 py-4 text-right">
-                <IconButton tooltip="View Details">
-                    <Eye size={16} />
-                </IconButton>
+                <Link href={`/admin/delivery-orders/${dbId}`}>
+                    <IconButton tooltip="View Details">
+                        <Eye size={16} />
+                    </IconButton>
+                </Link>
             </td>
         </tr>
     )

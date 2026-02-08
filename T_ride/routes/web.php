@@ -45,6 +45,10 @@ Route::get('/admin/rides', function () {
     return Inertia::render('admin/rides');
 })->name('admin.rides');
 
+Route::get('/admin/rides/{id}', function ($id) {
+    return Inertia::render('admin/view-ride', ['id' => $id]);
+})->name('admin.view-ride');
+
 Route::get('/admin/roles', function () {
     return Inertia::render('admin/roles');
 })->name('admin.roles');
@@ -80,6 +84,10 @@ Route::get('/admin/categories', function () {
 Route::get('/admin/delivery-orders', function () {
     return Inertia::render('admin/delivery-orders');
 })->name('admin.delivery-orders');
+
+Route::get('/admin/delivery-orders/{id}', function ($id) {
+    return Inertia::render('admin/view-delivery-order', ['id' => $id]);
+})->name('admin.view-delivery-order');
 
 Route::get('/admin/rents', function () {
     return Inertia::render('admin/rents');
