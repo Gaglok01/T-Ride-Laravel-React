@@ -254,6 +254,8 @@ interface ModalSelectProps {
   placeholder?: string
   required?: boolean
   icon?: React.ReactNode
+  disabled?: boolean
+  enableSearch?: boolean
 }
 
 export function ModalSelect({
@@ -263,10 +265,14 @@ export function ModalSelect({
   options,
   placeholder = "Select an option",
   required = false,
-  icon
+  icon,
+  disabled = false,
+  enableSearch = false
 }: ModalSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -278,7 +284,20 @@ export function ModalSelect({
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    if (isOpen && enableSearch && searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+    if (!isOpen) {
+      setSearchQuery("")
+    }
+  }, [isOpen, enableSearch])
+
   const selectedOption = options.find(opt => opt.value.toString() === value.toString())
+  
+  const filteredOptions = enableSearch 
+    ? options.filter(opt => opt.label.toLowerCase().includes(searchQuery.toLowerCase()))
+    : options
 
   return (
     <div className="space-y-2" ref={dropdownRef}>
@@ -288,10 +307,10 @@ export function ModalSelect({
       </label>
       <div className="relative">
         <div 
-            onClick={() => setIsOpen(!isOpen)}
-            className={`w-full bg-tride-card border ${isOpen ? 'border-tride-yellow ring-1 ring-tride-yellow' : 'border-tride-border'} rounded-xl text-tride-text cursor-pointer transition-all hover:border-tride-text-muted flex items-center justify-between ${
+            onClick={() => !disabled && setIsOpen(!isOpen)}
+            className={`w-full bg-tride-card border ${isOpen ? 'border-tride-yellow ring-1 ring-tride-yellow' : 'border-tride-border'} rounded-xl text-tride-text transition-all flex items-center justify-between ${
                 icon ? "pl-11 pr-4 py-3" : "px-4 py-3"
-            }`}
+            } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-tride-text-muted'}`}
         >
             {icon && (
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted pointer-events-none">
@@ -299,7 +318,7 @@ export function ModalSelect({
                 </div>
             )}
             
-            <span className={selectedOption ? "text-tride-text" : "text-tride-text-muted"}>
+            <span className={`truncate mr-2 ${selectedOption ? "text-tride-text" : "text-tride-text-muted"}`}>
                 {selectedOption ? selectedOption.label : placeholder}
             </span>
 
@@ -309,30 +328,45 @@ export function ModalSelect({
         </div>
 
         {isOpen && (
-            <div className="absolute z-50 w-full mt-2 bg-tride-card border border-tride-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto custom-scrollbar">
-                {options.length > 0 ? (
-                    options.map((option) => (
-                        <div 
-                            key={option.value} 
-                            onClick={() => {
-                                onChange(option.value.toString())
-                                setIsOpen(false)
-                            }}
-                            className={`px-4 py-3 text-sm cursor-pointer transition-colors flex items-center justify-between group ${
-                                option.value.toString() === value.toString() 
-                                ? 'bg-tride-yellow/10 text-tride-yellow' 
-                                : 'text-tride-text hover:bg-tride-hover'
-                            }`}
-                        >
-                            <span>{option.label}</span>
-                            {option.value.toString() === value.toString() && (
-                                <div className="w-2 h-2 rounded-full bg-tride-yellow"></div>
-                            )}
-                        </div>
-                    ))
-                ) : (
-                    <div className="px-4 py-3 text-sm text-tride-text-muted text-center">No options available</div>
+            <div className="absolute z-50 w-full mt-2 bg-tride-card border border-tride-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 flex flex-col">
+                {enableSearch && (
+                  <div className="p-2 border-b border-tride-border sticky top-0 bg-tride-card z-10">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full bg-tride-hover border border-tride-border rounded-lg px-3 py-2 text-sm text-tride-text focus:outline-none focus:border-tride-yellow placeholder-tride-text-muted"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
                 )}
+                <div className="overflow-y-auto custom-scrollbar flex-1">
+                  {filteredOptions.length > 0 ? (
+                      filteredOptions.map((option) => (
+                          <div 
+                              key={option.value} 
+                              onClick={() => {
+                                  onChange(option.value.toString())
+                                  setIsOpen(false)
+                              }}
+                              className={`px-4 py-3 text-sm cursor-pointer transition-colors flex items-center justify-between group ${
+                                  option.value.toString() === value.toString() 
+                                  ? 'bg-tride-yellow/10 text-tride-yellow' 
+                                  : 'text-tride-text hover:bg-tride-hover'
+                              }`}
+                          >
+                              <span>{option.label}</span>
+                              {option.value.toString() === value.toString() && (
+                                  <div className="w-2 h-2 rounded-full bg-tride-yellow"></div>
+                              )}
+                          </div>
+                      ))
+                  ) : (
+                      <div className="px-4 py-3 text-sm text-tride-text-muted text-center">No options found</div>
+                  )}
+                </div>
             </div>
         )}
       </div>

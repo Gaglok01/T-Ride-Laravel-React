@@ -44,6 +44,8 @@ class VendorController extends Controller
             'password' => 'required|string|min:6',
             'phone_number' => 'required|string|max:20|unique:users,phone_number',
             'address' => 'required|string|max:255',
+            'country' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
             'commission_rate' => 'required|numeric|min:0|max:100',
             'logo' => 'nullable|file|image|max:2048', 
         ]);
@@ -85,6 +87,8 @@ class VendorController extends Controller
                 'category_id' => $request->category_id,
                 'name' => $request->name,
                 'address' => $request->address,
+                'country' => $request->country,
+                'city' => $request->city,
                 'logo' => $logo,
                 'commission_rate' => $request->commission_rate,
                 'status' => 1,
@@ -136,6 +140,9 @@ class VendorController extends Controller
         $validator = Validator::make($request->all(), [
             'category_id' => 'exists:categories,id',
             'name' => 'string|max:255',
+            'address' => 'string|max:255',
+            'country' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
             'commission_rate' => 'numeric',
             'status' => 'integer',
             'is_open' => 'boolean'
@@ -159,6 +166,9 @@ class VendorController extends Controller
 
         $vendor->category_id = $request->category_id ?? $vendor->category_id;
         $vendor->name = $request->name ?? $vendor->name;
+        $vendor->address = $request->address ?? $vendor->address;
+        $vendor->country = $request->country ?? $vendor->country;
+        $vendor->city = $request->city ?? $vendor->city;
         $vendor->commission_rate = $request->commission_rate ?? $vendor->commission_rate;
         $vendor->status = $request->status ?? $vendor->status;
         $vendor->is_open = $request->is_open ?? $vendor->is_open;

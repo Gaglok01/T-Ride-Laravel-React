@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react"
-import { Package, FileText, DollarSign, Tag, Box, Upload, Plus } from "lucide-react"
-import { Modal, ModalButton, ModalError, ModalInput, ModalTextarea } from "@/components/ui/modal"
+import { Package, FileText, DollarSign, Tag, Box, Upload, Plus, MapPin } from "lucide-react"
+import { Modal, ModalButton, ModalError, ModalInput, ModalSelect, ModalTextarea } from "@/components/ui/modal"
+import { getCountryOptions, getCityOptions, countries } from "@/data/countries-cities"
 
 interface Product {
     id: number
     name: string
+    country?: string
+    city?: string
     description?: string
     price: number
     sale_price?: number
@@ -36,12 +39,16 @@ export function ProductModal({ isOpen, onClose, onSave, initialData }: ProductMo
     const [sku, setSku] = useState("")
     const [isFeatured, setIsFeatured] = useState(false)
     const [image, setImage] = useState<File | null>(null)
+    const [country, setCountry] = useState("")
+    const [city, setCity] = useState("")
 
     // Reset/Populate form when modal opens
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
                 setName(initialData.name)
+                setCountry(initialData.country || "")
+                setCity(initialData.city || "")
                 setDescription(initialData.description || "")
                 setPrice(initialData.price.toString())
                 setSalePrice(initialData.sale_price?.toString() || "")
@@ -51,6 +58,8 @@ export function ProductModal({ isOpen, onClose, onSave, initialData }: ProductMo
                 setImage(null)
             } else {
                 setName("")
+                setCountry("")
+                setCity("")
                 setDescription("")
                 setPrice("")
                 setSalePrice("")
@@ -64,6 +73,12 @@ export function ProductModal({ isOpen, onClose, onSave, initialData }: ProductMo
         }
     }, [isOpen, initialData])
 
+    // Reset city when country changes
+    const handleCountryChange = (newCountry: string) => {
+        setCountry(newCountry)
+        setCity("") // Reset city when country changes
+    }
+
     const handleSubmit = async () => {
         if (!name || !price) {
             setError("Product Name and Price are required.")
@@ -76,6 +91,8 @@ export function ProductModal({ isOpen, onClose, onSave, initialData }: ProductMo
         try {
             const formData = new FormData()
             formData.append("name", name)
+            if (country) formData.append("country", country)
+            if (city) formData.append("city", city)
             formData.append("description", description)
             formData.append("price", price)
             if (salePrice) formData.append("sale_price", salePrice)
@@ -145,6 +162,26 @@ export function ProductModal({ isOpen, onClose, onSave, initialData }: ProductMo
                     onChange={setName}
                     required
                 />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ModalSelect
+                        label="Country"
+                        icon={<MapPin size={16} />}
+                        placeholder="Select a country"
+                        value={country}
+                        onChange={handleCountryChange}
+                        options={getCountryOptions()}
+                    />
+                    <ModalSelect
+                        label="City"
+                        icon={<MapPin size={16} />}
+                        placeholder={country ? "Select a city" : "Select a country first"}
+                        value={city}
+                        onChange={setCity}
+                        options={getCityOptions(country)}
+                        disabled={!country}
+                    />
+                </div>
 
                 <ModalTextarea
                     label="Description"

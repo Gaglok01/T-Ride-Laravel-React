@@ -63,6 +63,8 @@ class ProductController extends Controller
         
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'country' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
@@ -110,6 +112,8 @@ class ProductController extends Controller
         $product = Product::create([
             'vendor_id' => $vendorId,
             'name' => $request->name,
+            'country' => $request->country,
+            'city' => $request->city,
             'description' => $request->description,
             'price' => $request->price,
             'sale_price' => $request->sale_price,
@@ -176,6 +180,8 @@ class ProductController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'string|max:255',
+            'country' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'price' => 'numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0',
@@ -203,6 +209,8 @@ class ProductController extends Controller
         }
 
         $product->name = $request->name ?? $product->name;
+        $product->country = $request->country ?? $product->country;
+        $product->city = $request->city ?? $product->city;
         $product->description = $request->description ?? $product->description;
         $product->price = $request->price ?? $product->price;
         $product->sale_price = $request->sale_price ?? $product->sale_price;

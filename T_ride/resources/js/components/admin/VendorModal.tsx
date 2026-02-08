@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Store, MapPin, Percent, Image, Plus, Pencil, Layers, Mail, Phone, Lock } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
 import { PasswordInput } from "@/components/ui/password-input"
+import { getCountryOptions, getCityOptions } from "@/data/countries-cities"
 
 interface Category {
     id: number
@@ -18,6 +19,8 @@ interface VendorData {
     is_open?: boolean
     email?: string
     phone_number?: string
+    country?: string
+    city?: string
 }
 
 interface VendorModalProps {
@@ -41,6 +44,8 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [phoneNumber, setPhoneNumber] = useState("")
+    const [country, setCountry] = useState("")
+    const [city, setCity] = useState("")
 
     // Reset/Populate form when modal opens
     useEffect(() => {
@@ -53,6 +58,8 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
                 setLogo(null)
                 setEmail(initialData.email || "")
                 setPhoneNumber(initialData.phone_number || "")
+                setCountry(initialData.country || "")
+                setCity(initialData.city || "")
                 setPassword("")
             } else {
                 setName("")
@@ -63,11 +70,18 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
                 setEmail("")
                 setPassword("")
                 setPhoneNumber("")
+                setCountry("")
+                setCity("")
             }
             setError("")
             setLoading(false)
         }
     }, [isOpen, initialData])
+
+    const handleCountryChange = (newCountry: string) => {
+        setCountry(newCountry)
+        setCity("")
+    }
 
     const handleSubmit = async () => {
         if (!name || !address || !categoryId || !commissionRate) {
@@ -90,6 +104,9 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
             formData.append("address", address)
             formData.append("category_id", categoryId)
             formData.append("commission_rate", commissionRate)
+            
+            if (country) formData.append("country", country)
+            if (city) formData.append("city", city)
             
             // Add login credentials for new vendor
             if (!initialData) {
@@ -213,6 +230,28 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
                         </div>
                     </>
                 )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ModalSelect
+                        label="Country"
+                        icon={<MapPin size={16} />}
+                        placeholder="Select a country"
+                        value={country}
+                        onChange={handleCountryChange}
+                        options={getCountryOptions()}
+                        enableSearch={true}
+                    />
+                    <ModalSelect
+                        label="City"
+                        icon={<MapPin size={16} />}
+                        placeholder={country ? "Select a city" : "Select a country first"}
+                        value={city}
+                        onChange={setCity}
+                        options={getCityOptions(country)}
+                        disabled={!country}
+                        enableSearch={true}
+                    />
+                </div>
 
                 <ModalInput
                     label="Address"

@@ -156,23 +156,14 @@ export default function AdminLogin() {
               </button>
             </form>
 
-            <div className="mt-8 text-center">
+            {/* <div className="mt-8 text-center">
               <button
                 onClick={() => router.visit("/")}
                 className="text-tride-text-muted hover:text-tride-text text-sm transition-colors"
               >
                 ← Back to Portal Selection
               </button>
-            </div>
-
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => router.visit("/admin/register")}
-                className="text-tride-yellow hover:text-tride-yellow/80 text-sm font-medium transition-colors"
-              >
-                Don't have an account? Create one
-              </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -17,6 +17,8 @@ interface Vendor {
     id: number
     name: string
     address: string
+    country?: string
+    city?: string
     category_id: number
     category?: Category
     logo?: string

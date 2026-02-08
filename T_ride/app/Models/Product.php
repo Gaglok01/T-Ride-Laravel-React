@@ -8,6 +8,8 @@ class Product extends Model
     protected $fillable = [
         'vendor_id',
         'name',
+        'country',
+        'city',
         'description',
         'price',
         'sale_price',
