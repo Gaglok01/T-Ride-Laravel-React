@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { Building, Globe, Clock, DollarSign, Tag, Plus, Pencil } from "lucide-react"
+import { Building, Globe, Clock, DollarSign, Tag, Plus, Pencil, MapPin } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
+import { getCountryOptions, getCityOptions, getTimezoneOptions, getCurrencyForCountry } from "@/data/countries-cities"
 
 interface CityData {
     id?: number
@@ -29,7 +30,8 @@ export function CityModal({ isOpen, onClose, onSave, initialData }: CityModalPro
     const [name, setName] = useState("")
     const [country, setCountry] = useState("")
     const [timezone, setTimezone] = useState("")
-    const [currency, setCurrency] = useState("")
+    const [currencyCode, setCurrencyCode] = useState("") // Auto-set from timezone (e.g. "USD")
+    const [currency, setCurrency] = useState("") // User-entered amount
     const [services, setServices] = useState<string[]>([])
     const [status, setStatus] = useState<'active' | 'inactive'>("active")
 
@@ -40,6 +42,7 @@ export function CityModal({ isOpen, onClose, onSave, initialData }: CityModalPro
                 setName(initialData.name || "")
                 setCountry(initialData.country || "")
                 setTimezone(initialData.timezone || "")
+                setCurrencyCode(initialData.country ? getCurrencyForCountry(initialData.country) : "")
                 setCurrency(initialData.currency || "")
                 setServices(initialData.services || [])
                 setStatus(initialData.status || "active")
@@ -47,6 +50,7 @@ export function CityModal({ isOpen, onClose, onSave, initialData }: CityModalPro
                 setName("")
                 setCountry("")
                 setTimezone("")
+                setCurrencyCode("")
                 setCurrency("")
                 setServices([])
                 setStatus("active")
@@ -55,6 +59,25 @@ export function CityModal({ isOpen, onClose, onSave, initialData }: CityModalPro
             setLoading(false)
         }
     }, [isOpen, initialData])
+
+    // Reset city, timezone, and currency when country changes
+    const handleCountryChange = (newCountry: string) => {
+        setCountry(newCountry)
+        setName("") // Reset city when country changes
+        setTimezone("") // Reset timezone when country changes
+        setCurrencyCode("") // Reset currency code
+        setCurrency("") // Reset currency amount
+    }
+
+    // Auto-set currency code when timezone is selected (based on selected country)
+    const handleTimezoneChange = (newTimezone: string) => {
+        setTimezone(newTimezone)
+        // Auto-set currency code based on the selected country
+        if (country) {
+            setCurrencyCode(getCurrencyForCountry(country))
+        }
+        setCurrency("") // Reset amount when timezone changes
+    }
 
     const handleServiceToggle = (service: string) => {
         if (services.includes(service)) {
@@ -78,6 +101,7 @@ export function CityModal({ isOpen, onClose, onSave, initialData }: CityModalPro
                 name,
                 country,
                 timezone: timezone || null,
+                currency_code: currencyCode || null,
                 currency: currency || null,
                 services,
                 status
@@ -127,39 +151,73 @@ export function CityModal({ isOpen, onClose, onSave, initialData }: CityModalPro
                 <ModalError message={error} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ModalInput
-                        label="City Name"
-                        icon={<Building size={16} />}
-                        placeholder="e.g. Accra"
+                    <ModalSelect
+                        label="Country"
+                        icon={<MapPin size={16} />}
+                        placeholder="Select a country"
+                        value={country}
+                        onChange={handleCountryChange}
+                        options={getCountryOptions()}
+                        required
+                        enableSearch={true}
+                    />
+                    <ModalSelect
+                        label="City"
+                        icon={<MapPin size={16} />}
+                        placeholder={country ? "Select a city" : "Select a country first"}
                         value={name}
                         onChange={setName}
+                        options={getCityOptions(country)}
+                        disabled={!country}
                         required
-                    />
-                    <ModalInput
-                        label="Country"
-                        icon={<Globe size={16} />}
-                        placeholder="e.g. Ghana"
-                        value={country}
-                        onChange={setCountry}
-                        required
+                        enableSearch={true}
                     />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ModalInput
+                    <ModalSelect
                         label="Timezone"
                         icon={<Clock size={16} />}
-                        placeholder="e.g. Africa/Accra"
+                        placeholder={country ? "Select a timezone" : "Select a country first"}
                         value={timezone}
-                        onChange={setTimezone}
+                        onChange={handleTimezoneChange}
+                        options={getTimezoneOptions(country)}
+                        disabled={!country}
+                        enableSearch={true}
                     />
-                    <ModalInput
-                        label="Currency"
-                        icon={<DollarSign size={16} />}
-                        placeholder="e.g. GHS"
-                        value={currency}
-                        onChange={setCurrency}
-                    />
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-tride-text">
+                            Currency
+                        </label>
+                        <div className="relative flex items-center">
+                            {currencyCode && (
+                                <div className="absolute left-3 flex items-center gap-1.5 pointer-events-none z-10">
+                                    <DollarSign size={14} className="text-tride-yellow" />
+                                    <span className="bg-tride-yellow/15 text-tride-yellow text-xs font-bold px-2 py-0.5 rounded-md border border-tride-yellow/30">
+                                        {currencyCode}
+                                    </span>
+                                </div>
+                            )}
+                            {!currencyCode && (
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted pointer-events-none">
+                                    <DollarSign size={16} />
+                                </div>
+                            )}
+                            <input
+                                type="number"
+                                value={currency}
+                                onChange={(e) => setCurrency(e.target.value)}
+                                placeholder={timezone ? "Enter amount" : "Select timezone first"}
+                                disabled={!timezone}
+                                min="0"
+                                step="0.01"
+                                className={`w-full bg-tride-card border border-tride-border rounded-xl text-tride-text focus:outline-none focus:border-tride-yellow focus:ring-1 focus:ring-tride-yellow transition-all placeholder-tride-text-muted pr-4 py-3 ${
+                                    currencyCode ? 'pl-[5.5rem]' : 'pl-11'
+                                } ${!timezone ? 'opacity-50 cursor-not-allowed' : ''}
+                                [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]`}
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div>
