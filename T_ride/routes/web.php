@@ -6,7 +6,11 @@ use Laravel\Fortify\Features;
 use Illuminate\Support\Facades\File;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('admin.login');
+})->name('home');
+
+Route::get('/login', function () {
+    return redirect()->route('admin.login');
 })->name('home');
 
 Route::get('/admin/login', function () {
