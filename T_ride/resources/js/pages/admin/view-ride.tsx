@@ -4,7 +4,8 @@ import { ArrowLeft, MapPin, Navigation, User, Car, Clock, DollarSign, Calendar, 
 import { Link } from "@inertiajs/react"
 import { Button } from "@/components/ui/button"
 import axios from "@/lib/axios"
-import { GoogleMap, LoadScript, Marker, Polyline } from '@react-google-maps/api'
+import { GoogleMap, Marker, Polyline } from '@react-google-maps/api'
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 
 declare global {
     interface Window {
@@ -52,6 +53,7 @@ export default function ViewRide({ id }: { id: string }) {
     const [ride, setRide] = useState<Ride | null>(null)
     const [loading, setLoading] = useState(true)
     const [driverLocation, setDriverLocation] = useState<{ lat: number, lng: number } | null>(null)
+    const { isLoaded } = useGoogleMaps()
 
     useEffect(() => {
         fetchRide()
@@ -279,7 +281,7 @@ export default function ViewRide({ id }: { id: string }) {
 
                 {/* Right Column: Map */}
                 <div className="lg:col-span-2 bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-lg relative h-full">
-                     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}>
+                     {isLoaded ? (
                         <GoogleMap
                             mapContainerStyle={mapContainerStyle}
                             zoom={13}
@@ -341,7 +343,14 @@ export default function ViewRide({ id }: { id: string }) {
                                 />
                             )}
                         </GoogleMap>
-                     </LoadScript>
+                     ) : (
+                        <div className="h-full w-full flex items-center justify-center text-tride-text-muted">
+                            <div className="text-center">
+                                <MapPin size={48} className="mx-auto mb-3" />
+                                <p>Loading map...</p>
+                            </div>
+                        </div>
+                     )}
                      
                      {/* Overlay Address Details */}
                      <div className="absolute top-4 left-4 right-4 bg-tride-card/90 backdrop-blur-md p-4 rounded-2xl border border-tride-border max-w-xl mx-auto shadow-lg">

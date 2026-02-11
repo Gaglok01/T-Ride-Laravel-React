@@ -1,15 +1,29 @@
 
 import { useEffect, useState } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { ArrowLeft, Building, Globe, Layers, Plane, ShieldAlert, CheckCircle, Navigation, Map } from "lucide-react"
+import { ArrowLeft, Building, Globe, Layers, Plane, ShieldAlert, CheckCircle, Navigation, Map, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "@inertiajs/react"
 import cityZoneService, { City } from "@/services/cityZoneService"
+import { GoogleMap } from "@react-google-maps/api"
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 
 export default function ViewCity({ id }: { id: number }) {
     const [city, setCity] = useState<City | null>(null)
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState("Overview")
+    const { isLoaded } = useGoogleMaps()
+
+    const mapContainerStyle = {
+        width: '100%',
+        height: '100%',
+        borderRadius: '1rem',
+    }
+    
+    const defaultCenter = {
+        lat: 40.7128,
+        lng: -74.0060
+    }
 
     useEffect(() => {
         const fetchCity = async () => {
@@ -164,9 +178,90 @@ export default function ViewCity({ id }: { id: number }) {
                                     </div>
                                 </div>
 
-                                <div className="h-64 bg-tride-hover rounded-2xl border-2 border-dashed border-white/10 flex items-center justify-center flex-col text-tride-text-muted">
-                                    <Map size={48} className="mb-2 opacity-50" />
-                                    <p>Map Preview Placeholder</p>
+                                <div className="h-64 bg-tride-hover rounded-2xl border border-tride-border overflow-hidden relative">
+                                    {isLoaded ? (
+                                        <GoogleMap
+                                            mapContainerStyle={mapContainerStyle}
+                                            center={defaultCenter}
+                                            zoom={11}
+                                            options={{
+                                                disableDefaultUI: true,
+                                                zoomControl: true,
+                                                styles: [
+                                                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                                                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                                                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                                                    {
+                                                        featureType: "administrative.locality",
+                                                        elementType: "labels.text.fill",
+                                                        stylers: [{ color: "#d59563" }],
+                                                    },
+                                                    {
+                                                        featureType: "poi",
+                                                        elementType: "labels.text.fill",
+                                                        stylers: [{ color: "#d59563" }],
+                                                    },
+                                                    {
+                                                        featureType: "poi.park",
+                                                        elementType: "geometry",
+                                                        stylers: [{ color: "#263c3f" }],
+                                                    },
+                                                    {
+                                                        featureType: "poi.park",
+                                                        elementType: "labels.text.fill",
+                                                        stylers: [{ color: "#6b9a76" }],
+                                                    },
+                                                    {
+                                                        featureType: "road",
+                                                        elementType: "geometry",
+                                                        stylers: [{ color: "#38414e" }],
+                                                    },
+                                                    {
+                                                        featureType: "road",
+                                                        elementType: "geometry.stroke",
+                                                        stylers: [{ color: "#212a37" }],
+                                                    },
+                                                    {
+                                                        featureType: "road",
+                                                        elementType: "labels.text.fill",
+                                                        stylers: [{ color: "#9ca5b3" }],
+                                                    },
+                                                    {
+                                                        featureType: "road.highway",
+                                                        elementType: "geometry",
+                                                        stylers: [{ color: "#746855" }],
+                                                    },
+                                                    {
+                                                        featureType: "road.highway",
+                                                        elementType: "geometry.stroke",
+                                                        stylers: [{ color: "#1f2835" }],
+                                                    },
+                                                    {
+                                                        featureType: "water",
+                                                        elementType: "geometry",
+                                                        stylers: [{ color: "#17263c" }],
+                                                    },
+                                                    {
+                                                        featureType: "water",
+                                                        elementType: "labels.text.fill",
+                                                        stylers: [{ color: "#515c6d" }],
+                                                    },
+                                                    {
+                                                        featureType: "water",
+                                                        elementType: "labels.text.stroke",
+                                                        stylers: [{ color: "#17263c" }],
+                                                    },
+                                                ]
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full text-tride-text-muted">
+                                            <div className="flex flex-col items-center">
+                                                <Loader2 size={32} className="animate-spin mb-2" />
+                                                <p>Loading Map...</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

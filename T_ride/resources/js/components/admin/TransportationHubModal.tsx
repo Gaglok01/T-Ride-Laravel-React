@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Plane, Train, Building, DollarSign, Users, Tag, Plus, Pencil, MapPin } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
+import { PlacesAutocompleteInput } from "@/components/ui/places-autocomplete-input"
 import { City } from "@/services/cityZoneService"
 
 interface TransportationHubData {
@@ -152,13 +153,17 @@ export function TransportationHubModal({ isOpen, onClose, onSave, initialData, c
                     />
                 </div>
 
-                <ModalInput
+                <PlacesAutocompleteInput
                     label="Hub Name"
-                    icon={<MapPin size={16} />}
-                    placeholder="e.g. Kotoka International Airport"
                     value={name}
                     onChange={setName}
+                    onPlaceSelect={(place) => {
+                        setName(place.address)
+                    }}
+                    placeholder="Search for airport, station or hub..."
                     required
+                    types={["establishment"]}
+                    icon={<MapPin size={16} />}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
+import { GoogleMapsProvider } from './providers/GoogleMapsProvider';
 
 const appName = import.meta.env.VITE_APP_NAME || 'T-Ride';
 
@@ -20,7 +21,9 @@ createInertiaApp({
 
         root.render(
             <StrictMode>
-                <App {...props} />
+                <GoogleMapsProvider>
+                    <App {...props} />
+                </GoogleMapsProvider>
             </StrictMode>,
         );
     },

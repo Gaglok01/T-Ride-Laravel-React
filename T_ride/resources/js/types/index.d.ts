@@ -30,6 +30,11 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
+export interface Window {
+    axios: AxiosInstance;
+    google: any;
+}
+
 export interface User {
     id: number;
     name: string;

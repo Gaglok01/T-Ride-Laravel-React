@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Store, MapPin, Percent, Image, Plus, Pencil, Layers, Mail, Phone, Lock } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
 import { PasswordInput } from "@/components/ui/password-input"
+import { PlacesAutocompleteInput } from "@/components/ui/places-autocomplete-input"
 import { getCountryOptions, getCityOptions } from "@/data/countries-cities"
 
 interface Category {
@@ -253,13 +254,16 @@ export function VendorModal({ isOpen, onClose, onSave, initialData, categories }
                     />
                 </div>
 
-                <ModalInput
+                <PlacesAutocompleteInput
                     label="Address"
-                    icon={<MapPin size={16} />}
-                    placeholder="e.g. 123 Main St, New York"
                     value={address}
                     onChange={setAddress}
+                    onPlaceSelect={(place) => {
+                        setAddress(place.address)
+                    }}
+                    placeholder="Search for an address..."
                     required
+                    icon={<MapPin size={16} />}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

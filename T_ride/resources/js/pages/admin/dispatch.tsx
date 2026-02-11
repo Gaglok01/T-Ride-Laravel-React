@@ -4,7 +4,8 @@ import { Car, Package, Truck, Users, Clock, Plus, RefreshCw, MapPin, Phone, User
 import { Button } from "@/components/ui/button"
 import axios from "@/lib/axios"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
-import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from "@react-google-maps/api"
+import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api"
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 
 // ==================== INTERFACES ====================
 
@@ -60,11 +61,7 @@ export default function DispatchPage() {
     const [selectedOrder, setSelectedOrder] = useState<PendingOrder | null>(null)
     const [isAssigning, setIsAssigning] = useState(false)
 
-    const { isLoaded } = useJsApiLoader({
-        id: 'google-map-script',
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
-        libraries: ['places'] as any
-    })
+    const { isLoaded } = useGoogleMaps()
 
     const mapContainerStyle = {
         width: '100%',

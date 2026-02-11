@@ -20,6 +20,8 @@ import { ExpansionPlanModal } from "@/components/admin/ExpansionPlanModal"
 import cityZoneService, { 
     City, ServiceZone, TransportationHub, RestrictedArea, ExpansionPlan 
 } from "@/services/cityZoneService"
+import { GoogleMap, Marker } from "@react-google-maps/api"
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 
 export default function CitiesZonesPage() {
     const [activeTab, setActiveTab] = useState("Cities")
@@ -539,6 +541,18 @@ function ServiceZonesTab({ zones, cities, onDelete, onStatusToggle, onEdit, onAd
 }) {
     const [selectedCity, setSelectedCity] = useState<number | null>(null)
     const [filteredZones, setFilteredZones] = useState<ServiceZone[]>(zones)
+    const { isLoaded } = useGoogleMaps()
+
+    const mapContainerStyle = {
+        width: '100%',
+        height: '100%',
+        borderRadius: '1rem',
+    }
+
+    const defaultCenter = {
+        lat: 40.7128, // Default to New York or get from user location/config
+        lng: -74.0060
+    }
 
     useEffect(() => {
         if (selectedCity) {
@@ -565,8 +579,92 @@ function ServiceZonesTab({ zones, cities, onDelete, onStatusToggle, onEdit, onAd
                         className="w-[180px]"
                     />
                 </div>
-                <div className="flex-1 bg-tride-hover rounded-2xl border-2 border-dashed border-tride-border flex items-center justify-center text-tride-text-muted">
-                    <MapIcon size={48} />
+                <div className="flex-1 bg-tride-hover rounded-2xl border border-tride-border overflow-hidden relative min-h-[400px]">
+                    {isLoaded ? (
+                        <GoogleMap
+                            mapContainerStyle={mapContainerStyle}
+                            center={defaultCenter}
+                            zoom={10}
+                            options={{
+                                styles: [
+                                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                                    {
+                                        featureType: "administrative.locality",
+                                        elementType: "labels.text.fill",
+                                        stylers: [{ color: "#d59563" }],
+                                    },
+                                    {
+                                        featureType: "poi",
+                                        elementType: "labels.text.fill",
+                                        stylers: [{ color: "#d59563" }],
+                                    },
+                                    {
+                                        featureType: "poi.park",
+                                        elementType: "geometry",
+                                        stylers: [{ color: "#263c3f" }],
+                                    },
+                                    {
+                                        featureType: "poi.park",
+                                        elementType: "labels.text.fill",
+                                        stylers: [{ color: "#6b9a76" }],
+                                    },
+                                    {
+                                        featureType: "road",
+                                        elementType: "geometry",
+                                        stylers: [{ color: "#38414e" }],
+                                    },
+                                    {
+                                        featureType: "road",
+                                        elementType: "geometry.stroke",
+                                        stylers: [{ color: "#212a37" }],
+                                    },
+                                    {
+                                        featureType: "road",
+                                        elementType: "labels.text.fill",
+                                        stylers: [{ color: "#9ca5b3" }],
+                                    },
+                                    {
+                                        featureType: "road.highway",
+                                        elementType: "geometry",
+                                        stylers: [{ color: "#746855" }],
+                                    },
+                                    {
+                                        featureType: "road.highway",
+                                        elementType: "geometry.stroke",
+                                        stylers: [{ color: "#1f2835" }],
+                                    },
+                                    {
+                                        featureType: "water",
+                                        elementType: "geometry",
+                                        stylers: [{ color: "#17263c" }],
+                                    },
+                                    {
+                                        featureType: "water",
+                                        elementType: "labels.text.fill",
+                                        stylers: [{ color: "#515c6d" }],
+                                    },
+                                    {
+                                        featureType: "water",
+                                        elementType: "labels.text.stroke",
+                                        stylers: [{ color: "#17263c" }],
+                                    },
+                                ],
+                                disableDefaultUI: true,
+                                zoomControl: true,
+                            }}
+                        >
+                            {/* Render zones or markers here if lat/lng available */}
+                        </GoogleMap>
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-tride-text-muted">
+                            <div className="flex flex-col items-center">
+                                <Loader2 size={32} className="animate-spin mb-2" />
+                                <p>Loading Map...</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             

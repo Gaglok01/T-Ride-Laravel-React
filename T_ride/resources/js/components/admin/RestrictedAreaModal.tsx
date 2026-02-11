@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { ShieldAlert, Building, AlertTriangle, Clock, FileText, Tag, Plus, Pencil } from "lucide-react"
+import { ShieldAlert, Building, AlertTriangle, Clock, FileText, Tag, Plus, Pencil, MapPin } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
+import { PlacesAutocompleteInput } from "@/components/ui/places-autocomplete-input"
 import { City } from "@/services/cityZoneService"
 
 interface RestrictedAreaData {
@@ -145,13 +146,16 @@ export function RestrictedAreaModal({ isOpen, onClose, onSave, initialData, citi
                     />
                 </div>
 
-                <ModalInput
+                <PlacesAutocompleteInput
                     label="Area Name"
-                    icon={<ShieldAlert size={16} />}
-                    placeholder="e.g. Military Zone A"
                     value={name}
                     onChange={setName}
+                    onPlaceSelect={(place) => {
+                        setName(place.address)
+                    }}
+                    placeholder="Search for a location..."
                     required
+                    icon={<ShieldAlert size={16} />}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
