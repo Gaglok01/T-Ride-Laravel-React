@@ -305,6 +305,22 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/products/{id}', [ProductController::class, 'update']);
         Route::patch('/products/{id}/status', [ProductController::class, 'toggleStatus']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
+        // Finance Dashboard
+        Route::prefix('finance')->group(function () {
+            Route::get('/stats', [App\Http\Controllers\Api\FinanceController::class, 'getStats']);
+            Route::get('/service-revenue', [App\Http\Controllers\Api\FinanceController::class, 'getServiceRevenue']);
+            Route::get('/revenue-trend', [App\Http\Controllers\Api\FinanceController::class, 'getRevenueTrend']);
+            Route::get('/revenue-distribution', [App\Http\Controllers\Api\FinanceController::class, 'getRevenueDistribution']);
+            Route::get('/quick-stats', [App\Http\Controllers\Api\FinanceController::class, 'getQuickStats']);
+            Route::get('/payment-methods', [App\Http\Controllers\Api\FinanceController::class, 'getPaymentMethods']);
+            Route::get('/pending-actions', [App\Http\Controllers\Api\FinanceController::class, 'getPendingActions']);
+            Route::get('/transactions', [App\Http\Controllers\Api\FinanceController::class, 'getTransactions']);
+            Route::get('/driver-payouts', [App\Http\Controllers\Api\FinanceController::class, 'getDriverPayouts']);
+            Route::get('/vendor-settlements', [App\Http\Controllers\Api\FinanceController::class, 'getVendorSettlements']);
+            Route::get('/wallet-stats', [App\Http\Controllers\Api\FinanceController::class, 'getWalletStats']);
+            Route::get('/wallet-transactions', [App\Http\Controllers\Api\FinanceController::class, 'getWalletTransactions']);
+        });
     });
 
     // Vendor Routes

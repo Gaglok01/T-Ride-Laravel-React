@@ -7,10 +7,18 @@ import orderService, { Order, CreateOrderRequest } from "@/services/orderService
 import { OrderModal } from "@/components/admin/OrderModal"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
 import { StatusUpdateModal } from "@/components/admin/StatusUpdateModal"
-import { ModalInput, ModalSelect } from "@/components/ui/modal"
 import { Check, X } from "lucide-react"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import axios from "@/lib/axios"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+
+interface Pagination {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+}
 
 export default function CourierOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([])
@@ -18,6 +26,8 @@ export default function CourierOrdersPage() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingOrder, setEditingOrder] = useState<Order | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
+    const [pagination, setPagination] = useState<Pagination | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
     
     // Delete Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -43,12 +53,14 @@ export default function CourierOrdersPage() {
 
     useEffect(() => {
         fetchOrders()
-    }, [appliedFilters, activeTab])
+    }, [appliedFilters, activeTab, currentPage])
 
     const fetchOrders = async () => {
         try {
             setLoading(true)
-            const params: any = {}
+            const params: any = {
+                page: currentPage
+            }
             if (activeTab !== "All Orders") {
                 params.status = activeTab
             }
@@ -59,8 +71,16 @@ export default function CourierOrdersPage() {
                 params.order_id = appliedFilters.order_id
             }
             
-            const data = await orderService.getAll(params)
-            setOrders(data)
+            const response = await axios.get('/admin/orders', { params })
+            if (response.data.success) {
+                setOrders(response.data.data.data)
+                setPagination({
+                    current_page: response.data.data.current_page,
+                    last_page: response.data.data.last_page,
+                    per_page: response.data.data.per_page,
+                    total: response.data.data.total
+                })
+            }
         } catch (error) {
             console.error("Failed to fetch orders", error)
         } finally {
@@ -348,7 +368,7 @@ export default function CourierOrdersPage() {
                     <Button
                         key={tab}
                         variant={activeTab === tab ? "default" : "ghost"}
-                        onClick={() => setActiveTab(tab)}
+                        onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
                     >
                         {tab}
                     </Button>
@@ -397,6 +417,36 @@ export default function CourierOrdersPage() {
                         </tbody>
                     </table>
                 </div>
+
+
+                {/* Pagination */}
+                {pagination && pagination.last_page > 1 && (
+                    <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
+                        <div className="text-sm text-tride-text-muted">
+                            Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} orders
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={pagination.current_page === 1}
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                            >
+                                <ChevronLeft size={16} className="mr-1" /> Previous
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
+                                disabled={pagination.current_page === pagination.last_page}
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                            >
+                                Next <ChevronRight size={16} className="ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <OrderModal

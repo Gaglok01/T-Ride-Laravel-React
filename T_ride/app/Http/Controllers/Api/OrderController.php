@@ -40,7 +40,7 @@ class OrderController extends Controller
                  $query->where('order_id', 'like', "%{$request->order_id}%");
             }
 
-            $orders = $query->latest()->get();
+            $orders = $query->latest()->paginate(10);
 
             return response()->json([
                 'success' => true,

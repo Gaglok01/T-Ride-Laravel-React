@@ -141,9 +141,13 @@ Route::get('/admin/commission-management', function () {
     return Inertia::render('admin/commission-management');
 })->name('admin.commission-management');
 
-Route::get('/admin/referral-program', function () {
+        Route::get('/admin/referral-program', function () {
     return Inertia::render('admin/referral-program');
 })->name('admin.referral-program');
+
+Route::get('/admin/finance', function () {
+    return Inertia::render('admin/finance');
+})->name('admin.finance');
 
 Route::get('/admin/referral-campaigns/{id}', function ($id) {
     return Inertia::render('admin/view-campaign', ['id' => $id]);

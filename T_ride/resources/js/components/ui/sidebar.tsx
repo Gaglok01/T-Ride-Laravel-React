@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState } from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent, Menu, Gift, FileText } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent, Menu, Gift, FileText, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Sidebar Context for useSidebar hook
@@ -165,6 +165,7 @@ export function Sidebar({
         {/* FINANCE */}
         <div className="space-y-1">
           <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Finance</div>
+          <NavItem onClick={handleNavClick} href="/admin/finance" icon={<Wallet size={20} />} label="Finance" active={isActive("/admin/finance")} />
           <NavItem onClick={handleNavClick} href="/admin/commission-management" icon={<Percent size={20} />} label="Commissions" active={isActive("/admin/commission-management")} />
           <NavItem onClick={handleNavClick} href="/admin/payment-gateway" icon={<CreditCard size={20} />} label="Payment Gateway" active={isActive("/admin/payment-gateway")} />
         </div>

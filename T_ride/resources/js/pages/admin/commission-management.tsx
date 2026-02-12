@@ -15,6 +15,7 @@ import commissionService, {
     CommissionRule, CommissionTier, CommissionEarning, DashboardStats 
 } from "@/services/commissionService"
 import cityZoneService, { City } from "@/services/cityZoneService"
+import { RevenueTrendChart } from "@/components/admin/RevenueTrendChart"
 
 export default function CommissionManagementPage() {
     const [activeTab, setActiveTab] = useState("Overview")
@@ -75,7 +76,9 @@ export default function CommissionManagementPage() {
             switch (activeTab) {
                 case "Overview":
                     const statsData = await commissionService.getDashboardStats()
+                    const earningsDataOverview = await commissionService.getEarnings()
                     setStats(statsData)
+                    setEarnings(earningsDataOverview)
                     break
                 case "Ride Commissions":
                     const rides = await commissionService.getRules('ride')
@@ -323,7 +326,7 @@ export default function CommissionManagementPage() {
                     </div>
                 ) : (
                     <>
-                        {activeTab === "Overview" && <OverviewTab stats={stats} formatCurrency={formatCurrency} />}
+                        {activeTab === "Overview" && <OverviewTab stats={stats} earnings={earnings} formatCurrency={formatCurrency} />}
                         {activeTab === "Ride Commissions" && <RulesTab rules={rideRules} title="Ride Commission Rules" subtitle="Configure commission rates for different ride types" onDelete={(item) => handleDelete(item, 'rule')} onStatusToggle={handleStatusToggle} onAdd={() => openAddRuleModal('ride')} onEdit={openEditRuleModal} />}
                         {activeTab === "Delivery Commissions" && <RulesTab rules={deliveryRules} title="Delivery Commission Rules" subtitle="Configure commission rates for delivery services" onDelete={(item) => handleDelete(item, 'rule')} onStatusToggle={handleStatusToggle} onAdd={() => openAddRuleModal('delivery')} onEdit={openEditRuleModal} />}
                         {activeTab === "Courier Commissions" && <RulesTab rules={courierRules} title="Courier Commission Rules" subtitle="Configure commission rates for courier services" onDelete={(item) => handleDelete(item, 'rule')} onStatusToggle={handleStatusToggle} onAdd={() => openAddRuleModal('courier')} onEdit={openEditRuleModal} />}
@@ -378,7 +381,7 @@ export default function CommissionManagementPage() {
 
 // ==================== TAB COMPONENTS ====================
 
-function OverviewTab({ stats, formatCurrency }: { stats: DashboardStats | null, formatCurrency: (val: number) => string }) {
+function OverviewTab({ stats, earnings, formatCurrency }: { stats: DashboardStats | null, earnings: CommissionEarning[], formatCurrency: (val: number) => string }) {
     const serviceStats = stats?.service_stats ?? {
         standard_rides: { rate: 0, volume: 0, earned: 0 },
         premium_rides: { rate: 0, volume: 0, earned: 0 },
@@ -400,12 +403,16 @@ function OverviewTab({ stats, formatCurrency }: { stats: DashboardStats | null, 
         <div className="p-6">
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                {/* Commission Revenue Chart Placeholder */}
-                <div className="lg:col-span-2 bg-tride-card border border-tride-border rounded-2xl p-6 shadow-sm">
-                    <h3 className="font-semibold text-lg mb-4 text-tride-text">Commission Revenue</h3>
-                    <div className="h-64 flex items-center justify-center text-tride-text-muted border-2 border-dashed border-tride-border rounded-xl bg-tride-hover">
-                        <TrendingUp size={48} />
-                    </div>
+                {/* Commission Revenue Chart */}
+                <div className="lg:col-span-2">
+                    <RevenueTrendChart 
+                        data={earnings}
+                        title="Commission Revenue"
+                        dataKey="commission_earned"
+                        xAxisKey="period"
+                        height={300}
+                        color="#10b981" // Custom color like green for commission
+                    />
                 </div>
 
                 {/* Revenue Breakdown */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Search, Plus, Eye, Edit, Store, CheckCircle, Clock, DollarSign, Star, Trash2 } from "lucide-react"
+import { Search, Plus, Eye, Edit, Store, CheckCircle, Clock, DollarSign, Star, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import { router } from "@inertiajs/react"
 import { Button, IconButton } from "@/components/ui/button"
 import { VendorModal } from "@/components/admin/VendorModal"
@@ -11,6 +11,13 @@ import axios from "@/lib/axios"
 interface Category {
     id: number
     name: string
+}
+
+interface Pagination {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
 }
 
 interface Vendor {
@@ -37,6 +44,8 @@ export default function VendorsPage() {
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<number | "All">("All")
+    const [pagination, setPagination] = useState<Pagination | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
     
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -53,38 +62,49 @@ export default function VendorsPage() {
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
 
     useEffect(() => {
-        fetchInitialData()
+        fetchCategories()
     }, [])
 
-    const fetchInitialData = async () => {
-        setLoading(true)
-        try {
-            const [vendorsRes, categoriesRes] = await Promise.all([
-                axios.get("/admin/vendors"),
-                axios.get("/admin/categories")
-            ])
+    useEffect(() => {
+        fetchVendors()
+    }, [currentPage, searchTerm, selectedCategory])
 
-            if (vendorsRes.data.status) {
-                setVendors(vendorsRes.data.data)
-            }
-            if (categoriesRes.data.status) {
-                setCategories(categoriesRes.data.data)
+    const fetchCategories = async () => {
+        try {
+            const res = await axios.get("/admin/categories")
+            if (res.data.status) {
+                setCategories(res.data.data)
             }
         } catch (error) {
-            console.error("Failed to fetch data:", error)
-        } finally {
-            setLoading(false)
+            console.error("Failed to fetch categories:", error)
         }
     }
 
     const fetchVendors = async () => {
+        setLoading(true)
         try {
-            const response = await axios.get("/admin/vendors")
+            const params: any = {
+                page: currentPage,
+                search: searchTerm
+            }
+            if (selectedCategory !== "All") {
+                params.category_id = selectedCategory
+            }
+
+            const response = await axios.get("/admin/vendors", { params })
             if (response.data.status) {
-                setVendors(response.data.data)
+                setVendors(response.data.data.data)
+                setPagination({
+                    current_page: response.data.data.current_page,
+                    last_page: response.data.data.last_page,
+                    per_page: response.data.data.per_page,
+                    total: response.data.data.total
+                })
             }
         } catch (error) {
             console.error("Failed to fetch vendors:", error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -162,12 +182,9 @@ export default function VendorsPage() {
         setIsModalOpen(true)
     }
 
-    // filtering logic
-    const filteredVendors = vendors.filter(vendor => {
-        const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesCategory = selectedCategory === "All" || vendor.category_id === selectedCategory
-        return matchesSearch && matchesCategory
-    })
+    // filtering logic moved to server-side
+    // const filteredVendors = vendors.filter... removed
+
 
     // Stats Calculation
     const totalVendors = vendors.length
@@ -191,7 +208,7 @@ export default function VendorsPage() {
                             type="text" 
                             placeholder="Search vendors..." 
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                             className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
                         />
                     </div>
@@ -259,7 +276,7 @@ export default function VendorsPage() {
                             key={category.id} 
                             variant={selectedCategory === category.id ? "default" : "ghost"}
                             className={selectedCategory === category.id ? "" : ""}
-                            onClick={() => setSelectedCategory(category.id)}
+                            onClick={() => { setSelectedCategory(category.id); setCurrentPage(1); }}
                         >
                             {category.name}
                         </Button>
@@ -291,14 +308,14 @@ export default function VendorsPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : filteredVendors.length === 0 ? (
+                            ) : vendors.length === 0 ? (
                                 <tr>
                                     <td colSpan={8} className="text-center py-8 text-tride-text-muted">
                                         No vendors found.
                                     </td>
                                 </tr>
                             ) : (
-                                filteredVendors.map(vendor => (
+                                vendors.map(vendor => (
                                     <VendorRow 
                                         key={vendor.id} 
                                         vendor={vendor}
@@ -312,7 +329,37 @@ export default function VendorsPage() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination */}
+                {pagination && pagination.last_page > 1 && (
+                    <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
+                        <div className="text-sm text-tride-text-muted">
+                            Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} vendors
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={pagination.current_page === 1}
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                            >
+                                <ChevronLeft size={16} className="mr-1" /> Previous
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
+                                disabled={pagination.current_page === pagination.last_page}
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                            >
+                                Next <ChevronRight size={16} className="ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
+
 
             <VendorModal 
                 isOpen={isModalOpen}

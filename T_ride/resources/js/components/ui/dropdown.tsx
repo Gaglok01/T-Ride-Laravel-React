@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import {
   Select,
@@ -39,18 +38,18 @@ export function Dropdown({
     >
       <SelectTrigger 
         className={cn(
-          "w-fit min-w-[150px] bg-white/10 border-white/10 text-white placeholder:text-white/50 focus:ring-tride-yellow focus:ring-offset-0",
+          "w-fit min-w-[150px] bg-tride-card border-tride-border text-tride-text placeholder:text-tride-text-muted focus:ring-tride-yellow focus:ring-offset-0 hover:bg-tride-hover transition-colors",
           className
         )}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="bg-[#1C1C1E] border-white/10 text-white">
+      <SelectContent className="bg-tride-card border-tride-border text-tride-text shadow-xl rounded-xl custom-scrollbar">
         {options.map((option) => (
           <SelectItem 
             key={option.value} 
             value={option.value.toString()}
-            className="focus:bg-white/10 focus:text-white cursor-pointer"
+            className="focus:bg-tride-hover focus:text-tride-text cursor-pointer data-[state=checked]:font-bold data-[state=checked]:text-tride-yellow hover:bg-tride-hover/50 transition-colors"
           >
             {option.label}
           </SelectItem>

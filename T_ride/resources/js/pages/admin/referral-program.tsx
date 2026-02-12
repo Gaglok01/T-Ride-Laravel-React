@@ -21,6 +21,7 @@ import { Switch } from "@headlessui/react"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { ConfirmationModal } from "@/components/ui/confirmation-modal"
+import { RevenueTrendChart } from "@/components/admin/RevenueTrendChart"
 
 // Types
 interface Stats {
@@ -458,29 +459,17 @@ export default function ReferralProgram() {
                 {activeTab === "Overview" && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Referral Performance Chart */}
-                        <div className="lg:col-span-2 bg-tride-card border border-tride-border p-6 rounded-3xl">
-                            <h3 className="text-lg font-semibold mb-6 text-tride-text">Referral Performance</h3>
-                            <div className="h-64 flex items-end justify-between gap-2 px-4 pb-4">
-                                {(performanceData?.data || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).map((count: number, i: number) => {
-                                    const maxVal = Math.max(...(performanceData?.data || [1]));
-                                    const heightPercent = maxVal > 0 ? (count / maxVal) * 100 : 0;
-                                    return (
-                                        <div key={i} className="flex-1 flex flex-col justify-end group h-full">
-                                            <div 
-                                                className="w-full bg-tride-yellow/20 rounded-t-lg group-hover:bg-tride-yellow transition-colors relative"
-                                                style={{ height: `${Math.max(heightPercent, 5)}%` }}
-                                            >
-                                                <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-tride-text text-tride-card text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity pointer-events-none">
-                                                    {count} Referrals
-                                                </div>
-                                            </div>
-                                            <div className="text-[10px] text-tride-text-muted text-center mt-1">
-                                                {performanceData?.labels?.[i] || ''}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                        <div className="lg:col-span-2">
+                             <RevenueTrendChart 
+                                data={performanceData?.data?.map((val: number, i: number) => ({
+                                    name: performanceData.labels?.[i] || '',
+                                    value: val
+                                })) || []}
+                                title="Referral Performance"
+                                dataKey="value"
+                                xAxisKey="name"
+                                height={300}
+                            />
                             <div className="grid grid-cols-4 gap-4 mt-6">
                                 <div className="bg-tride-hover/50 p-4 rounded-2xl text-center hover:bg-tride-hover transition-colors">
                                     <div className="text-xs text-tride-text-muted mb-1">This Week</div>

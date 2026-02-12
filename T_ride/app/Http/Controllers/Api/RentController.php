@@ -33,7 +33,7 @@ class RentController extends Controller
         return response()->json([
             'status' => true,
             'stats' => $stats,
-            'data' => $query->latest()->get()
+            'data' => $query->latest()->paginate(10)
         ]);
     }
 
@@ -170,7 +170,7 @@ class RentController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $query->get()
+            'data' => $query->paginate(10)
         ]);
     }
 
@@ -178,7 +178,7 @@ class RentController extends Controller
     {
         $rentals = Rental::with(['driver', 'vehicle'])
                     ->where('status', 'active')
-                    ->get();
+                    ->paginate(10);
 
         return response()->json([
             'status' => true,
@@ -197,7 +197,7 @@ class RentController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $query->latest()->get()
+            'data' => $query->latest()->paginate(10)
         ]);
     }
 
@@ -217,7 +217,7 @@ class RentController extends Controller
         return response()->json([
             'status' => true,
             'stats' => $stats,
-            'data' => $query->latest()->get()
+            'data' => $query->latest()->paginate(10)
         ]);
     }
 }

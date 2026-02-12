@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { router } from "@inertiajs/react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Car, Key, CheckCircle, Settings, DollarSign, Download, Plus, Eye, Edit2, MoreVertical, Search, Trash2 } from "lucide-react"
+import { Car, Key, CheckCircle, Settings, DollarSign, Download, Plus, Eye, Edit2, MoreVertical, Search, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import axios from "@/lib/axios"
 import { VehicleModal } from "@/components/admin/VehicleModal"
@@ -23,6 +23,13 @@ interface PaymentStats {
     pending: number
     overdue: number
     this_week: number
+}
+
+interface Pagination {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
 }
 
 interface Vehicle {
@@ -84,6 +91,8 @@ export default function RentPage() {
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState("Fleet Vehicles")
     const [searchTerm, setSearchTerm] = useState("")
+    const [pagination, setPagination] = useState<Pagination | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
     const [isExporting, setIsExporting] = useState(false)
@@ -100,36 +109,52 @@ export default function RentPage() {
 
     useEffect(() => {
         fetchData()
-    }, [activeTab, searchTerm])
+    }, [activeTab, searchTerm, currentPage])
 
     const fetchData = async () => {
         setLoading(true)
         try {
-            const params: any = {}
+            const params: any = {
+                page: currentPage
+            }
             if (searchTerm) params.search = searchTerm
 
+            let res;
             if (activeTab === "Fleet Vehicles") {
-                const res = await axios.get('/admin/fleet-vehicles', { params })
+                res = await axios.get('/admin/fleet-vehicles', { params })
                 if (res.data.status) {
                     setFleetStats(res.data.stats)
-                    setVehicles(res.data.data)
+                    setVehicles(res.data.data.data) // data.data is array in paginator
                 }
             } else if (activeTab === "Active Rentals") {
-                const res = await axios.get('/admin/active-rentals', { params })
-                if (res.data.status) setRentals(res.data.data)
+                res = await axios.get('/admin/active-rentals', { params })
+                if (res.data.status) setRentals(res.data.data.data)
             } else if (activeTab === "Rent Payments") {
-                const res = await axios.get('/admin/rent-payments', { params })
+                res = await axios.get('/admin/rent-payments', { params })
                 if (res.data.status) {
                     setPaymentStats(res.data.stats)
-                    setPayments(res.data.data)
+                    setPayments(res.data.data.data)
                 }
             } else if (activeTab === "Contracts") {
-                const res = await axios.get('/admin/contracts', { params })
-                if (res.data.status) setRentals(res.data.data)
+                res = await axios.get('/admin/contracts', { params })
+                if (res.data.status) setRentals(res.data.data.data)
             } else if (activeTab === "Maintenance") {
-                const res = await axios.get('/admin/maintenance', { params })
-                if (res.data.status) setMaintenance(res.data.data)
+                res = await axios.get('/admin/maintenance', { params })
+                if (res.data.status) setMaintenance(res.data.data.data)
             }
+
+            if (res && res.data.status && res.data.data) {
+                // Determine if data is directly the paginator or nested
+                // Based on controller, it is typically res.data.data
+                const paginator = res.data.data;
+                setPagination({
+                    current_page: paginator.current_page,
+                    last_page: paginator.last_page,
+                    per_page: paginator.per_page,
+                    total: paginator.total
+                })
+            }
+
         } catch (error) {
             console.error("Error fetching data:", error)
         } finally {
@@ -139,6 +164,7 @@ export default function RentPage() {
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value)
+        setCurrentPage(1)
     }
 
     const handleSaveVehicle = async (data: any) => {
@@ -447,7 +473,7 @@ export default function RentPage() {
                         <Button
                             key={tab}
                             variant={activeTab === tab ? "default" : "ghost"}
-                            onClick={() => { setActiveTab(tab); setSearchTerm(""); }}
+                            onClick={() => { setActiveTab(tab); setSearchTerm(""); setCurrentPage(1); }}
                         >
                             {tab}
                         </Button>
@@ -576,7 +602,37 @@ export default function RentPage() {
                         </table>
                     ) : null}
                 </div>
-            </div>
+                </div>
+
+                {/* Pagination */}
+                {pagination && pagination.last_page > 1 && (
+                    <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
+                        <div className="text-sm text-tride-text-muted">
+                            Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} entries
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={pagination.current_page === 1}
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                            >
+                                <ChevronLeft size={16} className="mr-1" /> Previous
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
+                                disabled={pagination.current_page === pagination.last_page}
+                                className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                            >
+                                Next <ChevronRight size={16} className="ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
 
             <VehicleModal 
                 isOpen={isModalOpen}

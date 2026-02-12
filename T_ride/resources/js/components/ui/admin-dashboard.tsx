@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { StatsCard } from "./stats-card"
-import { EarningsChart } from "./earnings-chart"
+import { RevenueTrendChart } from "@/components/admin/RevenueTrendChart"
 import { LiveActivity } from "./live-activity"
 import axios from "@/lib/axios"
 
@@ -60,9 +60,16 @@ export function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <EarningsChart data={data?.earningsChart || []} summary={data?.earningsSummary || undefined} />
+      <div className="grid grid-cols-1 gap-8">
+        <div>
+          <RevenueTrendChart 
+            data={data?.earningsChart || []} 
+            title="Weekly Earnings Overview" 
+            dataKey="earnings"
+            xAxisKey="name"
+            height={360} 
+            className="w-full"
+          />
         </div>
         <div>
           <LiveActivity activities={data?.liveActivity || []} />

@@ -26,7 +26,7 @@ class VendorController extends Controller
         if ($request->has('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
-        $vendors = $query->latest()->get(); 
+        $vendors = $query->latest()->paginate(10); 
 
         return response()->json([
             'status' => true,
