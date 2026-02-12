@@ -127,27 +127,61 @@ export function Sidebar({
         </button>
       </div>
 
-      <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-        <NavItem onClick={handleNavClick} href="/admin" icon={<LayoutGrid size={20} />} label="Dashboard" active={isActive("/admin")} />
-        <NavItem onClick={handleNavClick} href="/admin/users" icon={<Users size={20} />} label="User Management" active={isActive("/admin/users")} />
-        <NavItem onClick={handleNavClick} href="/admin/drivers" icon={<Users size={20} />} label="Drivers" active={isActive("/admin/drivers")} />
-        <NavItem onClick={handleNavClick} href="/admin/rides" icon={<Car size={20} />} label="Rides" active={isActive("/admin/rides")} />
-        <NavItem onClick={handleNavClick} href="/admin/orders" icon={<Package size={20} />} label="Courier Orders" active={isActive("/admin/orders")} />
-        <NavItem onClick={handleNavClick} href="/admin/delivery-orders" icon={<ShoppingBag size={20} />} label="Delivery Orders" active={isActive("/admin/delivery-orders")} />
-        <NavItem onClick={handleNavClick} href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
-        <NavItem onClick={handleNavClick} href="/admin/rents" icon={<Key size={20} />} label="Rent Management" active={isActive("/admin/rents")} />
-        <NavItem onClick={handleNavClick} href="/admin/cities-zones" icon={<Map size={20} />} label="Cities & Zones" active={isActive("/admin/cities-zones")} />
-        <NavItem onClick={handleNavClick} href="/admin/commission-management" icon={<Percent size={20} />} label="Commissions" active={isActive("/admin/commission-management")} />
-        <NavItem onClick={handleNavClick} href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
-        <NavItem onClick={handleNavClick} href="/admin/reports" icon={<FileText size={20} />} label="Reports" active={isActive("/admin/reports")} />
-        <NavItem onClick={handleNavClick} href="/admin/referral-program" icon={<Gift size={20} />} label="Referral Program" active={isActive("/admin/referral-program")} />
-        <NavItem onClick={handleNavClick} href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
-        <NavItem onClick={handleNavClick} href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
-        <NavItem onClick={handleNavClick} href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
-        <NavItem onClick={handleNavClick} href="/admin/payment-gateway" icon={<CreditCard size={20} />} label="Payment Gateway" active={isActive("/admin/payment-gateway")} />
-        <NavItem onClick={handleNavClick} href="/admin/pricing" icon={<DollarSign size={20} />} label="Pricing" active={isActive("/admin/pricing")} />
-        <NavItem onClick={handleNavClick} href="/admin/dispatch" icon={<Radio size={20} />} label="Dispatch" active={isActive("/admin/dispatch")} />
-        <NavItem onClick={handleNavClick} href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
+      <nav className="flex-1 overflow-y-auto custom-scrollbar space-y-6">
+        {/* MAIN */}
+        <div className="space-y-1">
+          <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Main</div>
+          <NavItem onClick={handleNavClick} href="/admin" icon={<LayoutGrid size={20} />} label="Dashboard" active={isActive("/admin")} />
+        </div>
+
+        {/* USERS */}
+        <div className="space-y-1">
+          <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Users</div>
+          <NavItem onClick={handleNavClick} href="/admin/users" icon={<Users size={20} />} label="User Management" active={isActive("/admin/users")} />
+          <NavItem onClick={handleNavClick} href="/admin/drivers" icon={<Users size={20} />} label="Drivers" active={isActive("/admin/drivers")} />
+          <NavItem onClick={handleNavClick} href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
+          <NavItem onClick={handleNavClick} href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
+        </div>
+
+        {/* OPERATIONS */}
+        <div className="space-y-1">
+          <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Operations</div>
+          <NavItem onClick={handleNavClick} href="/admin/rides" icon={<Car size={20} />} label="Rides" active={isActive("/admin/rides")} />
+          <NavItem onClick={handleNavClick} href="/admin/orders" icon={<Package size={20} />} label="Courier Orders" active={isActive("/admin/orders")} />
+          <NavItem onClick={handleNavClick} href="/admin/delivery-orders" icon={<ShoppingBag size={20} />} label="Delivery Orders" active={isActive("/admin/delivery-orders")} />
+          <NavItem onClick={handleNavClick} href="/admin/dispatch" icon={<Radio size={20} />} label="Dispatch" active={isActive("/admin/dispatch")} />
+          <NavItem onClick={handleNavClick} href="/admin/categories" icon={<Layers size={20} />} label="Categories" active={isActive("/admin/categories")} />
+        </div>
+
+        {/* BUSINESS */}
+        <div className="space-y-1">
+          <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Business</div>
+          <NavItem onClick={handleNavClick} href="/admin/vendors" icon={<Store size={20} />} label="Vendor" active={isActive("/admin/vendors")} />
+          <NavItem onClick={handleNavClick} href="/admin/rents" icon={<Key size={20} />} label="Rent Management" active={isActive("/admin/rents")} />
+          <NavItem onClick={handleNavClick} href="/admin/cities-zones" icon={<Map size={20} />} label="Cities & Zones" active={isActive("/admin/cities-zones")} />
+          <NavItem onClick={handleNavClick} href="/admin/pricing" icon={<DollarSign size={20} />} label="Pricing" active={isActive("/admin/pricing")} />
+        </div>
+
+        {/* FINANCE */}
+        <div className="space-y-1">
+          <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Finance</div>
+          <NavItem onClick={handleNavClick} href="/admin/commission-management" icon={<Percent size={20} />} label="Commissions" active={isActive("/admin/commission-management")} />
+          <NavItem onClick={handleNavClick} href="/admin/payment-gateway" icon={<CreditCard size={20} />} label="Payment Gateway" active={isActive("/admin/payment-gateway")} />
+        </div>
+
+        {/* MARKETING */}
+        <div className="space-y-1">
+          <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Marketing</div>
+          <NavItem onClick={handleNavClick} href="/admin/promotions" icon={<Ticket size={20} />} label="Promotions" active={isActive("/admin/promotions")} />
+          <NavItem onClick={handleNavClick} href="/admin/referral-program" icon={<Gift size={20} />} label="Referral Program" active={isActive("/admin/referral-program")} />
+        </div>
+
+        {/* SYSTEM */}
+        <div className="space-y-1">
+          <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">System</div>
+          <NavItem onClick={handleNavClick} href="/admin/reports" icon={<FileText size={20} />} label="Reports" active={isActive("/admin/reports")} />
+          <NavItem onClick={handleNavClick} href="/admin/settings" icon={<Settings size={20} />} label="Settings" active={isActive("/admin/settings")} />
+        </div>
       </nav>
 
       {/* Logout Button */}

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { Building, Globe, Clock, DollarSign, Tag, Plus, Pencil, MapPin } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
-import { getCountryOptions, getTimezoneOptions, getCurrencyForCountry } from "@/data/countries-cities"
-import { PlacesAutocompleteInput } from "@/components/ui/places-autocomplete-input"
+import { getCountryOptions, getTimezoneOptions, getCurrencyForCountry, getCityOptions } from "@/data/countries-cities"
+
 
 interface CityData {
     id?: number
@@ -162,22 +162,16 @@ export function CityModal({ isOpen, onClose, onSave, initialData }: CityModalPro
                         required
                         enableSearch={true}
                     />
-                    <PlacesAutocompleteInput
+                    <ModalSelect
                         label="City"
+                        icon={<Building size={16} />}
+                        placeholder={country ? "Select a city" : "Select a country first"}
                         value={name}
                         onChange={setName}
-                        onPlaceSelect={(place) => {
-                            if (place.city) {
-                                setName(place.city)
-                            } else {
-                                setName(place.address)
-                            }
-                        }}
-                        placeholder={country ? "Search for a city..." : "Select a country first"}
+                        options={getCityOptions(country)}
                         disabled={!country}
                         required
-                        types={["(cities)"]}
-                        icon={<Building size={16} />}
+                        enableSearch={true}
                     />
                 </div>
 

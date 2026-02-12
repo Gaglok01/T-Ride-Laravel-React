@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Search, Filter, Plus, Eye, Edit, MoreVertical, Star, Car, Bike, Truck, FileText, Router, Trash2, Download } from "lucide-react"
+import { Search, Filter, Plus, Eye, Edit, MoreVertical, Star, Car, Bike, Truck, FileText, Router, Trash2, Download, ShieldCheck, AlertTriangle } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { Button, IconButton } from "@/components/ui/button"
 import { DriverModal } from "@/components/admin/DriverModal"
@@ -22,6 +22,10 @@ interface Driver {
   rating: number
   trips: number
   vehicle_model: string
+  cnic?: string
+  license_number?: string
+  background_check_status?: string
+  background_report_key?: string
   type?: {
     type_name: string
     id: number
@@ -421,22 +425,22 @@ export default function DriversPage() {
               <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
                 <th className="px-6 py-4 font-medium">Driver</th>
                 <th className="px-6 py-4 font-medium">Type</th>
-                <th className="px-6 py-4 font-medium">Vehicle</th>
+                <th className="px-6 py-4 font-medium">CNIC / License</th>
+                <th className="px-6 py-4 font-medium">Verification</th>
                 <th className="px-6 py-4 font-medium">Trips</th>
                 <th className="px-6 py-4 font-medium">Rating</th>
                 <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Documents</th>
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-tride-border">
                 {loading ? (
                     <tr>
-                        <td colSpan={8} className="text-center py-8 text-tride-text-muted">Loading drivers...</td>
+                        <td colSpan={9} className="text-center py-8 text-tride-text-muted">Loading drivers...</td>
                     </tr>
                 ) : filteredDrivers.length === 0 ? (
                     <tr>
-                        <td colSpan={8} className="text-center py-8 text-tride-text-muted">No drivers found.</td>
+                        <td colSpan={9} className="text-center py-8 text-tride-text-muted">No drivers found.</td>
                     </tr>
                 ) : (
                     filteredDrivers.map(driver => (
@@ -526,7 +530,53 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
                     {driver.type?.type_name || 'Unknown'}
                 </span>
             </td>
-            <td className="px-6 py-4 text-sm text-tride-text-muted">{driver.vehicle_model || '-'}</td>
+            <td className="px-6 py-4">
+                <div className="space-y-1">
+                    {driver.cnic && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                            <span className="text-tride-text-muted">CNIC:</span>
+                            <span className="font-mono text-tride-text">{driver.cnic.replace(/(\d{5})(\d{7})(\d)/, '$1-$2-$3')}</span>
+                        </div>
+                    )}
+                    {driver.license_number && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                            <span className="text-tride-text-muted">License:</span>
+                            <span className="font-mono text-tride-text">{driver.license_number}</span>
+                        </div>
+                    )}
+                    {!driver.cnic && !driver.license_number && (
+                        <span className="text-xs text-red-400">Not provided</span>
+                    )}
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                {(() => {
+                    const status = driver.background_check_status || 'not_checked'
+                    const styles: Record<string, string> = {
+                        verified: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                        pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                        failed: 'bg-red-500/10 text-red-400 border-red-500/20',
+                        not_checked: 'bg-white/5 text-white/40 border-white/10',
+                    }
+                    const icons: Record<string, React.ReactNode> = {
+                        verified: <ShieldCheck size={12} />,
+                        pending: <AlertTriangle size={12} />,
+                        failed: <AlertTriangle size={12} />,
+                        not_checked: <ShieldCheck size={12} />,
+                    }
+                    const labels: Record<string, string> = {
+                        verified: 'Verified',
+                        pending: 'Pending',
+                        failed: 'Failed',
+                        not_checked: 'Not Checked',
+                    }
+                    return (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>
+                            {icons[status]} {labels[status]}
+                        </span>
+                    )
+                })()}
+            </td>
             <td className="px-6 py-4 font-mono text-sm text-tride-text">{driver.trips}</td>
             <td className="px-6 py-4">
                 <div className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
@@ -534,7 +584,6 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
                 </div>
             </td>
             <td className="px-6 py-4">
-
                 <button 
                   onClick={onToggleStatus}
                   className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
@@ -545,16 +594,6 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
                 >
                     {driver.status}
                 </button>
-            </td>
-
-            <td className="px-6 py-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    driver.documents 
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/20' 
-                    : 'bg-red-500/20 text-red-400 border border-red-500/20'
-                }`}>
-                    {driver.documents ? 'Submitted' : 'Missing'}
-                </span>
             </td>
             <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-2">

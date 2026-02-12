@@ -86,6 +86,7 @@ class AuthController extends Controller
             ], 403);
         }
 
+        /* OTP Logic Commented Out
         Otp::where('identifier', $request->identifier)->delete();
 
         $otpCode = rand(100000, 999999);
@@ -103,6 +104,33 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'OTP sent successfully. Please check your email.',
+        ], 200);
+        */
+
+        // Direct Login Logic
+        $token = $user->createToken('login_token')->accessToken;
+
+        // Get user roles for frontend redirection
+        $roles = $user->roles->map(function($role) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'token' => $token,
+                'user'  => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone_number' => $user->phone_number,
+                    'roles' => $roles
+                ]
+            ]
         ], 200);
     }
 

@@ -50,8 +50,20 @@ class AuthService {
     /**
      * Send OTP to user's email or phone
      */
-    async login(data: LoginRequest): Promise<BaseResponse> {
-        const response = await axiosInstance.post<BaseResponse>('/login', data);
+    /**
+     * Send OTP to user's email or phone (Modified to Login directly)
+     */
+    async login(data: LoginRequest): Promise<AuthResponse> {
+        const response = await axiosInstance.post<AuthResponse>('/login', data);
+        
+        // Store token and user data if authentication is successful
+        if (response.data.success && response.data.data?.token) {
+            localStorage.setItem('auth_token', response.data.data.token);
+        }
+        if (response.data.success && response.data.data?.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        }
+
         return response.data;
     }
 

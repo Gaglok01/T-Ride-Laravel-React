@@ -41,4 +41,9 @@ return [
         'from'  => env('TWILIO_FROM'),
     ],
 
+    'backgroundchecks' => [
+        'api_token' => env('BACKGROUNDCHECKS_API_TOKEN', ''),
+        'sandbox'   => env('BACKGROUNDCHECKS_SANDBOX', true),
+    ],
+
 ];

@@ -14,9 +14,13 @@ class Driver extends Model
         'name',
         'type_id',
         'vehicle_model',
+        'cnic',
+        'license_number',
         'trips',
         'rating',
         'status',
+        'background_check_status',
+        'background_report_key',
         'documents',
         'image',
     ];

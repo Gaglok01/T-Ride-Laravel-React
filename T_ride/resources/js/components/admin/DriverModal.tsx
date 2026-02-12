@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus, Users } from "lucide-react"
+import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus, Users, CreditCard, ShieldCheck, AlertTriangle } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
 
 interface Type {
@@ -14,6 +14,9 @@ interface DriverData {
     email?: string
     phone_number?: string
     vehicle_model?: string
+    cnic?: string
+    license_number?: string
+    background_check_status?: string
     type?: {
         id: number
         type_name: string
@@ -46,8 +49,14 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
   const [password, setPassword] = useState("")
   const [typeId, setTypeId] = useState("")
   const [vehicleModel, setVehicleModel] = useState("")
+  const [cnic, setCnic] = useState("")
+  const [licenseNumber, setLicenseNumber] = useState("")
   const [documents, setDocuments] = useState("")
   const [image, setImage] = useState<File | null>(null)
+
+  // Validation states
+  const [cnicError, setCnicError] = useState("")
+  const [licenseError, setLicenseError] = useState("")
 
   // Reset/Populate form when modal opens
   useEffect(() => {
@@ -63,6 +72,8 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
         const tId = initialData.type?.id ? initialData.type.id.toString() : ""
         setTypeId(tId)
         setVehicleModel(initialData.vehicle_model || "")
+        setCnic(initialData.cnic || "")
+        setLicenseNumber(initialData.license_number || "")
         // Documents might be array or string, handle as string for now if it's text input
         setDocuments(initialData.documents || "")
         setPassword("") 
@@ -73,13 +84,64 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
         setPassword("")
         setTypeId("")
         setVehicleModel("")
+        setCnic("")
+        setLicenseNumber("")
         setDocuments("")
         setImage(null)
       }
       setError("")
+      setCnicError("")
+      setLicenseError("")
       setLoading(false)
     }
   }, [isOpen, initialData])
+
+  // CNIC format validation (13 digits: XXXXX-XXXXXXX-X)
+  const validateCnic = (value: string): boolean => {
+    if (!value) return true // optional if license provided
+    const cleaned = value.replace(/-/g, '')
+    return /^\d{13}$/.test(cleaned)
+  }
+
+  // License format validation 
+  const validateLicense = (value: string): boolean => {
+    if (!value) return true // optional if cnic provided
+    const cleaned = value.replace(/[-\s]/g, '')
+    return cleaned.length >= 5 && /^[A-Za-z0-9]+$/.test(cleaned)
+  }
+
+  // Format CNIC as user types (XXXXX-XXXXXXX-X)
+  const handleCnicChange = (value: string) => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '').slice(0, 13)
+    
+    // Format as XXXXX-XXXXXXX-X
+    let formatted = digits
+    if (digits.length > 5) {
+      formatted = digits.slice(0, 5) + '-' + digits.slice(5)
+    }
+    if (digits.length > 12) {
+      formatted = digits.slice(0, 5) + '-' + digits.slice(5, 12) + '-' + digits.slice(12)
+    }
+    
+    setCnic(formatted)
+    
+    if (formatted && !validateCnic(formatted)) {
+      setCnicError("CNIC must be 13 digits (e.g., 12345-1234567-1)")
+    } else {
+      setCnicError("")
+    }
+  }
+
+  const handleLicenseChange = (value: string) => {
+    setLicenseNumber(value)
+    
+    if (value && !validateLicense(value)) {
+      setLicenseError("License must be at least 5 alphanumeric characters")
+    } else {
+      setLicenseError("")
+    }
+  }
 
   const handleSubmit = async () => {
     if (!name || !email || !phone || !typeId) {
@@ -89,6 +151,24 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
     
     if (!initialData && !password) {
       setError("Password is required for new drivers.")
+      return
+    }
+
+    // 🔹 At least one of CNIC or License required
+    if (!cnic && !licenseNumber) {
+      setError("Either CNIC or License Number is required. Please provide at least one.")
+      return
+    }
+
+    // 🔹 Validate CNIC format
+    if (cnic && !validateCnic(cnic)) {
+      setError("Invalid CNIC format. Must be 13 digits (e.g., 12345-1234567-1).")
+      return
+    }
+
+    // 🔹 Validate License format
+    if (licenseNumber && !validateLicense(licenseNumber)) {
+      setError("Invalid License Number. Must be at least 5 alphanumeric characters.")
       return
     }
 
@@ -105,6 +185,8 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
       }
       formData.append("type_id", typeId)
       formData.append("vehicle_model", vehicleModel)
+      formData.append("cnic", cnic.replace(/-/g, '')) // Send without dashes
+      formData.append("license_number", licenseNumber)
       formData.append("documents", documents)
       
       if (image) {
@@ -124,6 +206,30 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
     } finally {
       setLoading(false)
     }
+  }
+
+  // Background check status badge
+  const BackgroundStatusBadge = ({ status }: { status?: string }) => {
+    if (!status || status === 'not_checked') return null
+    
+    const styles = {
+      pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+      verified: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+      failed: "bg-red-500/10 text-red-400 border-red-500/20",
+    }
+    const icons = {
+      pending: <AlertTriangle size={12} />,
+      verified: <ShieldCheck size={12} />,
+      failed: <AlertTriangle size={12} />,
+    }
+    const style = styles[status as keyof typeof styles] || ""
+    const icon = icons[status as keyof typeof icons]
+    
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${style}`}>
+        {icon} Background: {status.replace(/_/g, ' ')}
+      </span>
+    )
   }
 
   return (
@@ -152,6 +258,15 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
     >
       <div className="space-y-4">
         <ModalError message={error} />
+
+        {/* Background Check Status (edit mode only) */}
+        {initialData?.background_check_status && initialData.background_check_status !== 'not_checked' && (
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
+            <ShieldCheck size={16} className="text-tride-yellow" />
+            <span className="text-sm text-gray-300">Background Check:</span>
+            <BackgroundStatusBadge status={initialData.background_check_status} />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ModalInput
@@ -215,11 +330,57 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
             onChange={setVehicleModel}
           />
         </div>
+
+        {/* CNIC & License Section */}
+        <div className="border border-tride-yellow/20 rounded-xl p-4 bg-tride-yellow/5">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck size={16} className="text-tride-yellow" />
+            <span className="text-sm font-medium text-tride-yellow">Identity Verification</span>
+            <span className="text-xs text-gray-400">(At least one required)</span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <ModalInput
+                label="CNIC Number"
+                icon={<CreditCard size={16} />}
+                placeholder="12345-1234567-1"
+                value={cnic}
+                onChange={handleCnicChange}
+              />
+              {cnicError && (
+                <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                  <AlertTriangle size={10} /> {cnicError}
+                </p>
+              )}
+            </div>
+            <div>
+              <ModalInput
+                label="License Number"
+                icon={<FileText size={16} />}
+                placeholder="e.g. DL-12345"
+                value={licenseNumber}
+                onChange={handleLicenseChange}
+              />
+              {licenseError && (
+                <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                  <AlertTriangle size={10} /> {licenseError}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {!cnic && !licenseNumber && (
+            <p className="text-xs text-amber-400 mt-2 flex items-center gap-1">
+              <AlertTriangle size={10} /> Please provide at least CNIC or License Number for background verification.
+            </p>
+          )}
+        </div>
         
         <ModalInput
-            label="Documents / License No"
+            label="Documents / Additional Info"
             icon={<FileText size={16} />}
-            placeholder="Enter license number or details"
+            placeholder="Enter any additional document details"
             value={documents}
             onChange={setDocuments}
         />
@@ -250,7 +411,7 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
                                 <img src={`/storage/${initialData.image}`} alt="Current" className="w-full h-full object-cover" />
                              </div>
                              <span className="text-gray-400 text-sm">Click to change</span>
-                           </>
+                            </>
                         ) : (
                           <>
                               <Upload size={24} className="mb-1 opacity-50" />

@@ -33,10 +33,10 @@ export default function AdminLogin() {
       console.log("response", response)
       
       if (response.success) {
-          sessionStorage.setItem("adminEmail", email)
-          router.visit("/admin/otp")
+          // sessionStorage.setItem("adminEmail", email)
+          router.visit("/admin")
       } else {
-          setError(response.message || "Failed to send OTP.")
+          setError(response.message || "Login failed.")
       }
     } catch (error: any) {
       setIsLoading(false)

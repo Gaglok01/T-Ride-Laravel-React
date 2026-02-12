@@ -56,6 +56,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/drivers/{id}', [DriverController::class, 'update']);
         Route::patch('/drivers/{id}/status', [DriverController::class, 'updateStatus']);
         Route::delete('/drivers/{id}', [DriverController::class, 'destroy']);
+        Route::get('/drivers/{id}/background-check', [DriverController::class, 'checkBackgroundStatus']);
 
         // Order Management
         Route::get('/orders', [OrderController::class, 'index']);

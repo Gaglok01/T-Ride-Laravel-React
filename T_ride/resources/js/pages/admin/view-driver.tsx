@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { ArrowLeft, User, Phone, Mail, Car, Star, FileText, CheckCircle, XCircle } from "lucide-react"
+import { ArrowLeft, User, Phone, Mail, Car, Star, FileText, CheckCircle, XCircle, ShieldCheck, AlertTriangle, RefreshCw, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "@inertiajs/react"
 import axios from "@/lib/axios"
@@ -23,6 +23,10 @@ interface DriverData {
     trips: number
     rating: number
     documents: string[]
+    cnic?: string
+    license_number?: string
+    background_check_status?: string
+    background_report_key?: string
     created_at: string
 }
 
@@ -87,20 +91,33 @@ export default function ViewDriver({ id }: { id: number }) {
                             {driver.image ? (
                                 <img src={`/storage/${driver.image}`} alt={driver.name} className="w-full h-full object-cover" />
                             ) : (
-                                <Car size={40} />
+                                <div className="flex items-center justify-center w-full h-full bg-tride-hover text-tride-text-muted">
+                                    <span className="text-2xl">{driver.name.charAt(0)}</span>
+                                </div>
                             )}
                         </div>
                         <h2 className="text-2xl font-bold text-tride-text mb-1">{driver.name}</h2>
                         <p className="text-tride-text-muted text-sm mb-4">{driver.driver_id}</p>
                         
-                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
-                            driver.status === 'Active' ? 'bg-green-500/20 text-green-400 border-green-500/20' : 
-                            'bg-tride-hover text-tride-text-muted border-tride-border'
-                        }`}>
-                            {driver.status}
-                        </span>
+                        <div className="flex flex-wrap justify-center gap-2 mb-6">
+                             <span className={`px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
+                                driver.status === 'Active' ? 'bg-green-500/20 text-green-400 border-green-500/20' : 
+                                'bg-tride-hover text-tride-text-muted border-tride-border'
+                            }`}>
+                                {driver.status}
+                            </span>
+                             {driver.background_check_status && (
+                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider flex items-center gap-1 ${
+                                    driver.background_check_status === 'verified' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20' :
+                                    driver.background_check_status === 'failed' ? 'bg-red-500/20 text-red-400 border-red-500/20' :
+                                    'bg-amber-500/20 text-amber-400 border-amber-500/20'
+                                }`}>
+                                   <ShieldCheck size={12} /> {driver.background_check_status.replace(/_/g, ' ')}
+                                </span>
+                             )}
+                        </div>
 
-                        <div className="w-full mt-8 space-y-4">
+                        <div className="w-full space-y-3">
                             {driver.user && (
                                 <>
                                     <InfoRow icon={<Mail size={16} />} label="Email" value={driver.user.email} />
@@ -109,7 +126,41 @@ export default function ViewDriver({ id }: { id: number }) {
                             )}
                             <InfoRow icon={<Car size={16} />} label="Vehicle" value={driver.vehicle_model} />
                             <InfoRow icon={<FileText size={16} />} label="Type" value={driver.type?.type_name || 'N/A'} />
+                            
+                            {/* Identity Fields */}
+                            {driver.cnic && (
+                                <InfoRow icon={<CreditCard size={16} />} label="CNIC" value={driver.cnic.replace(/(\d{5})(\d{7})(\d)/, '$1-$2-$3')} />
+                            )}
+                            {driver.license_number && (
+                                <InfoRow icon={<FileText size={16} />} label="License" value={driver.license_number} />
+                            )}
                         </div>
+                        
+                        {driver.background_report_key && (
+                            <div className="mt-6 w-full pt-4 border-t border-tride-border">
+                                <Button 
+                                    variant="outline" 
+                                    className="w-full justify-center text-xs h-8"
+                                    onClick={async () => {
+                                        setLoading(true)
+                                        try {
+                                            const res = await axios.get(`/admin/drivers/${driver.id}/background-check`)
+                                            if (res.data.success) {
+                                                setDriver(prev => prev ? ({ ...prev, background_check_status: res.data.data.status }) : null)
+                                                alert("Status refreshed: " + res.data.data.status)
+                                            }
+                                        } catch (e) {
+                                            console.error(e)
+                                            alert("Failed to refresh status")
+                                        } finally {
+                                            setLoading(false)
+                                        }
+                                    }}
+                                >
+                                    <RefreshCw size={12} className="mr-2" /> Refresh Background Status
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -183,3 +234,4 @@ function StatBox({ label, value, icon, color, bg }: { label: string, value: stri
         </div>
     )
 }
+
