@@ -11,7 +11,7 @@ Route::get('/', function () {
 
 Route::get('/login', function () {
     return redirect()->route('admin.login');
-})->name('home');
+})->name('login');
 
 Route::get('/admin/login', function () {
     return Inertia::render('admin/login');
