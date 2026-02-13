@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus, Users, CreditCard, ShieldCheck, AlertTriangle } from "lucide-react"
+import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus, Users, CreditCard, ShieldCheck, AlertTriangle, MapPin } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
 
 interface Type {
@@ -14,6 +14,7 @@ interface DriverData {
     email?: string
     phone_number?: string
     vehicle_model?: string
+    location?: string
     cnic?: string
     license_number?: string
     background_check_status?: string
@@ -49,6 +50,7 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
   const [password, setPassword] = useState("")
   const [typeId, setTypeId] = useState("")
   const [vehicleModel, setVehicleModel] = useState("")
+  const [location, setLocation] = useState("")
   const [cnic, setCnic] = useState("")
   const [licenseNumber, setLicenseNumber] = useState("")
   const [documents, setDocuments] = useState("")
@@ -72,6 +74,7 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
         const tId = initialData.type?.id ? initialData.type.id.toString() : ""
         setTypeId(tId)
         setVehicleModel(initialData.vehicle_model || "")
+        setLocation(initialData.location || "")
         setCnic(initialData.cnic || "")
         setLicenseNumber(initialData.license_number || "")
         // Documents might be array or string, handle as string for now if it's text input
@@ -84,6 +87,7 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
         setPassword("")
         setTypeId("")
         setVehicleModel("")
+        setLocation("")
         setCnic("")
         setLicenseNumber("")
         setDocuments("")
@@ -185,6 +189,7 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
       }
       formData.append("type_id", typeId)
       formData.append("vehicle_model", vehicleModel)
+      formData.append("location", location)
       formData.append("cnic", cnic.replace(/-/g, '')) // Send without dashes
       formData.append("license_number", licenseNumber)
       formData.append("documents", documents)
@@ -323,11 +328,11 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
           />
 
            <ModalInput
-            label="Vehicle Model"
-            icon={<Car size={16} />}
-            placeholder="e.g. Toyota Corolla 2022"
-            value={vehicleModel}
-            onChange={setVehicleModel}
+            label="Location"
+            icon={<MapPin size={16} />}
+            placeholder="e.g. Downtown, North Zone"
+            value={location}
+            onChange={setLocation}
           />
         </div>
 

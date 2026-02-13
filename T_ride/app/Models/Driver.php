@@ -23,6 +23,7 @@ class Driver extends Model
         'background_report_key',
         'documents',
         'image',
+        'location',
     ];
 
     protected $casts = [

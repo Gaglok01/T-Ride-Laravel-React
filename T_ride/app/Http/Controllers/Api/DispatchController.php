@@ -61,6 +61,13 @@ class DispatchController extends Controller
                     'couriers_trend' => '+3',
                     'drivers_trend' => '+24',
                     'pending_trend' => '-5'
+                ],
+                'zone_stats' => [
+                    'North' => Driver::where('status', 'active')->where('location', 'like', '%North%')->count(),
+                    'South' => Driver::where('status', 'active')->where('location', 'like', '%South%')->count(),
+                    'East' => Driver::where('status', 'active')->where('location', 'like', '%East%')->count(),
+                    'West' => Driver::where('status', 'active')->where('location', 'like', '%West%')->count(),
+                    'Central' => Driver::where('status', 'active')->where('location', 'like', '%Central%')->count(),
                 ]
             ]
         ]);
@@ -184,7 +191,9 @@ class DispatchController extends Controller
                     'vehicle_type' => $driver->type?->type_name ?? 'N/A',
                     'service_type' => $driver->type?->service_type ?? 'ride',
                     'rating' => $driver->rating ?? 4.5,
-                    'photo' => $driver->photo ? "/storage/{$driver->photo}" : null
+                    'location' => $driver->location,
+                    'trips_count' => $driver->rides()->count() + $driver->deliveryOrders()->count(),
+                    'photo' => $driver->image ? "/storage/" . $driver->image : null,
                 ];
             });
 
@@ -340,6 +349,82 @@ class DispatchController extends Controller
     /**
      * Get all manual bookings
      */
+    /**
+     * Get all active (in-progress) orders for live tracking
+     */
+    public function getActiveOrders()
+    {
+        $activeOrders = collect();
+
+        // Active Rides
+        $rides = Ride::whereIn('status', ['accepted', 'in_progress'])
+            ->with(['driver', 'user'])
+            ->latest()
+            ->get()
+            ->map(function ($ride) {
+                return [
+                    'id' => $ride->id,
+                    'order_id' => $ride->ride_custom_id ?? 'RID-' . str_pad($ride->id, 5, '0', STR_PAD_LEFT),
+                    'type' => 'Ride',
+                    'driver' => $ride->driver?->name ?? 'Unassigned',
+                    'status' => $ride->status === 'accepted' ? 'En Route to Pickup' : 'In Trip',
+                    'eta' => 'Dynamic', // Would need real-time logic
+                    'dist' => 'Dynamic',
+                    'dur' => 'Dynamic',
+                    'fare' => '$' . number_format($ride->total_fare, 2),
+                ];
+            });
+        $activeOrders = $activeOrders->merge($rides);
+
+        // Active Courier Orders
+        $couriers = Order::whereIn('status', ['In Transit'])
+            ->with(['driver', 'user'])
+            ->latest()
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_id' => 'PKG-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
+                    'type' => 'Courier',
+                    'driver' => $order->driver?->name ?? 'Unassigned',
+                    'status' => 'In Transit',
+                    'eta' => 'Dynamic',
+                    'dist' => 'Dynamic',
+                    'dur' => 'Dynamic',
+                    'fare' => '$' . number_format($order->price, 2),
+                ];
+            });
+        $activeOrders = $activeOrders->merge($couriers);
+
+        // Active Delivery Orders (Legacy/Other table if exists)
+        if (class_exists(DeliveryOrder::class)) {
+            $deliveries = DeliveryOrder::whereIn('status', ['accepted', 'preparing', 'on_the_way'])
+                ->with(['driver'])
+                ->latest()
+                ->get()
+                ->map(function ($order) {
+                    return [
+                        'id' => $order->id,
+                        'order_id' => 'DEL-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
+                        'type' => 'Delivery',
+                        'driver' => $order->driver?->name ?? 'Unassigned',
+                        'status' => $order->status === 'on_the_way' ? 'Delivering' : 'At Vendor',
+                        'eta' => 'Dynamic',
+                        'dist' => 'Dynamic',
+                        'dur' => 'Dynamic',
+                        'fare' => '$' . number_format($order->total_price, 2),
+                    ];
+                });
+            $activeOrders = $activeOrders->merge($deliveries);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Active orders fetched successfully',
+            'data' => $activeOrders
+        ]);
+    }
+
     public function getManualBookings(Request $request)
     {
         $query = ManualBooking::with('driver')->latest();

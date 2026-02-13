@@ -147,6 +147,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/dispatch/stats', [DispatchController::class, 'getStats']);
         Route::get('/dispatch/pending-orders', [DispatchController::class, 'getPendingOrders']);
         Route::get('/dispatch/available-drivers', [DispatchController::class, 'getAvailableDrivers']);
+        Route::get('/dispatch/active-orders', [DispatchController::class, 'getActiveOrders']);
         Route::post('/dispatch/assign-driver', [DispatchController::class, 'assignDriver']);
         Route::post('/dispatch/manual-booking', [DispatchController::class, 'createManualBooking']);
         Route::get('/dispatch/manual-bookings', [DispatchController::class, 'getManualBookings']);

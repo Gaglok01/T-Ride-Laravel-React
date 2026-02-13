@@ -44,6 +44,7 @@ class DriverController extends Controller
             'image' => 'nullable|image|max:2048',
             'cnic' => 'nullable|string',
             'license_number' => 'nullable|string',
+            'location' => 'nullable|string',
         ]);
 
         // 🔹 At least one of CNIC or License is required
@@ -99,6 +100,7 @@ class DriverController extends Controller
                 // cast to array since model expects array
                 'documents' => $request->documents ? [$request->documents] : [],
                 'image' => $imagePath,
+                'location' => $request->location,
             ]);
 
             // ✅ User create
@@ -190,6 +192,7 @@ class DriverController extends Controller
             'status' => 'sometimes|in:Active,Inactive',
             'cnic' => 'nullable|string',
             'license_number' => 'nullable|string',
+            'location' => 'nullable|string',
         ]);
 
         // 🔹 At least one of CNIC or License is required
@@ -243,13 +246,14 @@ class DriverController extends Controller
 
             // 🔹 Driver update
             $driver->update([
-                'name' => $request->name,
-                'type_id' => $request->type_id,
-                'vehicle_model' => $request->vehicle_model,
-                'cnic' => $cnic ?? $driver->cnic,
-                'license_number' => $licenseNumber ?? $driver->license_number,
-                'status' => $request->input('status', $driver->status),
+                'name' => $request->name ?? $driver->name,
+                'type_id' => $request->type_id ?? $driver->type_id,
+                'vehicle_model' => $request->vehicle_model ?? $driver->vehicle_model,
+                'cnic' => $request->cnic ?? $driver->cnic,
+                'status' => $request->status ?? $driver->status,
+                'license_number' => $request->license_number ?? $driver->license_number,
                 'documents' => $request->documents ? [$request->documents] : $driver->documents,
+                'location' => $request->location ?? $driver->location,
             ]);
 
             // 🔹 User update
