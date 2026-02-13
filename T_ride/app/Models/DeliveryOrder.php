@@ -14,8 +14,20 @@ class DeliveryOrder extends Model
         'category_id',
         'total_items',
         'total_amount',
-        'status'
+        'status',
+        'delivery_address',
+        'delivery_lat',
+        'delivery_lng',
+        'contact_phone',
+        'delivery_instructions',
+        'payment_method',
+        'delivery_fee'
     ];
+
+    public function items()
+    {
+        return $this->hasMany(DeliveryOrderItem::class, 'order_id');
+    }
 
     protected $casts = [
         'total_amount' => 'decimal:2',

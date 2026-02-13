@@ -7,6 +7,7 @@ class Vendor extends Model
 {
     protected $fillable = [
         'user_id', 'name', 'address', 'country', 'city', 'logo', 'category_id',
+        'lat', 'lng', 'delivery_range_km', 'min_order_amount', 'delivery_fee',
         'total_orders', 'total_revenue', 'rating',
         'commission_rate', 'status', 'is_open'
     ];

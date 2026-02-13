@@ -12,6 +12,10 @@ class Type extends Model
     protected $fillable = [
         'type_custom_id',
         'type_name',
+        'description',
+        'capacity',
+        'max_weight',
+        'photo',
         'service_type',
         'status',
     ];
