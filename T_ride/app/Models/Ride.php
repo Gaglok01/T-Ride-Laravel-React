@@ -24,7 +24,18 @@ class Ride extends Model
         'rating',
         'comment',
         'started_at',
-        'completed_at'
+        'completed_at',
+        // Courier fields
+        'receiver_name',
+        'receiver_phone',
+        'package_size',
+        'package_weight',
+        'package_photo',
+        'pickup_instructions',
+        'dropoff_instructions',
+        'service_type',
+        'delivery_signature',
+        'proof_of_delivery',
     ];
 
     protected $casts = [

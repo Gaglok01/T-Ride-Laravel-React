@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "8e3f05cc2-0810-42a2-b535-a43c6c5d163b",
         "name": "T-Ride Mobile APIs",
-        "description": "Collection for T-Ride Mobile Application APIs including Registration, Authentication, Profile, Ride Flow, and Feedback.",
+        "description": "Collection for T-Ride Mobile Application APIs including Registration, Authentication, Profile, Ride Flow, Courier Flow, Food Delivery Flow, and Feedback.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -444,6 +444,572 @@
                         }
                     },
                     "response": []
+                }
+            ]
+        },
+        {
+            "name": "Courier Flow (Protected)",
+            "item": [
+                {
+                    "name": "Get Nearby Couriers",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"pickup_lat\": 24.8607,\n    \"pickup_lng\": 67.0011,\n    \"vehicle_type_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/nearby",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "nearby"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Estimates",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"pickup_lat\": 24.8607,\n    \"pickup_lng\": 67.0011,\n    \"dropoff_lat\": 24.9000,\n    \"dropoff_lng\": 67.1000,\n    \"package_size\": \"medium\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/estimate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "estimate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Request Courier",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"sender_pickup_address\": \"Clifton Block 4, Karachi\",\n    \"sender_pickup_lat\": 24.8213,\n    \"sender_pickup_lng\": 67.0322,\n    \"sender_phone\": \"+923001234567\",\n    \"receiver_name\": \"Ali Khan\",\n    \"receiver_phone\": \"+923007654321\",\n    \"receiver_dropoff_address\": \"Gulshan-e-Iqbal, Karachi\",\n    \"receiver_dropoff_lat\": 24.9213,\n    \"receiver_dropoff_lng\": 67.1122,\n    \"package_size\": \"medium\",\n    \"package_weight\": 2.5,\n    \"package_photo\": \"https://example.com/photo.jpg\",\n    \"pickup_instructions\": \"Ring the doorbell\",\n    \"dropoff_instructions\": \"Leave at reception\",\n    \"vehicle_type_id\": 1,\n    \"estimated_fare\": 250.00,\n    \"payment_method\": \"Cash\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/request",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "request"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Upload Package Photo",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "photo",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/upload-photo",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "upload-photo"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Active Deliveries",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/active",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "active"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Delivery Details",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "1"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cancel Delivery",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/1/cancel",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "1",
+                                "cancel"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Rate Delivery",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"rating\": 5,\n    \"comment\": \"Excellent delivery service!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/courier/1/rate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "courier",
+                                "1",
+                                "rate"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Food Delivery Flow (Protected)",
+            "item": [
+                {
+                    "name": "Get Home Data",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/food/home?lat=24.8607&lng=67.0011",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "food",
+                                "home"
+                            ],
+                            "query": [
+                                {
+                                    "key": "lat",
+                                    "value": "24.8607"
+                                },
+                                {
+                                    "key": "lng",
+                                    "value": "67.0011"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Vendor Details",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/food/vendor/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "food",
+                                "vendor",
+                                "1"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Place Order",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"vendor_id\": 1,\n    \"delivery_address\": \"Phase 5, DHA, Karachi\",\n    \"delivery_lat\": 24.8100,\n    \"delivery_lng\": 67.0500,\n    \"contact_phone\": \"+923001234567\",\n    \"payment_method\": \"Cash\",\n    \"delivery_instructions\": \"Ring bell.\",\n    \"items\": [\n        {\n            \"product_id\": 1,\n            \"quantity\": 2,\n            \"special_instructions\": \"Extra sauce\"\n        }\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/food/order/place",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "food",
+                                "order",
+                                "place"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Track Order",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/food/order/1/track",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "food",
+                                "order",
+                                "1",
+                                "track"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User Addresses",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/user/addresses",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "user",
+                                "addresses"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Address",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"label\": \"Home\",\n    \"address\": \"A-123, Block 2, Clifton\",\n    \"city\": \"Karachi\",\n    \"lat\": 24.8300,\n    \"lng\": 67.0200,\n    \"is_default\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/user/address",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "user",
+                                "address"
+                            ]
+                        }
+                    }
                 }
             ]
         },
