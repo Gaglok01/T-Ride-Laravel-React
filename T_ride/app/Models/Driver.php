@@ -10,8 +10,12 @@ class Driver extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'driver_id',
         'name',
+        'address',
+        'region',
+        'city',
         'type_id',
         'vehicle_model',
         'cnic',
@@ -19,6 +23,8 @@ class Driver extends Model
         'trips',
         'rating',
         'status',
+        'is_online',
+        'account_status',
         'background_check_status',
         'background_report_key',
         'documents',

@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 class Vendor extends Model
 {
     protected $fillable = [
-        'user_id', 'name', 'address', 'country', 'city', 'logo', 'category_id',
+        'user_id', 'name', 'contact', 'address', 'country', 'city', 'logo', 'category_id',
         'lat', 'lng', 'delivery_range_km', 'min_order_amount', 'delivery_fee',
         'total_orders', 'total_revenue', 'rating',
-        'commission_rate', 'status', 'is_open'
+        'commission_rate', 'status', 'is_open', 'business_timings', 'is_available_for_delivery'
     ];
 
     public function category()

@@ -7,6 +7,10 @@ use App\Http\Controllers\Api\AppAuthController;
 use App\Http\Controllers\Api\AppRideController;
 use App\Http\Controllers\Api\AppCourierController;
 use App\Http\Controllers\Api\AppFoodDeliveryController;
+use App\Http\Controllers\Api\AppWalletController;
+use App\Http\Controllers\Api\AppDriverController;
+use App\Http\Controllers\Api\AppVendorFoodController;
+use App\Http\Controllers\Api\AppRentalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,28 +34,72 @@ Route::prefix('api/app')->group(function () {
         Route::post('logout', [AppAuthController::class, 'logout']);
 
         // Ride Flow Routes
-        Route::post('rides/nearby-drivers', [AppRideController::class, 'getNearbyDrivers']);
-        Route::post('rides/estimate', [AppRideController::class, 'getEstimates']);
-        Route::post('rides/request', [AppRideController::class, 'requestRide']);
-        Route::get('rides/active', [AppRideController::class, 'getActiveRide']);
-        Route::post('rides/{id}/cancel', [AppRideController::class, 'cancelRide']);
-        Route::post('rides/{id}/rate', [AppRideController::class, 'rateRide']);
+        Route::prefix('rides')->group(function () {
+            Route::post('nearby-drivers', [AppRideController::class, 'getNearbyDrivers']);
+            Route::post('estimate', [AppRideController::class, 'getEstimates']);
+            Route::post('request', [AppRideController::class, 'requestRide']);
+            Route::get('active', [AppRideController::class, 'getActiveRide']);
+            Route::post('{id}/cancel', [AppRideController::class, 'cancelRide']);
+            Route::post('{id}/rate', [AppRideController::class, 'rateRide']);
+        });
 
         // Courier Flow Routes
-        Route::post('courier/nearby', [AppCourierController::class, 'getNearbyCouriers']);
-        Route::post('courier/estimate', [AppCourierController::class, 'getEstimates']);
-        Route::post('courier/request', [AppCourierController::class, 'requestCourier']);
-        Route::get('courier/active', [AppCourierController::class, 'getActiveDeliveries']);
-        Route::get('courier/{id}', [AppCourierController::class, 'getDeliveryDetails']); // Specific delivery
-        Route::post('courier/{id}/cancel', [AppCourierController::class, 'cancelCourier']);
-        Route::post('courier/{id}/rate', [AppCourierController::class, 'rateCourier']);
-        Route::post('courier/upload-photo', [AppCourierController::class, 'uploadPackagePhoto']);
+        Route::prefix('courier')->group(function () {
+            Route::post('nearby', [AppCourierController::class, 'getNearbyCouriers']);
+            Route::post('estimate', [AppCourierController::class, 'getEstimates']);
+            Route::post('request', [AppCourierController::class, 'requestCourier']);
+            Route::get('active', [AppCourierController::class, 'getActiveDeliveries']);
+            Route::get('{id}', [AppCourierController::class, 'getDeliveryDetails']); // Specific delivery
+            Route::post('{id}/cancel', [AppCourierController::class, 'cancelCourier']);
+            Route::post('{id}/rate', [AppCourierController::class, 'rateCourier']);
+            Route::post('upload-photo', [AppCourierController::class, 'uploadPackagePhoto']);
+        });
 
         // Food Delivery Flow Routes
-        Route::get('food/home', [AppFoodDeliveryController::class, 'getHomeData']);
-        Route::get('food/vendor/{id}', [AppFoodDeliveryController::class, 'getVendorDetails']);
-        Route::post('food/order/place', [AppFoodDeliveryController::class, 'placeOrder']);
-        Route::get('food/order/{id}/track', [AppFoodDeliveryController::class, 'trackOrder']);
+        Route::prefix('food')->group(function () {
+            Route::get('home', [AppFoodDeliveryController::class, 'getHomeData']);
+            Route::get('vendor/{id}', [AppFoodDeliveryController::class, 'getVendorDetails']);
+            Route::post('order/place', [AppFoodDeliveryController::class, 'placeOrder']);
+            Route::get('order/{id}/track', [AppFoodDeliveryController::class, 'trackOrder']);
+        });
+
+        // Wallet Flow Routes
+        Route::prefix('wallet')->group(function () {
+            Route::get('data', [AppWalletController::class, 'getWalletData']);
+            Route::post('add-money', [AppWalletController::class, 'addMoney']);
+            Route::post('withdraw', [AppWalletController::class, 'withdrawMoney']);
+        });
+
+        // Rental Flow Routes
+        Route::prefix('rental')->group(function () {
+            Route::get('items', [AppRentalController::class, 'getItems']);
+            Route::get('item/{id}', [AppRentalController::class, 'getItemDetail']);
+            Route::post('book', [AppRentalController::class, 'bookItem']);
+            Route::get('my-bookings', [AppRentalController::class, 'getMyBookings']);
+        });
+
+        // Driver Flow Routes
+        Route::prefix('driver')->group(function () {
+            Route::post('profile-setup', [AppDriverController::class, 'setupProfile']);
+            Route::post('upload-docs', [AppDriverController::class, 'uploadDocuments']);
+            Route::get('status', [AppDriverController::class, 'getStatus']);
+            Route::post('toggle-online', [AppDriverController::class, 'toggleOnline']);
+            Route::get('dashboard', [AppDriverController::class, 'getDashboard']);
+            Route::get('ride-requests', [AppDriverController::class, 'getRideRequests']);
+            Route::post('ride/{id}/respond', [AppDriverController::class, 'respondToRide']);
+            Route::post('ride/{id}/status', [AppDriverController::class, 'updateRideStatus']);
+        });
+
+        // Vendor Food Delivery Routes
+        Route::prefix('vendor/food')->group(function () {
+            Route::get('profile', [AppVendorFoodController::class, 'getProfile']);
+            Route::post('profile', [AppVendorFoodController::class, 'updateProfile']);
+            Route::get('dashboard', [AppVendorFoodController::class, 'getDashboard']);
+            Route::get('orders', [AppVendorFoodController::class, 'getOrders']);
+            Route::post('order/{id}/status', [AppVendorFoodController::class, 'updateOrderStatus']);
+            Route::get('earnings', [AppVendorFoodController::class, 'getEarnings']);
+            Route::get('menu', [AppVendorFoodController::class, 'getMenu']);
+        });
         
         // Address Management
         Route::get('user/addresses', [AppFoodDeliveryController::class, 'getAddresses']);
