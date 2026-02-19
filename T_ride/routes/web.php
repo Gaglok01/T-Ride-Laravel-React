@@ -149,6 +149,10 @@ Route::get('/admin/finance', function () {
     return Inertia::render('admin/finance');
 })->name('admin.finance');
 
+Route::get('/admin/analytics', function () {
+    return Inertia::render('admin/analytics');
+})->name('admin.analytics');
+
 Route::get('/admin/referral-campaigns/{id}', function ($id) {
     return Inertia::render('admin/view-campaign', ['id' => $id]);
 })->name('admin.view-campaign');

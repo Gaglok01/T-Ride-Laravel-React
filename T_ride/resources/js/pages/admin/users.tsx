@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Search, Filter, Plus, Eye, Edit, Trash2, Download, Users, UserCheck, UserX, TrendingUp, Clock } from "lucide-react"
+import { 
+    Search, Filter, Plus, Eye, Edit, Trash2, Download, 
+    Users, UserCheck, UserX, TrendingUp, Clock, 
+    Wallet, Star, Ban, Mail, Phone, MapPin, ChevronDown 
+} from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import { UserModal } from "@/components/admin/UserModal"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
@@ -11,6 +15,8 @@ import axios from "@/lib/axios"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { Link } from "@inertiajs/react"
+import { WalletManagementTab } from "../../components/admin/users/WalletManagementTab"
+import { UserActivityTab } from "../../components/admin/users/UserActivityTab"
 
 interface User {
     id: number
@@ -23,6 +29,10 @@ interface User {
     roles?: { name: string }[]
     rides_count?: number
     created_at?: string
+    city?: string
+    total_spent?: number
+    rating?: number
+    last_active?: string
 }
 
 interface Stats {
@@ -88,9 +98,10 @@ export default function UsersPage() {
             if (appliedFilters.status !== "All") {
                 params.status = appliedFilters.status.toLowerCase()
             }
-            // Filter by Role (from Tabs)
-            if (activeTab !== "All Users") {
-                params.role = activeTab.toLowerCase() // "rider" or "customer"
+            // Filter by Status (from Tabs)
+            const statusTabs = ["Active", "Suspended", "Inactive"]
+            if (statusTabs.includes(activeTab)) {
+                params.status = activeTab.toLowerCase()
             }
 
             const response = await axios.get("/admin/users", { params })
@@ -351,99 +362,21 @@ export default function UsersPage() {
     return (
         <AdminLayout
             title="User Management"
-            description="Manage riders and customers"
+            description="Manage riders, customers, and user accounts"
             actions={
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
-                        <input 
-                            type="text" 
-                            placeholder="Search name, email..." 
-                            value={searchTerm}
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="bg-tride-card border border-tride-border rounded-full pl-10 pr-4 py-2 text-sm text-tride-text placeholder-tride-text-muted focus:outline-none focus:border-tride-yellow transition-colors w-full sm:w-64"
-                        />
-                    </div>
-                    <div className="flex gap-2 flex-nowrap">
-                        <div className="relative">
-                            <Button 
-                                variant={showFilters ? "default" : "secondary"} 
-                                onClick={() => {
-                                    if (!showFilters) setTempFilters(appliedFilters)
-                                    setShowFilters(!showFilters)
-                                }}
-                            >
-                                <Filter size={18} />
-                                Filter
-                            </Button>
-                            
-                            {/* Filter Dropdown Panel */}
-                            {showFilters && (
-                                <div className="absolute right-0 mt-3 w-80 bg-tride-card border border-tride-border rounded-2xl shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
-                                    <div className="space-y-5">
-                                        <div className="flex items-center justify-between border-b border-tride-border pb-3">
-                                            <h3 className="font-semibold text-tride-text">Filter Users</h3>
-                                            <button onClick={() => setShowFilters(false)} className="text-tride-text-muted hover:text-tride-text transition-colors">
-                                                <span className="sr-only">Close</span>
-                                                <X size={18} />
-                                            </button>
-                                        </div>
-                                        
-                                        <div className="space-y-4">
-                                            <ModalSelect
-                                                label="Status"
-                                                value={tempFilters.status}
-                                                onChange={(val) => setTempFilters({...tempFilters, status: val})}
-                                                options={[
-                                                    { label: "All Statuses", value: "All" },
-                                                    { label: "Active", value: "Active" },
-                                                    { label: "Suspended", value: "Suspended" },
-                                                    { label: "Inactive", value: "Inactive" },
-                                                    { label: "Pending", value: "Pending" }
-                                                ]}
-                                            />
-                                        </div>
-
-                                        <div className="pt-4 grid grid-cols-2 gap-3">
-                                            <Button 
-                                                onClick={clearFilters}
-                                                variant="secondary"
-                                                className="w-full justify-center"
-                                            >
-                                                <X size={16} />
-                                                Clear
-                                            </Button>
-                                            <Button 
-                                                onClick={applyFilters} 
-                                                variant="default"
-                                                className="w-full justify-center"
-                                            >
-                                                <Check size={16} />
-                                                Apply
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <Button variant="secondary" onClick={handleExport} disabled={isExporting}>
-                            {isExporting ? (
-                                <>
-                                    <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                                    Exporting...
-                                </>
-                            ) : (
-                                <>
-                                    <Download size={18} />
-                                    Export
-                                </>
-                            )}
-                        </Button>
-                        <Button onClick={openCreateModal}>
-                            <Plus size={18} />
-                            Add User
-                        </Button>
-                    </div>
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <Button variant="secondary" onClick={handleExport} disabled={isExporting}>
+                        {isExporting ? (
+                            <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                        ) : (
+                            <Download size={18} />
+                        )}
+                        Export
+                    </Button>
+                    <Button onClick={openCreateModal}>
+                        <Plus size={18} />
+                        Add User
+                    </Button>
                 </div>
             }
         >
@@ -491,120 +424,167 @@ export default function UsersPage() {
                 />
             </div>
 
+            {/* View Switching Tabs */}
+            <div className="flex gap-1 mb-8 bg-tride-card p-1 rounded-2xl w-fit overflow-x-auto no-scrollbar max-w-full border border-tride-border">
+                {["All Users", "Active", "Suspended", "Inactive", "Wallet Management", "User Activity"].map((tab) => (
+                    <Button
+                        key={tab}
+                        variant={activeTab === tab ? "default" : "ghost"}
+                        className={`rounded-xl whitespace-nowrap px-6 transition-all duration-200 ${
+                            activeTab === tab 
+                            ? "bg-tride-yellow text-black shadow-sm font-bold" 
+                            : "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover"
+                        }`}
+                        onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+                    >
+                        {tab} {tab === "All Users" && stats && (
+                            <span className={`ml-2 px-2 py-0.5 rounded-lg text-[10px] font-black ${
+                                activeTab === tab ? "bg-black/10 text-black" : "bg-tride-hover text-tride-text-muted"
+                            }`}>
+                                {stats.total_users}
+                            </span>
+                        )}
+                    </Button>
+                ))}
+            </div>
 
-            {/* Users Table */}
-            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
-                <div className="flex gap-1 p-4 border-b border-tride-border flex-wrap">
-                    {["All Users", "Rider", "Customer"].map((tab) => (
-                        <Button
-                            key={tab}
-                            variant={activeTab === tab ? "default" : "ghost"}
-                            className={activeTab === tab ? "" : ""}
-                            onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
-                        >
-                            {tab}
-                        </Button>
-                    ))}
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
-                                <th className="px-6 py-4 font-medium">User</th>
-                                <th className="px-6 py-4 font-medium">Role</th>
-                                <th className="px-6 py-4 font-medium">Phone</th>
-                                <th className="px-6 py-4 font-medium">Rides</th>
-                                <th className="px-6 py-4 font-medium">Wallet</th>
-                                <th className="px-6 py-4 font-medium">Status</th>
-                                <th className="px-6 py-4 font-medium">Joined</th>
-                                <th className="px-6 py-4 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-tride-border">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={8} className="text-center py-8 text-tride-text-muted">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <div className="animate-spin h-5 w-5 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
-                                            Loading users...
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : users.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="text-center py-8 text-tride-text-muted">
-                                        No users found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                users.map(user => (
-                                    <UserRow 
-                                        key={user.id} 
-                                        user={user}
-                                        onEdit={() => openEditModal(user)}
-                                        onDelete={() => confirmDelete(user)}
-                                        onToggleStatus={() => openStatusModal(user)}
-                                        formatDate={formatDate}
-                                        formatWallet={formatWallet}
-                                    />
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination */}
-                {pagination && pagination.last_page > 1 && (
-                    <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
-                        <div className="text-sm text-tride-text-muted">
-                            Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} users
+            {activeTab === "Wallet Management" ? (
+                <WalletManagementTab />
+            ) : activeTab === "User Activity" ? (
+                <UserActivityTab />
+            ) : (
+                <div className="space-y-6">
+                    {/* Search and Filters Bar */}
+                    <div className="bg-tride-card border border-tride-border p-4 rounded-3xl flex flex-col lg:flex-row lg:items-center gap-4 shadow-sm mb-6">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
+                            <input 
+                                type="text" 
+                                placeholder="Search by name, email, phone, or ID..." 
+                                value={searchTerm}
+                                onChange={(e) => handleSearch(e.target.value)}
+                                className="w-full bg-tride-hover border border-tride-border rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-[#fbbf24] transition-all font-medium"
+                            />
                         </div>
                         <div className="flex items-center gap-2">
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                disabled={currentPage === 1}
-                                className="px-4 py-2 rounded-xl bg-tride-hover text-tride-text-muted hover:bg-tride-border hover:text-tride-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Previous
-                            </button>
-                            <div className="flex items-center gap-1">
-                                {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
-                                    let pageNum: number
-                                    if (pagination.last_page <= 5) {
-                                        pageNum = i + 1
-                                    } else if (currentPage <= 3) {
-                                        pageNum = i + 1
-                                    } else if (currentPage >= pagination.last_page - 2) {
-                                        pageNum = pagination.last_page - 4 + i
-                                    } else {
-                                        pageNum = currentPage - 2 + i
-                                    }
-                                    return (
-                                        <button
-                                            key={pageNum}
-                                            onClick={() => setCurrentPage(pageNum)}
-                                            className={`w-10 h-10 rounded-xl transition-colors ${
-                                                currentPage === pageNum 
-                                                    ? "bg-tride-yellow text-black font-bold" 
-                                                    : "bg-tride-hover text-tride-text-muted hover:bg-tride-border hover:text-tride-text"
-                                            }`}
-                                        >
-                                            {pageNum}
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
-                                disabled={currentPage === pagination.last_page}
-                                className="px-4 py-2 rounded-xl bg-tride-hover text-tride-text-muted hover:bg-tride-border hover:text-tride-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Next
-                            </button>
+                             <div className="relative group">
+                                <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-sm font-semibold text-tride-text min-w-[120px] justify-between hover:border-[#fbbf24] transition-colors">
+                                    City: All
+                                    <ChevronDown size={14} className="text-tride-text-muted" />
+                                </button>
+                             </div>
+                             <div className="relative group">
+                                <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-sm font-semibold text-tride-text min-w-[140px] justify-between hover:border-[#fbbf24] transition-colors">
+                                    Status: All
+                                    <ChevronDown size={14} className="text-tride-text-muted" />
+                                </button>
+                             </div>
                         </div>
                     </div>
-                )}
-            </div>
+
+                    {/* Users Table */}
+                    <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
+                                        <th className="px-6 py-4 font-medium text-tride-text">User</th>
+                                        <th className="px-6 py-4 font-medium text-tride-text">Role</th>
+                                        <th className="px-6 py-4 font-medium text-tride-text">Phone</th>
+                                        <th className="px-6 py-4 font-medium text-tride-text">Rides</th>
+                                        <th className="px-6 py-4 font-medium text-tride-text">Wallet</th>
+                                        <th className="px-6 py-4 font-medium text-tride-text">Status</th>
+                                        <th className="px-6 py-4 font-medium text-tride-text">Joined</th>
+                                        <th className="px-6 py-4 font-medium text-tride-text text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-tride-border/50">
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan={8} className="text-center py-20">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="animate-spin h-5 w-5 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
+                                                    <span className="text-sm font-medium text-tride-text-muted">Loading users...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : users.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={8} className="text-center py-20 text-tride-text-muted">
+                                                No users found.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        users.map(user => (
+                                            <UserRow 
+                                                key={user.id} 
+                                                user={user}
+                                                onEdit={() => openEditModal(user)}
+                                                onDelete={() => confirmDelete(user)}
+                                                onToggleStatus={() => openStatusModal(user)}
+                                                formatDate={formatDate}
+                                                formatWallet={formatWallet}
+                                            />
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        {pagination && pagination.last_page > 1 && (
+                            <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
+                                <div className="text-sm text-tride-text-muted">
+                                    Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} users
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="px-4 py-2 rounded-xl bg-tride-hover text-tride-text-muted hover:bg-tride-border hover:text-tride-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Previous
+                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+                                            let pageNum: number
+                                            if (pagination.last_page <= 5) {
+                                                pageNum = i + 1
+                                            } else if (currentPage <= 3) {
+                                                pageNum = i + 1
+                                            } else if (currentPage >= pagination.last_page - 2) {
+                                                pageNum = pagination.last_page - 4 + i
+                                            } else {
+                                                pageNum = currentPage - 2 + i
+                                            }
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    onClick={() => setCurrentPage(pageNum)}
+                                                    className={`w-10 h-10 rounded-xl transition-colors ${
+                                                        currentPage === pageNum 
+                                                            ? "bg-[#fbbf24] text-black font-bold" 
+                                                            : "bg-tride-hover text-tride-text-muted hover:bg-tride-border hover:text-tride-text"
+                                                    }`}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                    <button 
+                                        onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
+                                        disabled={currentPage === pagination.last_page}
+                                        className="px-4 py-2 rounded-xl bg-tride-hover text-tride-text-muted hover:bg-tride-border hover:text-tride-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <UserModal 
                 isOpen={isModalOpen}
@@ -680,7 +660,7 @@ function UserRow({ user, onEdit, onDelete, onToggleStatus, formatDate, formatWal
         <tr className="hover:bg-tride-hover transition-colors group">
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-tride-hover flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-tride-hover flex items-center justify-center overflow-hidden border border-tride-border">
                         {user.photo ? (
                             <img src={`/storage/${user.photo}`} alt={user.name} className="w-full h-full object-cover" />
                         ) : (
