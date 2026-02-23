@@ -82,15 +82,16 @@ class AppAuthController extends Controller
             ]
         );
 
-        match ($request->input('method')) {
-            'phone' => $this->sendSms($identifier, $otp),
-            'whatsapp' => $this->sendWhatsapp($identifier, $otp),
-            'email' => $this->sendEmail($identifier, $otp),
-        };
+        // match ($request->input('method')) {
+        //     'phone' => $this->sendSms($identifier, $otp),
+        //     'whatsapp' => $this->sendWhatsapp($identifier, $otp),
+        //     'email' => $this->sendEmail($identifier, $otp),
+        // };
 
         return response()->json([
             'status' => true,
             'message' => 'OTP sent',
+            'otp' => $otp,
             'next' => 'verify_otp'
         ]);
     }
