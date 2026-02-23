@@ -49,21 +49,21 @@ class AppAuthController extends Controller
             'method' => 'required|in:phone,email,whatsapp',
         ]);
 
-        if ($request->method === 'phone') {
+        if ($request->input('method') === 'phone') {
             $request->validate([
                 'phone_number' => 'required|string|unique:users,phone_number'
             ]);
             $identifier = $request->phone_number;
         }
 
-        if ($request->method === 'email') {
+        if ($request->input('method') === 'email') {
             $request->validate([
                 'email' => 'required|email|unique:users,email'
             ]);
             $identifier = $request->email;
         }
 
-        if ($request->method === 'whatsapp') {
+        if ($request->input('method') === 'whatsapp') {
             $request->validate([
                 'whatsapp_number' => 'required|string|unique:users,whatsapp_number'
             ]);
@@ -75,14 +75,14 @@ class AppAuthController extends Controller
         Otp::updateOrCreate(
             ['identifier' => $identifier],
             [
-                'method' => $request->method,
+                'method' => $request->input('method'),
                 'otp' => $otp,
                 'expires_at' => now()->addMinutes(10),
                 'is_used' => false
             ]
         );
 
-        match ($request->method) {
+        match ($request->input('method')) {
             'phone' => $this->sendSms($identifier, $otp),
             'whatsapp' => $this->sendWhatsapp($identifier, $otp),
             'email' => $this->sendEmail($identifier, $otp),
@@ -205,7 +205,7 @@ class AppAuthController extends Controller
 
     public function getProfile()
     {
-        $user = User::Select('id', 'name', 'email', 'phone_number', 'whatsapp_number', 'address', 'city', 'language_id', 'status', 'created_at', 'updated_at')->findorfail(Auth::user()->id);
+        $user = User::Select('id', 'name', 'email', 'phone_number', 'whatsapp_number', 'address', 'city', 'language_id', 'status', 'created_at', 'updated_at')->findorfail(Auth::id());
         $user->load('roles');
 
         return response()->json([
@@ -226,7 +226,7 @@ class AppAuthController extends Controller
         ]);
 
         Feedback::create([
-            'user_id' => Auth::user()->id,
+            'user_id' => Auth::id(),
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
