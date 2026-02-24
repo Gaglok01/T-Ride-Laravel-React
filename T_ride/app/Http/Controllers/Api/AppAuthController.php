@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client;
 use App\Mail\OtpMail;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
 
 class AppAuthController extends Controller
 {
@@ -177,7 +178,7 @@ class AppAuthController extends Controller
         }
 
         $user = User::create($data);
-        $user->assignRole($request->role);
+        $user->assignRole(Role::findByName($request->role, 'api'));
 
         return response()->json([
             'status' => true,
