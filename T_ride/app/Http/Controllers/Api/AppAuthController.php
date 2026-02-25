@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client;
 use App\Mail\OtpMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Spatie\Permission\Models\Role;
 
 class AppAuthController extends Controller
@@ -135,6 +136,7 @@ class AppAuthController extends Controller
             'language_id' => 'required|exists:languages,id',
             'address' => 'nullable|string',
             'city' => 'nullable|string',
+            'region' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -155,6 +157,7 @@ class AppAuthController extends Controller
             'language_id' => $request->language_id,
             'address' => $request->address,
             'city' => $request->city,
+            'region' => $request->region,
             'status' => 'active',
         ];
 
@@ -207,12 +210,55 @@ class AppAuthController extends Controller
 
     public function getProfile()
     {
-        $user = User::Select('id', 'name', 'email', 'phone_number', 'whatsapp_number', 'address', 'city', 'language_id', 'status', 'created_at', 'updated_at')->findorfail(Auth::id());
+        $user = User::Select('id', 'name', 'email', 'phone_number', 'whatsapp_number', 'photo', 'address', 'city', 'region', 'language_id', 'status', 'created_at', 'updated_at')->findorfail(Auth::id());
         $user->load('roles');
 
         return response()->json([
             'status' => true,
             'user' => $user
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = User::findOrFail(Auth::id());
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'nullable|string',
+            'region' => 'nullable|string',
+            'city' => 'nullable|string',
+            'role' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $data = $request->only(['name', 'address', 'region', 'city']);
+
+        if ($request->hasFile('photo')) {
+            // Delete old photo if it exists
+            if ($user->photo) {
+                $oldPath = public_path('uploads/photos/' . $user->photo);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+
+            $photo = $request->file('photo');
+            $photoName = time() . '.' . $photo->getClientOriginalExtension();
+            $photo->move(public_path('uploads/photos'), $photoName);
+            $data['photo'] = $photoName;
+        }
+
+        $user->update($data);
+
+        if ($request->role) {
+            $user->syncRoles([Role::findByName($request->role, 'api')]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile updated successfully',
+            'user' => $user->load('roles')
         ]);
     }
 
