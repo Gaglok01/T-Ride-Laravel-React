@@ -76,16 +76,20 @@ class AppRideController extends Controller
         $validator = Validator::make($request->all(), [
             'pickup_lat' => 'required|numeric',
             'pickup_lng' => 'required|numeric',
-            'vehicle_type_id' => 'required|exists:types,id',
+            'vehicle_type_id' => 'nullable|exists:types,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
 
-        $drivers = Driver::where('status', 'active')
-            ->where('type_id', $request->vehicle_type_id)
-            ->whereHas('user', function ($query) use ($request) {
+        $driversQuery = Driver::where('status', 'active');
+
+        if ($request->filled('vehicle_type_id')) {
+            $driversQuery->where('type_id', $request->vehicle_type_id);
+        }
+
+        $drivers = $driversQuery->whereHas('user', function ($query) {
                 $query->whereNotNull('lat')->whereNotNull('lng');
             })
             ->with(['user', 'type'])
