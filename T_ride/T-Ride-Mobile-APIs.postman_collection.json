@@ -171,7 +171,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"identifier\": \"+923001234567\",\n    \"name\": \"Asad PM\",\n    \"password\": \"password123\",\n    \"role\": \"customer\",\n    \"language_id\": 1,\n    \"address\": \"Main Street\",\n    \"city\": \"Karachi\"\n}",
+                            "raw": "{\n    \"identifier\": \"+923001234567\",\n    \"name\": \"Asad PM\",\n    \"password\": \"password123\",\n    \"role\": \"customer\",\n    \"language_id\": 1,\n    \"address\": \"Main Street\",\n    \"city\": \"Karachi\",\n    \"region\": \"Sindh\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -1935,6 +1935,75 @@
                                 "api",
                                 "app",
                                 "get-profile"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Asad Updated",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "address",
+                                    "value": "New Address 123",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "region",
+                                    "value": "Sindh Updated",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "city",
+                                    "value": "Karachi West",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "role",
+                                    "value": "customer",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "photo",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/app/update-profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "app",
+                                "update-profile"
                             ]
                         }
                     },
