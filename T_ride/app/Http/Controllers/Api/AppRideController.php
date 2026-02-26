@@ -132,7 +132,7 @@ class AppRideController extends Controller
             'dropoff_address' => 'required|string',
             'dropoff_lat' => 'required|numeric',
             'dropoff_lng' => 'required|numeric',
-            'vehicle_type_id' => 'required|exists:types,id',
+            'vehicle_type_id' => 'nullable|exists:types,id',
             'payment_method' => 'required|in:Cash,Wallet,Card',
             'fare' => 'required|numeric',
             'driver_id' => 'nullable|exists:drivers,id'
