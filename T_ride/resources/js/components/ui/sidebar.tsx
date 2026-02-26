@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState } from "react"
 import { Link, usePage } from "@inertiajs/react"
-import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent, Menu, Gift, FileText, Wallet, BarChart3 } from "lucide-react"
+import { LayoutGrid, Users, LogOut, Settings, Car, Store, Shield, Package, Layers, Key, ShoppingBag, Ticket, DollarSign, Radio, CreditCard, X, Map, Percent, Menu, Gift, FileText, Wallet, BarChart3, Star, Users2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Sidebar Context for useSidebar hook
@@ -140,14 +140,18 @@ export function Sidebar({
           <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Users</div>
           <NavItem onClick={handleNavClick} href="/admin/users" icon={<Users size={20} />} label="User Management" active={isActive("/admin/users")} />
           <NavItem onClick={handleNavClick} href="/admin/drivers" icon={<Users size={20} />} label="Drivers" active={isActive("/admin/drivers")} />
+          <NavItem onClick={handleNavClick} href="/admin/driver-tiers" icon={<Layers size={20} />} label="Driver Tiers" active={isActive("/admin/driver-tiers")} />
+          <NavItem onClick={handleNavClick} href="/admin/driver-ratings" icon={<Star size={20} />} label="Driver Ratings" active={isActive("/admin/driver-ratings")} />
           <NavItem onClick={handleNavClick} href="/admin/types" icon={<Users size={20} />} label="Driver Types" active={isActive("/admin/types")} />
           <NavItem onClick={handleNavClick} href="/admin/roles" icon={<Shield size={20} />} label="Roles & Permissions" active={isActive("/admin/roles")} />
+          <NavItem onClick={handleNavClick} href="/admin/trust-compliance" icon={<Shield size={20} />} label="Trust & Compliance" active={isActive("/admin/trust-compliance")} />
         </div>
 
         {/* OPERATIONS */}
         <div className="space-y-1">
           <div className="px-4 text-xs font-semibold text-tride-text-muted uppercase tracking-wider mb-2">Operations</div>
           <NavItem onClick={handleNavClick} href="/admin/rides" icon={<Car size={20} />} label="Rides" active={isActive("/admin/rides")} />
+          <NavItem onClick={handleNavClick} href="/admin/ride-pooling" icon={<Users2 size={20} />} label="Ride Pooling" active={isActive("/admin/ride-pooling")} />
           <NavItem onClick={handleNavClick} href="/admin/orders" icon={<Package size={20} />} label="Courier Orders" active={isActive("/admin/orders")} />
           <NavItem onClick={handleNavClick} href="/admin/delivery-orders" icon={<ShoppingBag size={20} />} label="Delivery Orders" active={isActive("/admin/delivery-orders")} />
           <NavItem onClick={handleNavClick} href="/admin/dispatch" icon={<Radio size={20} />} label="Dispatch" active={isActive("/admin/dispatch")} />

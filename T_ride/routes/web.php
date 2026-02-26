@@ -57,6 +57,30 @@ Route::get('/admin/roles', function () {
     return Inertia::render('admin/roles');
 })->name('admin.roles');
 
+Route::get('/admin/trust-compliance', function () {
+    return Inertia::render('admin/trust-compliance');
+})->name('admin.trust-compliance');
+
+Route::get('/admin/driver-tiers', function () {
+    return Inertia::render('admin/driver-tiers');
+})->name('admin.driver-tiers');
+
+Route::get('/admin/ride-pooling', function () {
+    return Inertia::render('admin/ride-pooling');
+})->name('admin.ride-pooling');
+
+Route::get('/admin/ride-pooling/{id}', function ($id) {
+    return Inertia::render('admin/view-ride-pool', ['id' => $id]);
+})->name('admin.view-ride-pool');
+
+Route::get('/admin/driver-ratings', function () {
+    return Inertia::render('admin/driver-ratings');
+})->name('admin.driver-ratings');
+
+Route::get('/admin/driver-ratings/{id}', function ($id) {
+    return Inertia::render('admin/view-review', ['id' => $id]);
+})->name('admin.view-review');
+
 Route::get('/admin/reports', function () {
     return Inertia::render('admin/reports');
 })->name('admin.reports');

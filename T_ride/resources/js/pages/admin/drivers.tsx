@@ -23,6 +23,8 @@ interface Driver {
   phone_number?: string
   status: string
   rating: number
+  completion_rate?: number
+  driver_tier_id?: number
   trips: number
   vehicle_model: string
   cnic?: string
@@ -33,7 +35,6 @@ interface Driver {
     type_name: string
     id: number
   }
-  documents?: string
   image?: string
   user?: {
     email: string
@@ -232,19 +233,19 @@ export default function DriversPage() {
       setIsModalOpen(true)
   }
 
-  const filteredDrivers = drivers.filter(driver => {
-    // 1. Global Search (Name or ID) - kept as generic
-    const matchesSearch = driver.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          driver.driver_id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDrivers = drivers.filter((driver: Driver) => {
+    const name = driver.name || ""
+    const dId = driver.driver_id || ""
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          dId.toLowerCase().includes(searchTerm.toLowerCase())
     
-    // 2. Status Filter (Applied on 'Apply' click)
     const matchesStatus = appliedFilters.status === "All" || driver.status === appliedFilters.status
-
-    // 3. Specific Driver ID Filter (Applied on 'Apply' click)
-    const matchesDriverId = appliedFilters.driverId === "" || driver.driver_id.toLowerCase().includes(appliedFilters.driverId.toLowerCase())
-
-    // 4. Type Filter (Controlled by Tabs)
-    const matchesType = activeTab === "All Drivers" || driver.type?.type_name === activeTab
+    const matchesDriverId = appliedFilters.driverId === "" || dId.toLowerCase().includes(appliedFilters.driverId.toLowerCase())
+    const matchesType = activeTab === "All Drivers" || 
+                        (activeTab === "Ride Drivers" && driver.type?.type_name === "Ride") ||
+                        (activeTab === "Couriers" && driver.type?.type_name === "Courier") ||
+                        (activeTab === "Delivery" && driver.type?.type_name === "Delivery") ||
+                        (activeTab === "Pending Approval" && driver.status === "Pending")
 
     return matchesSearch && matchesStatus && matchesType && matchesDriverId
   })
@@ -355,82 +356,88 @@ export default function DriversPage() {
         />
       </div>
 
-      {/* View Switching Tabs */}
-      <div className="flex gap-1 mb-8 bg-tride-card p-1 rounded-2xl w-fit overflow-x-auto no-scrollbar max-w-full border border-tride-border">
-        {["All Drivers", "Ride Drivers", "Couriers", "Delivery", "Pending Approval", "Documents", "Earnings", "Performance"].map((tab) => (
-          <Button
-            key={tab}
-            variant={activeTab === tab ? "default" : "ghost"}
-            className={`rounded-xl whitespace-nowrap px-6 transition-all duration-200 ${
-              activeTab === tab 
-              ? "bg-tride-yellow text-black shadow-sm font-bold" 
-              : "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover"
-            }`}
-            onClick={() => { setActiveTab(tab); }}
-          >
-            {tab}
-          </Button>
-        ))}
-      </div>
+      <div className="bg-tride-card border border-tride-border rounded-[2.5rem] overflow-hidden shadow-sm">
+        {/* View Switching Tabs - Now Inside Card */}
+        <div className="flex gap-1 p-4 border-b border-tride-border overflow-x-auto no-scrollbar scrollbar-hide">
+          {["All Drivers", "Ride Drivers", "Couriers", "Delivery", "Pending Approval", "Documents", "Earnings", "Performance"].map((tab) => (
+            <Button
+              key={tab}
+              variant={activeTab === tab ? "default" : "ghost"}
+              className={`rounded-xl whitespace-nowrap px-6 transition-all duration-200 h-10 ${
+                activeTab === tab 
+                ? "bg-tride-yellow text-black shadow-sm font-bold" 
+                : "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover"
+              }`}
+              onClick={() => { setActiveTab(tab); }}
+            >
+              {tab}
+            </Button>
+          ))}
+        </div>
 
-      {activeTab === "Documents" ? (
-        <DriverDocumentsTab />
-      ) : activeTab === "Earnings" ? (
-        <DriverEarningsTab />
-      ) : activeTab === "Performance" ? (
-        <DriverPerformanceTab />
-      ) : (
-        <div className="space-y-6">
-          {/* Search and Filters Bar */}
-          <div className="bg-tride-card border border-tride-border p-4 rounded-3xl flex flex-col lg:flex-row lg:items-center gap-4 shadow-sm mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search by name, vehicle, or plate..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-tride-hover border border-tride-border rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-tride-yellow transition-all font-medium"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-               <div className="relative group">
-                <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-sm font-semibold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors">
-                  Type: All
-                  <ChevronDown size={14} className="text-tride-text-muted" />
-                </button>
-               </div>
-               <div className="relative group">
-                <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-sm font-semibold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors">
-                  City: All
-                  <ChevronDown size={14} className="text-tride-text-muted" />
-                </button>
-               </div>
-               <div className="relative group">
-                <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-sm font-semibold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors">
-                  Status: All
-                  <ChevronDown size={14} className="text-tride-text-muted" />
-                </button>
-               </div>
-            </div>
+        {activeTab === "Documents" ? (
+          <div className="p-6">
+            <DriverDocumentsTab />
           </div>
+        ) : activeTab === "Earnings" ? (
+          <div className="p-6">
+            <DriverEarningsTab />
+          </div>
+        ) : activeTab === "Performance" ? (
+          <div className="p-6">
+            <DriverPerformanceTab />
+          </div>
+        ) : (
+          <div className="p-6 space-y-6">
+            {/* Search and Filters Bar - Now Inside Card */}
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Search by name, vehicle, or plate..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-tride-hover border border-tride-border rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-tride-yellow transition-all font-medium"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                 <div className="relative group">
+                  <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-xs font-bold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors uppercase tracking-wider">
+                    Type: All
+                    <ChevronDown size={14} className="text-tride-text-muted" />
+                  </button>
+                 </div>
+                 <div className="relative group">
+                  <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-xs font-bold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors uppercase tracking-wider">
+                    City: All
+                    <ChevronDown size={14} className="text-tride-text-muted" />
+                  </button>
+                 </div>
+                 <div className="relative group">
+                  <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-xs font-bold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors uppercase tracking-wider">
+                    Status: All
+                    <ChevronDown size={14} className="text-tride-text-muted" />
+                  </button>
+                 </div>
+              </div>
+            </div>
 
-          {/* Table */}
-          <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
+            {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
-                    <th className="px-6 py-4 font-medium text-tride-text">Driver</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">Type</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">Vehicle</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">City</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">Trips</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">Rating</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">Earnings</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">Documents</th>
-                    <th className="px-6 py-4 font-medium text-tride-text">Status</th>
-                    <th className="px-6 py-4 font-medium text-tride-text text-right">Actions</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Driver</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Type</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Vehicle</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">City</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Trips</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Rating</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Earnings</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Documents</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
+                    <th className="px-6 py-4 font-medium whitespace-nowrap text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-tride-border">
@@ -462,8 +469,8 @@ export default function DriversPage() {
               </table>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <DriverModal 
         isOpen={isModalOpen}
@@ -515,9 +522,9 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
 function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Driver, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void }) {
     return (
         <tr className="hover:bg-tride-hover transition-colors group">
-            <td className="px-6 py-4">
+            <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-tride-hover rounded-full flex items-center justify-center text-lg font-bold text-tride-text overflow-hidden border border-tride-border">
+                    <div className="w-10 h-10 bg-tride-hover rounded-full flex items-center justify-center text-base font-bold text-tride-text overflow-hidden border border-tride-border shrink-0">
                         {driver.image ? (
                              <img src={`/storage/${driver.image}`} alt={driver.name} className="w-full h-full object-cover" />
                         ) : (
@@ -525,35 +532,37 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
                         )}
                     </div>
                     <div>
-                        <div className="font-bold text-tride-text">{driver.name}</div>
-                        <div className="text-xs text-tride-text-muted">{driver.driver_id}</div>
+                        <div className="font-bold text-tride-text text-sm">{driver.name}</div>
+                        <div className="text-[10px] text-tride-text-muted uppercase tracking-tighter">{driver.driver_id}</div>
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4">
-                <span className="px-3 py-1 rounded-full border border-tride-border text-xs font-medium text-tride-text capitalize">
+            <td className="px-6 py-4 whitespace-nowrap">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-[10px] font-bold text-tride-text capitalize bg-tride-hover/30">
                     {driver.type?.type_name || 'Ride'}
                 </span>
             </td>
-            <td className="px-6 py-4">
-                <div className="text-sm font-medium text-tride-text">{driver.vehicle_model || "Toyota Camry 2022"}</div>
-                <div className="text-[10px] text-tride-text-muted font-mono uppercase">GR-2345-22</div>
-            </td>
-            <td className="px-6 py-4 text-sm text-tride-text-muted">Accra</td>
-            <td className="px-6 py-4 font-mono text-sm text-tride-text">{driver.trips}</td>
-            <td className="px-6 py-4">
-                <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
-                    <Star size={14} fill="currentColor" /> {Number(driver.rating || 0).toFixed(1)}
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex flex-col">
+                    <div className="text-xs font-bold text-tride-text">{driver.vehicle_model || "Toyota Camry 2022"}</div>
+                    <div className="text-[10px] text-tride-text-muted font-mono uppercase tracking-widest mt-0.5">GR-2345-22</div>
                 </div>
             </td>
-            <td className="px-6 py-4 font-bold text-tride-text text-sm">$12,450</td>
-            <td className="px-6 py-4">
+            <td className="px-6 py-4 text-xs font-bold text-tride-text-muted whitespace-nowrap">Accra</td>
+            <td className="px-6 py-4 font-mono text-xs font-bold text-tride-text whitespace-nowrap">{driver.trips}</td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-1 text-amber-500 font-black text-xs">
+                    <Star size={12} fill="currentColor" /> {Number(driver.rating || 0).toFixed(1)}
+                </div>
+            </td>
+            <td className="px-6 py-4 font-black text-tride-text text-xs whitespace-nowrap">$12,450</td>
+            <td className="px-6 py-4 whitespace-nowrap">
                 {(() => {
                     const status = driver.background_check_status || 'verified'
                     const styles: Record<string, string> = {
-                        verified: 'bg-blue-500 text-white',
+                        verified: 'bg-blue-600 text-white',
                         pending: 'bg-amber-100 text-amber-600 border-amber-500/20',
-                        failed: 'bg-red-500/10 text-red-400 border-red-500/20',
+                        failed: 'bg-red-500 text-white',
                         not_checked: 'bg-white/5 text-white/40 border-white/10',
                     }
                     const labels: Record<string, string> = {
@@ -563,24 +572,29 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
                         not_checked: 'Not Checked',
                     }
                     return (
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${styles[status]}`}>
-                            {labels[status]}
-                        </span>
+                        <div className="flex items-center gap-2">
+                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${styles[status]}`}>
+                                {labels[status]}
+                            </span>
+                            <IconButton size="xs" tooltip="View Documents">
+                                <FileText size={12} />
+                            </IconButton>
+                        </div>
                     )
                 })()}
             </td>
-            <td className="px-6 py-4 text-center">
+            <td className="px-6 py-4 text-center whitespace-nowrap">
                 <div className="flex items-center gap-1.5 justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span className="text-xs font-bold text-tride-text">Online</span>
+                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                    <span className="text-[10px] font-black text-tride-text uppercase">Online</span>
                 </div>
             </td>
-            <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2 text-tride-text-muted">
+            <td className="px-6 py-4 text-right whitespace-nowrap">
+                <div className="flex items-center justify-end gap-x-8 text-tride-text-muted">
                     <Link href={`/admin/drivers/${driver.id}`}>
-                        <Eye size={18} className="hover:text-tride-text transition-colors cursor-pointer" />
+                        <Eye size={18} className="hover:text-blue-500 transition-colors cursor-pointer" />
                     </Link>
-                    <Edit size={18} className="hover:text-tride-text transition-colors cursor-pointer" onClick={onEdit} />
+                    <Edit size={18} className="hover:text-tride-yellow transition-colors cursor-pointer" onClick={onEdit} />
                     <Ban size={18} className="hover:text-red-500 transition-colors cursor-pointer" onClick={onDelete} />
                 </div>
             </td>

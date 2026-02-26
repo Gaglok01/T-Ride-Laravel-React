@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 import { Link } from "@inertiajs/react"
 import { AdminLayout } from "@/layouts/admin-layout"
-import { Filter, Calendar, Eye, CarFront, CheckCircle, Activity, XCircle, DollarSign, Search, ChevronLeft, ChevronRight, Download } from "lucide-react"
+import { Filter, Calendar, Eye, CarFront, CheckCircle, Activity, XCircle, DollarSign, Search, ChevronLeft, ChevronRight, Download, Map as MapIcon, Navigation, MapPin, Zap, RefreshCw, Layers } from "lucide-react"
 import { Button, IconButton } from "@/components/ui/button"
 import axios from "@/lib/axios"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import { GoogleMap, Marker, InfoWindow } from "@react-google-maps/api"
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 
 interface RideStats {
     total_rides: number
@@ -50,10 +52,34 @@ export default function RidesPage() {
     const [pagination, setPagination] = useState<Pagination | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const [isExporting, setIsExporting] = useState(false)
+    const [liveRides, setLiveRides] = useState<any[]>([])
+    const { isLoaded } = useGoogleMaps()
+    const [selectedLiveRide, setSelectedLiveRide] = useState<any>(null)
+    const [lastSync, setLastSync] = useState<Date>(new Date())
 
     useEffect(() => {
         fetchStats()
+        fetchLiveRides()
+
+        // Real-time update simulation
+        const interval = setInterval(() => {
+            fetchLiveRides()
+            setLastSync(new Date())
+        }, 15000)
+
+        return () => clearInterval(interval)
     }, [])
+
+    const fetchLiveRides = async () => {
+        try {
+            const res = await axios.get('/admin/rides/live')
+            if (res.data.status) {
+                setLiveRides(res.data.data)
+            }
+        } catch (error) {
+            console.error("Live sync failed:", error)
+        }
+    }
 
     useEffect(() => {
         fetchRides()
@@ -177,6 +203,7 @@ export default function RidesPage() {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
         setCurrentPage(1) // Reset to page 1 on tab change
+        setSelectedLiveRide(null)
     }
 
     return (
@@ -251,94 +278,210 @@ export default function RidesPage() {
             </div>
 
             <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
-                <div className="flex gap-1 p-4 border-tride-border">
-                    {["All Rides", "Completed", "In Progress", "Cancelled"].map((tab) => (
+                <div className="flex gap-1 p-4 border-tride-border overflow-x-auto">
+                    {["All Rides", "Live Tracker", "Completed", "In Progress", "Cancelled"].map((tab) => (
                         <Button
                             key={tab}
                             variant={activeTab === tab ? "default" : "ghost"}
-                            className={activeTab === tab ? "" : ""}
+                            className={`rounded-xl px-6 font-bold whitespace-nowrap ${
+                                activeTab === tab ? "bg-tride-yellow text-black" : "text-tride-text-muted"
+                            }`}
                             onClick={() => handleTabChange(tab)}
                         >
+                            {tab === "Live Tracker" && <Activity size={14} className="mr-2 animate-pulse text-red-500" />}
                             {tab}
                         </Button>
                     ))}
                 </div>
 
                 <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
-                                    <th className="px-6 py-4 font-medium">Ride ID</th>
-                                    <th className="px-6 py-4 font-medium">Rider</th>
-                                    <th className="px-6 py-4 font-medium">Driver</th>
-                                    <th className="px-6 py-4 font-medium">Route</th>
-                                    <th className="px-6 py-4 font-medium">Fare</th>
-                                    <th className="px-6 py-4 font-medium">Payment</th>
-                                    <th className="px-6 py-4 font-medium">Status</th>
-                                    <th className="px-6 py-4 font-medium text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-tride-border">
-                                {loading ? (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <div className="animate-spin h-4 w-4 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
-                                                Loading rides...
+                    {activeTab === "Live Tracker" ? (
+                        <div className="flex flex-col lg:flex-row h-[700px]">
+                            {/* Live Sidebar */}
+                            <div className="w-full lg:w-80 border-r border-tride-border bg-tride-hover/30 flex flex-col">
+                                <div className="p-4 border-b border-tride-border bg-tride-card">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="font-bold text-tride-text">Live Feed</h3>
+                                        <span className="text-[10px] text-tride-text-muted flex items-center gap-1">
+                                            <RefreshCw size={10} className="animate-spin" /> {lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-tride-text-muted">{liveRides.length} active rides currently untracked</p>
+                                </div>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                    {liveRides.length === 0 ? (
+                                        <div className="p-10 text-center text-tride-text-muted opacity-50">
+                                            <Zap size={32} className="mx-auto mb-2" />
+                                            <p className="text-sm">No active rides at the moment</p>
+                                        </div>
+                                    ) : (
+                                        liveRides.map((ride) => (
+                                            <div 
+                                                key={ride.id} 
+                                                onClick={() => setSelectedLiveRide(ride)}
+                                                className={`p-4 border-b border-tride-border hover:bg-tride-hover cursor-pointer transition-colors ${selectedLiveRide?.id === ride.id ? 'bg-tride-yellow/10 border-l-4 border-l-tride-yellow' : ''}`}
+                                            >
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <span className="font-mono text-[10px] text-tride-yellow">{ride.ride_custom_id}</span>
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase ${ride.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' : 'bg-yellow-500/20 text-yellow-500'}`}>
+                                                        {ride.status.replace('_', ' ')}
+                                                    </span>
+                                                </div>
+                                                <p className="font-bold text-sm text-tride-text truncate">{ride.rider?.name}</p>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <div className="flex flex-col items-center">
+                                                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                                        <div className="w-0.5 h-3 bg-tride-border"></div>
+                                                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                                    </div>
+                                                    <div className="text-[10px] text-tride-text-muted truncate">
+                                                        <p className="truncate">{ride.pickup_address}</p>
+                                                        <p className="truncate mt-1">{ride.dropoff_address}</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                ) : rides.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">No rides found.</td>
-                                    </tr>
-                                ) : (
-                                    rides.map((ride) => (
-                                        <RideRow
-                                            key={ride.id}
-                                            id={ride.ride_custom_id}
-                                            rider={ride.rider?.name || 'Unknown'}
-                                            driver={ride.driver?.name || 'Unknown'}
-                                            from={ride.pickup_address}
-                                            to={ride.dropoff_address}
-                                            fare={`$${ride.fare}`}
-                                            payment={ride.payment_method}
-                                            status={ride.status}
-                                        />
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Pagination */}
-                    {pagination && pagination.last_page > 1 && (
-                        <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
-                            <div className="text-sm text-tride-text-muted">
-                                Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} rides
+                                        ))
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={pagination.current_page === 1}
-                                    className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
-                                >
-                                    <ChevronLeft size={16} className="mr-1" /> Previous
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
-                                    disabled={pagination.current_page === pagination.last_page}
-                                    className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
-                                >
-                                    Next <ChevronRight size={16} className="ml-1" />
-                                </Button>
+
+                            {/* Live Map */}
+                            <div className="flex-1 relative">
+                                {isLoaded ? (
+                                    <GoogleMap
+                                        mapContainerStyle={{ width: '100%', height: '100%' }}
+                                        zoom={12}
+                                        center={selectedLiveRide ? { lat: Number(selectedLiveRide.pickup_lat), lng: Number(selectedLiveRide.pickup_lng) } : { lat: 40.7128, lng: -74.0060 }}
+                                        options={{
+                                            styles: [{ elementType: "geometry", stylers: [{ color: "#242f3e" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] }],
+                                            disableDefaultUI: false,
+                                        }}
+                                    >
+                                        {liveRides.map((ride) => (
+                                            <Marker
+                                                key={ride.id}
+                                                position={{ lat: Number(ride.pickup_lat), lng: Number(ride.pickup_lng) }}
+                                                onClick={() => setSelectedLiveRide(ride)}
+                                                icon={{
+                                                    path: window.google?.maps?.SymbolPath?.CIRCLE,
+                                                    scale: 7,
+                                                    fillColor: ride.status === 'in_progress' ? "#3b82f6" : "#f59e0b",
+                                                    fillOpacity: 1,
+                                                    strokeWeight: 2,
+                                                    strokeColor: "#ffffff"
+                                                }}
+                                            />
+                                        ))}
+
+                                        {selectedLiveRide && (
+                                            <InfoWindow
+                                                position={{ lat: Number(selectedLiveRide.pickup_lat), lng: Number(selectedLiveRide.pickup_lng) }}
+                                                onCloseClick={() => setSelectedLiveRide(null)}
+                                            >
+                                                <div className="p-1 min-w-[150px]">
+                                                    <h4 className="font-bold text-gray-900">{selectedLiveRide.ride_custom_id}</h4>
+                                                    <p className="text-xs text-gray-600">Rider: {selectedLiveRide.rider?.name}</p>
+                                                    <p className="text-xs text-gray-600">Driver: {selectedLiveRide.driver?.name || 'Searching...'}</p>
+                                                    <Link href={`/admin/rides/${selectedLiveRide.id}`} className="text-[10px] text-blue-600 font-bold mt-2 block">View Details →</Link>
+                                                </div>
+                                            </InfoWindow>
+                                        )}
+                                    </GoogleMap>
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-tride-hover text-tride-text-muted">
+                                        Loading Live Tracking...
+                                    </div>
+                                )}
+                                
+                                {/* Overlay Controls */}
+                                <div className="absolute top-4 right-4 flex flex-col gap-2">
+                                    <Button variant="secondary" size="sm" className="bg-tride-card/80 backdrop-blur shadow-xl border-tride-border">
+                                        <Layers size={14} className="mr-2" /> All Layers
+                                    </Button>
+                                    <Button variant="secondary" size="sm" className="bg-tride-card/80 backdrop-blur shadow-xl border-tride-border">
+                                        <MapIcon size={14} className="mr-2" /> Map View
+                                    </Button>
+                                </div>
                             </div>
                         </div>
+                    ) : (
+                        <>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
+                                            <th className="px-6 py-4 font-medium">Ride ID</th>
+                                            <th className="px-6 py-4 font-medium">Rider</th>
+                                            <th className="px-6 py-4 font-medium">Driver</th>
+                                            <th className="px-6 py-4 font-medium">Route</th>
+                                            <th className="px-6 py-4 font-medium">Fare</th>
+                                            <th className="px-6 py-4 font-medium">Payment</th>
+                                            <th className="px-6 py-4 font-medium">Status</th>
+                                            <th className="px-6 py-4 font-medium text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-tride-border">
+                                        {loading ? (
+                                            <tr>
+                                                <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <div className="animate-spin h-4 w-4 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
+                                                        Loading rides...
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : rides.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={8} className="px-6 py-8 text-center text-tride-text-muted">No rides found.</td>
+                                            </tr>
+                                        ) : (
+                                            rides.map((ride) => (
+                                                <RideRow
+                                                    key={ride.id}
+                                                    id={ride.ride_custom_id}
+                                                    rider={ride.rider?.name || 'Unknown'}
+                                                    driver={ride.driver?.name || 'Unknown'}
+                                                    from={ride.pickup_address}
+                                                    to={ride.dropoff_address}
+                                                    fare={`$${ride.fare}`}
+                                                    payment={ride.payment_method}
+                                                    status={ride.status}
+                                                />
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Pagination */}
+                            {pagination && pagination.last_page > 1 && (
+                                <div className="px-6 py-4 border-t border-tride-border flex items-center justify-between">
+                                    <div className="text-sm text-tride-text-muted">
+                                        Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} rides
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={pagination.current_page === 1}
+                                            className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                                        >
+                                            <ChevronLeft size={16} className="mr-1" /> Previous
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.min(pagination.last_page, prev + 1))}
+                                            disabled={pagination.current_page === pagination.last_page}
+                                            className="disabled:opacity-30 disabled:cursor-not-allowed text-tride-text"
+                                        >
+                                            Next <ChevronRight size={16} className="ml-1" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

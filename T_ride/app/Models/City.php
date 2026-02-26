@@ -13,7 +13,12 @@ class City extends Model
         'timezone',
         'currency',
         'services',
-        'status'
+        'status',
+        'license_renewal',
+        'insurance_req',
+        'background_freq',
+        'vehicle_inspection',
+        'min_age'
     ];
 
     protected $casts = [

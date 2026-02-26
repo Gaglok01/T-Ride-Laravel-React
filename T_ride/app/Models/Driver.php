@@ -17,11 +17,13 @@ class Driver extends Model
         'region',
         'city',
         'type_id',
+        'driver_tier_id',
         'vehicle_model',
         'cnic',
         'license_number',
         'trips',
         'rating',
+        'completion_rate',
         'status',
         'is_online',
         'account_status',
@@ -39,6 +41,11 @@ class Driver extends Model
     public function type()
     {
         return $this->belongsTo(Type::class);
+    }
+
+    public function tier()
+    {
+        return $this->belongsTo(DriverTier::class, 'driver_tier_id');
     }
 
      protected $appends = ['image_url'];

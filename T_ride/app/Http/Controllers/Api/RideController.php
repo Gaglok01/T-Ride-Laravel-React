@@ -107,4 +107,15 @@ class RideController extends Controller
 
         return response()->json(['status' => true, 'data' => $ride]);
     }
+    public function getLiveRides()
+    {
+        $rides = Ride::with(['rider:id,name', 'driver:id,name', 'vehicleType:id,name'])
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $rides
+        ]);
+    }
 }

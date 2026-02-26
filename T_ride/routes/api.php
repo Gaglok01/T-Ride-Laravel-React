@@ -22,6 +22,9 @@ use App\Http\Controllers\Api\ReferralController;
 use App\Http\Controllers\Api\PricingController;
 use App\Http\Controllers\Api\DispatchController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\TrustComplianceController;
+use App\Http\Controllers\Api\DriverTierController;
+use App\Http\Controllers\Api\DriverRatingController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -113,6 +116,7 @@ Route::middleware('auth:api')->group(function () {
 
         // Ride Management
         Route::get('/rides/stats', [RideController::class, 'getStats']);
+        Route::get('/rides/live', [RideController::class, 'getLiveRides']);
         Route::get('/rides', [RideController::class, 'index']);
         Route::get('/rides/{id}', [RideController::class, 'show']);
         Route::put('/rides/{id}/status', [RideController::class, 'updateStatus']);
@@ -321,6 +325,41 @@ Route::middleware('auth:api')->group(function () {
             Route::get('/vendor-settlements', [App\Http\Controllers\Api\FinanceController::class, 'getVendorSettlements']);
             Route::get('/wallet-stats', [App\Http\Controllers\Api\FinanceController::class, 'getWalletStats']);
             Route::get('/wallet-transactions', [App\Http\Controllers\Api\FinanceController::class, 'getWalletTransactions']);
+        });
+
+        // Trust & Compliance
+        Route::prefix('trust-compliance')->group(function () {
+            Route::get('/stats', [TrustComplianceController::class, 'getDashboardStats']);
+            Route::get('/drivers', [TrustComplianceController::class, 'getDrivers']);
+            Route::get('/document-queue', [TrustComplianceController::class, 'getDocumentQueue']);
+            Route::get('/city-rules', [TrustComplianceController::class, 'getCityRules']);
+            Route::get('/enforcement-rules', [TrustComplianceController::class, 'getEnforcementRules']);
+            Route::patch('/enforcement-rules/{id}/toggle', [TrustComplianceController::class, 'toggleEnforcementRule']);
+            Route::post('/process-document/{id}', [TrustComplianceController::class, 'processDocument']);
+        });
+
+        // Driver Tiers & Rewards
+        Route::prefix('driver-tiers')->group(function () {
+            Route::get('/stats', [DriverTierController::class, 'getStats']);
+            Route::get('/rules', [DriverTierController::class, 'getRules']);
+            Route::get('/movements', [DriverTierController::class, 'getMovements']);
+            Route::post('/recalculate', [DriverTierController::class, 'recalculate']);
+        });
+
+        // Driver Ratings & Analytics
+        Route::prefix('driver-ratings')->group(function () {
+            Route::get('/analytics', [DriverRatingController::class, 'getAnalytics']);
+            Route::get('/reviews', [DriverRatingController::class, 'getReviews']);
+            Route::get('/reviews/{id}', [DriverRatingController::class, 'show']);
+            Route::patch('/reviews/{id}/moderate', [DriverRatingController::class, 'moderateReview']);
+            Route::delete('/reviews/{id}', [DriverRatingController::class, 'destroy']);
+        });
+
+        // Ride Pooling
+        Route::prefix('ride-pooling')->group(function () {
+            Route::get('/dashboard', [App\Http\Controllers\Api\RidePoolController::class, 'getDashboardData']);
+            Route::get('/{id}', [App\Http\Controllers\Api\RidePoolController::class, 'show']);
+            Route::patch('/settings', [App\Http\Controllers\Api\RidePoolController::class, 'updateSettings']);
         });
     });
 
