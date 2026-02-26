@@ -388,21 +388,21 @@ export default function DriversPage() {
         </div>
 
         {activeTab === "Documents" ? (
-          <div className="p-6">
+          <div>
             <DriverDocumentsTab />
           </div>
         ) : activeTab === "Earnings" ? (
-          <div className="p-6">
+          <div>
             <DriverEarningsTab />
           </div>
         ) : activeTab === "Performance" ? (
-          <div className="p-6">
+          <div>
             <DriverPerformanceTab />
           </div>
         ) : (
-          <div className="p-6 space-y-6">
+          <div className="py-6 space-y-6">
             {/* Search and Filters Bar - Now Inside Card */}
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div className="px-6 flex flex-col lg:flex-row lg:items-center gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
                 <input 
@@ -439,17 +439,17 @@ export default function DriversPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Driver</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Type</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Vehicle</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">City</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Trips</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Rating</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Earnings</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Documents</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap">Status</th>
-                    <th className="px-6 py-4 font-medium whitespace-nowrap text-right">Actions</th>
+                  <tr className="border-b border-tride-border text-left text-tride-text-muted text-[11px] bg-tride-hover font-black uppercase tracking-wider">
+                    <th className="px-6 py-4 whitespace-nowrap">Driver</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Type</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Vehicle</th>
+                    <th className="px-6 py-4 whitespace-nowrap">City</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Trips</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Rating</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Earnings</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Documents</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                    <th className="px-6 py-4 whitespace-nowrap text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-tride-border">
@@ -606,90 +606,95 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus, onViewLocation }:
                         )}
                     </div>
                     <div>
-                        <div className="font-bold text-tride-text text-sm">{driver.name}</div>
+                        <div className="font-bold text-tride-text text-[13px]">{driver.name}</div>
                         <div className="text-[10px] text-tride-text-muted uppercase tracking-tighter">{driver.driver_id}</div>
                     </div>
                 </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-                <span className="px-3 py-1 rounded-full border border-tride-border text-[10px] font-bold text-tride-text capitalize bg-tride-hover/30">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-[10px] font-black text-tride-text capitalize bg-tride-hover/30">
                     {driver.type?.type_name || 'Ride'}
                 </span>
             </td>
-            <td className="px-6 py-4">
-                <div className="text-sm font-medium text-tride-text">{driver.vehicle_model || "Toyota Camry 2022"}</div>
-                <div className="text-[10px] text-tride-text-muted font-mono uppercase">GR-2345-22</div>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-[11px] font-bold text-tride-text">{driver.vehicle_model || "Toyota Camry 2022"}</div>
+                <div className="text-[10px] text-tride-text-muted font-mono uppercase tracking-widest mt-0.5">GR-2345-22</div>
             </td>
-            <td className="px-6 py-4">
-                <div className="flex items-center gap-2 group/loc">
-                    <span className="text-sm text-tride-text-muted truncate max-w-[120px]" title={driver.location}>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-tride-text-muted truncate max-w-[80px]" title={driver.location}>
                         {driver.location || "N/A"}
                     </span>
                     {(driver.user?.lat || driver.lat) && (
                         <button 
                             onClick={onViewLocation}
-                            className="p-1.5 bg-tride-yellow/10 text-tride-yellow rounded-lg hover:bg-tride-yellow hover:text-black transition-all"
-                            title="View on Map"
+                            className="p-1 bg-tride-yellow/10 text-tride-yellow rounded hover:bg-tride-yellow hover:text-black transition-all"
                         >
-                            <MapPin size={14} />
+                            <MapPin size={10} />
                         </button>
                     )}
                 </div>
             </td>
-            <td className="px-6 py-4 font-mono text-sm text-tride-text">{driver.trips}</td>
-            <td className="px-6 py-4">
-                <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
-                    <Star size={14} fill="currentColor" /> {Number(driver.rating || 0).toFixed(1)}
-                </div>
-            </td>
-            <td className="px-6 py-4 text-xs font-bold text-tride-text-muted whitespace-nowrap">Accra</td>
-            <td className="px-6 py-4 font-mono text-xs font-bold text-tride-text whitespace-nowrap">{driver.trips}</td>
             <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center gap-1 text-amber-500 font-black text-xs">
+                <span className="font-mono text-[11px] font-black text-tride-text">{driver.trips}</span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-1 text-amber-500 font-black text-[11px]">
                     <Star size={12} fill="currentColor" /> {Number(driver.rating || 0).toFixed(1)}
                 </div>
             </td>
-            <td className="px-6 py-4 font-black text-tride-text text-xs whitespace-nowrap">$12,450</td>
             <td className="px-6 py-4 whitespace-nowrap">
-                {(() => {
-                    const status = driver.background_check_status || 'verified'
-                    const styles: Record<string, string> = {
-                        verified: 'bg-blue-600 text-white',
-                        pending: 'bg-amber-100 text-amber-600 border-amber-500/20',
-                        failed: 'bg-red-500 text-white',
-                        not_checked: 'bg-white/5 text-white/40 border-white/10',
-                    }
-                    const labels: Record<string, string> = {
-                        verified: 'Verified',
-                        pending: 'Pending',
-                        failed: 'Failed',
-                        not_checked: 'Not Checked',
-                    }
-                    return (
-                        <div className="flex items-center gap-2">
-                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${styles[status]}`}>
+                <span className="text-[11px] font-black text-tride-text">$12,450</span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                    {(() => {
+                        const status = driver.background_check_status || 'verified'
+                        const styles: Record<string, string> = {
+                            verified: 'bg-blue-600 text-white',
+                            pending: 'bg-amber-500/20 text-amber-500 border-amber-500/20',
+                            failed: 'bg-red-500 text-white',
+                            not_checked: 'bg-white/5 text-tride-text-muted border-white/10',
+                        }
+                        const labels: Record<string, string> = {
+                            verified: 'Verified',
+                            pending: 'Pending',
+                            failed: 'Failed',
+                            not_checked: 'No Docs',
+                        }
+                        return (
+                            <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border border-transparent ${styles[status]}`}>
                                 {labels[status]}
                             </span>
-                            <IconButton size="xs" tooltip="View Documents">
-                                <FileText size={12} />
-                            </IconButton>
-                        </div>
-                    )
-                })()}
-            </td>
-            <td className="px-6 py-4 text-center whitespace-nowrap">
-                <div className="flex items-center gap-1.5 justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-                    <span className="text-[10px] font-black text-tride-text uppercase">Online</span>
+                        )
+                    })()}
+                    <IconButton size="sm" tooltip="View Docs" className="h-6 w-6">
+                        <FileText size={10} />
+                    </IconButton>
                 </div>
             </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <button 
+                    onClick={onToggleStatus}
+                    className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                >
+                    <div className={`w-2 h-2 rounded-full ${driver.status === 'Active' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500'}`}></div>
+                    <span className="text-[10px] font-black text-tride-text uppercase">{driver.status === 'Active' ? 'Online' : 'Offline'}</span>
+                </button>
+            </td>
             <td className="px-6 py-4 text-right whitespace-nowrap">
-                <div className="flex items-center justify-end gap-x-8 text-tride-text-muted">
+                <div className="flex items-center justify-end gap-2 text-tride-text-muted">
                     <Link href={`/admin/drivers/${driver.id}`}>
-                        <Eye size={18} className="hover:text-blue-500 transition-colors cursor-pointer" />
+                        <IconButton tooltip="View Profile" size="sm">
+                            <Eye size={14} />
+                        </IconButton>
                     </Link>
-                    <Edit size={18} className="hover:text-tride-yellow transition-colors cursor-pointer" onClick={onEdit} />
-                    <Ban size={18} className="hover:text-red-500 transition-colors cursor-pointer" onClick={onDelete} />
+                    <IconButton tooltip="Edit Details" size="sm" onClick={onEdit}>
+                        <Edit size={14} />
+                    </IconButton>
+                    <IconButton tooltip="Delete Account" size="sm" variant="danger" onClick={onDelete}>
+                        <Trash2 size={14} />
+                    </IconButton>
                 </div>
             </td>
         </tr>

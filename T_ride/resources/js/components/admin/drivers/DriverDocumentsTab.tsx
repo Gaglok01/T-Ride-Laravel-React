@@ -18,9 +18,9 @@ const documents = [
 
 export function DriverDocumentsTab() {
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 py-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-6">
                 {docStats.map((stat, i) => (
                     <div key={i} className="bg-tride-card border border-tride-border p-5 rounded-3xl flex items-start justify-between shadow-sm">
                         <div>
@@ -38,57 +38,63 @@ export function DriverDocumentsTab() {
             </div>
 
             {/* Verification Queue */}
-            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-tride-border">
-                    <h3 className="text-lg font-semibold text-tride-text">Document Verification Queue</h3>
-                    <p className="text-sm text-tride-text-muted">Review and approve driver documents</p>
+            <div className="border-t border-tride-border pt-6">
+                <div className="px-6 mb-4">
+                    <h3 className="text-lg font-black text-tride-text uppercase tracking-tight">Document Verification Queue</h3>
+                    <p className="text-[11px] text-tride-text-muted font-bold">Review and approve driver documents</p>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
-                                <th className="px-6 py-4 font-medium">Driver</th>
-                                <th className="px-6 py-4 font-medium">Document Type</th>
-                                <th className="px-6 py-4 font-medium">Submitted</th>
-                                <th className="px-6 py-4 font-medium">Expiry Date</th>
-                                <th className="px-6 py-4 font-medium">Auto-Check</th>
-                                <th className="px-6 py-4 font-medium">Status</th>
-                                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-[11px] bg-tride-hover font-black uppercase tracking-wider">
+                                <th className="px-6 py-4 whitespace-nowrap">Driver</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Document Type</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Submitted</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Expiry Date</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Auto-Check</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                                <th className="px-6 py-4 whitespace-nowrap text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-tride-border">
                             {documents.map((doc, i) => (
-                                <tr key={i} className="hover:bg-tride-hover transition-colors">
-                                    <td className="px-6 py-4 font-medium text-tride-text">{doc.driver}</td>
-                                    <td className="px-6 py-4">
-                                        <span className="bg-tride-hover px-3 py-1 rounded-full text-xs text-tride-text border border-tride-border font-medium">
+                                <tr key={i} className="hover:bg-tride-hover transition-colors group">
+                                    <td className="px-6 py-4 whitespace-nowrap font-bold text-tride-text text-[13px]">{doc.driver}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="bg-tride-hover/30 px-3 py-1 rounded-full text-[10px] text-tride-text border border-tride-border font-black">
                                             {doc.type}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-tride-text-muted">{doc.submitted}</td>
-                                    <td className="px-6 py-4 text-sm text-tride-text-muted font-mono">{doc.expiry}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-bold text-tride-text-muted">{doc.submitted}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-bold text-tride-text-muted font-mono">{doc.expiry}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border border-transparent ${
                                             doc.autoCheck.includes('Passed') ? 'bg-green-500/10 text-green-500' : 
                                             doc.autoCheck.includes('Failed') ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'
                                         }`}>
                                             {doc.autoCheck}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border border-transparent ${
                                             doc.status === 'Pending' ? 'bg-amber-500/20 text-amber-500' :
                                             doc.status === 'Rejected' ? 'bg-red-500/20 text-red-500' :
-                                            doc.status === 'Expiring' ? 'bg-orange-500/20 text-orange-500' : 'bg-blue-500/20 text-blue-500'
+                                            doc.status === 'Expiring' ? 'bg-orange-500/20 text-orange-500' : 'bg-blue-500/20 text-blue-400'
                                         }`}>
                                             {doc.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button className="text-tride-text-muted hover:text-tride-text text-sm font-medium">View</button>
-                                            <button className="text-green-500 hover:text-green-600 text-sm font-medium">Approve</button>
-                                            <button className="text-red-500 hover:text-red-600 text-sm font-medium">Reject</button>
+                                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                                        <div className="flex items-center justify-end gap-2 text-tride-text-muted">
+                                            <button className="p-1.5 hover:bg-tride-hover hover:text-blue-500 rounded-lg transition-all" title="View Document">
+                                                <Eye size={14} />
+                                            </button>
+                                            <button className="p-1.5 hover:bg-green-500/10 hover:text-green-500 rounded-lg transition-all" title="Approve">
+                                                <Check size={14} strokeWidth={3} />
+                                            </button>
+                                            <button className="p-1.5 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all" title="Reject">
+                                                <X size={14} strokeWidth={3} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

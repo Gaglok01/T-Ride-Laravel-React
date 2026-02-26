@@ -17,9 +17,9 @@ const earnings = [
 
 export function DriverEarningsTab() {
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 py-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-6">
                 {earningStats.map((stat, i) => (
                     <div key={i} className="bg-tride-card border border-tride-border p-5 rounded-3xl flex items-start justify-between shadow-sm">
                         <div>
@@ -37,38 +37,39 @@ export function DriverEarningsTab() {
             </div>
 
             {/* Earnings Breakdown */}
-            <div className="bg-tride-card border border-tride-border rounded-3xl overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-tride-border">
-                    <h3 className="text-lg font-semibold text-tride-text">Driver Earnings Breakdown</h3>
+            <div className="border-t border-tride-border pt-6">
+                <div className="px-6 mb-4">
+                    <h3 className="text-lg font-black text-tride-text uppercase tracking-tight">Driver Earnings Breakdown</h3>
+                    <p className="text-[11px] text-tride-text-muted font-bold">Monitor and process driver payouts</p>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-sm bg-tride-hover">
-                                <th className="px-6 py-4 font-medium">Driver</th>
-                                <th className="px-6 py-4 font-medium">Trips</th>
-                                <th className="px-6 py-4 font-medium">Gross Earnings</th>
-                                <th className="px-6 py-4 font-medium">Commission</th>
-                                <th className="px-6 py-4 font-medium">Bonuses</th>
-                                <th className="px-6 py-4 font-medium">Tips</th>
-                                <th className="px-6 py-4 font-medium">Net Payout</th>
-                                <th className="px-6 py-4 font-medium">Last Payout</th>
-                                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                            <tr className="border-b border-tride-border text-left text-tride-text-muted text-[11px] bg-tride-hover font-black uppercase tracking-wider">
+                                <th className="px-6 py-4 whitespace-nowrap text-xs font-black">Driver</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Trips</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Gross Earnings</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Commission</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Bonuses</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Tips</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Net Payout</th>
+                                <th className="px-6 py-4 whitespace-nowrap">Last Payout</th>
+                                <th className="px-6 py-4 whitespace-nowrap text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-tride-border">
                             {earnings.map((row, i) => (
-                                <tr key={i} className="hover:bg-tride-hover transition-colors text-sm">
-                                    <td className="px-6 py-4 font-medium text-tride-text">{row.driver}</td>
-                                    <td className="px-6 py-4 text-tride-text-muted">{row.trips}</td>
-                                    <td className="px-6 py-4 font-medium text-tride-text">{row.gross}</td>
-                                    <td className="px-6 py-4 text-red-500">{row.commission}</td>
-                                    <td className="px-6 py-4 text-green-500">{row.bonuses}</td>
-                                    <td className="px-6 py-4 text-green-500">{row.tips}</td>
-                                    <td className="px-6 py-4 font-bold text-tride-text">{row.net}</td>
-                                    <td className="px-6 py-4 text-tride-text-muted">{row.lastPayout}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="px-4 py-1.5 bg-tride-hover border border-tride-border rounded-xl text-xs font-semibold hover:bg-tride-border transition-colors">
+                                <tr key={i} className="hover:bg-tride-hover transition-colors group">
+                                    <td className="px-6 py-4 whitespace-nowrap font-bold text-tride-text text-[13px]">{row.driver}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-black text-tride-text-muted font-mono">{row.trips}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-black text-tride-text">{row.gross}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-black text-red-500">{row.commission}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-black text-green-500">{row.bonuses}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-black text-green-500">{row.tips}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[12px] font-black text-tride-text">{row.net}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[11px] font-bold text-tride-text-muted">{row.lastPayout}</td>
+                                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                                        <button className="px-3 py-1 bg-tride-yellow text-black rounded-lg text-[10px] font-black uppercase tracking-tight hover:scale-105 transition-transform">
                                             Pay Now
                                         </button>
                                     </td>
