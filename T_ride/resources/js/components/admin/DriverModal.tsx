@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
-import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus, Users, CreditCard, ShieldCheck, AlertTriangle, MapPin } from "lucide-react"
+import { User, Mail, Phone, Lock, Car, FileText, Upload, Plus, Users, CreditCard, ShieldCheck, AlertTriangle, MapPin, Search } from "lucide-react"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
+import { PlacesAutocompleteInput } from "@/components/ui/places-autocomplete-input"
+import { GoogleMap, Marker } from "@react-google-maps/api"
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 
 interface Type {
   id: number
@@ -22,11 +25,15 @@ interface DriverData {
         id: number
         type_name: string
     }
+    lat?: number
+    lng?: number
     documents?: string
     image?: string
     user?: {
         email: string
         phone_number: string
+        lat?: number
+        lng?: number
     }
 }
 
@@ -55,6 +62,12 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
   const [licenseNumber, setLicenseNumber] = useState("")
   const [documents, setDocuments] = useState("")
   const [image, setImage] = useState<File | null>(null)
+  
+  const [lat, setLat] = useState<number | undefined>(undefined)
+  const [lng, setLng] = useState<number | undefined>(undefined)
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false)
+  
+  const { isLoaded } = useGoogleMaps()
 
   // Validation states
   const [cnicError, setCnicError] = useState("")
@@ -80,6 +93,12 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
         // Documents might be array or string, handle as string for now if it's text input
         setDocuments(initialData.documents || "")
         setPassword("") 
+        
+        const rawLat = initialData.user?.lat || initialData.lat
+        const rawLng = initialData.user?.lng || initialData.lng
+        
+        setLat(rawLat ? Number(rawLat) : undefined)
+        setLng(rawLng ? Number(rawLng) : undefined)
       } else {
         setName("")
         setEmail("")
@@ -92,6 +111,8 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
         setLicenseNumber("")
         setDocuments("")
         setImage(null)
+        setLat(undefined)
+        setLng(undefined)
       }
       setError("")
       setCnicError("")
@@ -190,6 +211,8 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
       formData.append("type_id", typeId)
       formData.append("vehicle_model", vehicleModel)
       formData.append("location", location)
+      if (lat) formData.append("lat", lat.toString())
+      if (lng) formData.append("lng", lng.toString())
       formData.append("cnic", cnic.replace(/-/g, '')) // Send without dashes
       formData.append("license_number", licenseNumber)
       formData.append("documents", documents)
@@ -320,20 +343,35 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
             value={typeId}
             onChange={setTypeId}
             options={types
-                .filter(t => t.status === 'active' || (initialData?.type?.id === t.id)) // Show active only, but keep current if editing
+                .filter(t => t.status === 'active' || (initialData?.type?.id === t.id))
                 .map(t => ({ label: t.type_name, value: t.id }))
             }
             required
             icon={<Users size={16} />}
           />
 
-           <ModalInput
-            label="Location"
-            icon={<MapPin size={16} />}
-            placeholder="e.g. Downtown, North Zone"
-            value={location}
-            onChange={setLocation}
-          />
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <PlacesAutocompleteInput
+                label="Location"
+                placeholder="Search location..."
+                value={location}
+                onChange={setLocation}
+                onPlaceSelect={(place) => {
+                  setLocation(place.address)
+                  setLat(place.lat)
+                  setLng(place.lng)
+                }}
+              />
+            </div>
+            <button
+                type="button"
+                onClick={() => setIsMapModalOpen(true)}
+                className="h-[50px] px-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+            >
+                <MapPin size={16} />
+            </button>
+          </div>
         </div>
 
         {/* CNIC & License Section */}
@@ -430,6 +468,144 @@ export function DriverModal({ isOpen, onClose, onSave, types, initialData }: Dri
         </div>
 
       </div>
+      
+      {/* Map Picker Modal */}
+      <Modal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        title="Select Location on Map"
+        size="xl"
+        footer={
+            <>
+              <ModalButton variant="secondary" onClick={() => setIsMapModalOpen(false)}>
+                Cancel
+              </ModalButton>
+              <ModalButton variant="primary" onClick={() => setIsMapModalOpen(false)}>
+                Confirm Location
+              </ModalButton>
+            </>
+        }
+      >
+        <div className="space-y-4">
+            <PlacesAutocompleteInput
+                label="Search for location"
+                placeholder="Type to search..."
+                value={location}
+                onChange={setLocation}
+                onPlaceSelect={(place) => {
+                    setLocation(place.address)
+                    setLat(place.lat)
+                    setLng(place.lng)
+                }}
+            />
+            
+            <div className="h-[400px] rounded-2xl overflow-hidden border border-white/10 relative">
+                {isLoaded ? (
+                    <GoogleMap
+                        mapContainerStyle={{ width: '100%', height: '100%' }}
+                        center={(lat && lng && !isNaN(Number(lat)) && !isNaN(Number(lng))) 
+                            ? { lat: Number(lat), lng: Number(lng) } 
+                            : { lat: 31.5204, lng: 74.3587 }}
+                        zoom={15}
+                        onClick={(e) => {
+                            if (e.latLng) {
+                                const newLat = e.latLng.lat()
+                                const newLng = e.latLng.lng()
+                                setLat(newLat)
+                                setLng(newLng)
+                                
+                                // Geocode to get address string
+                                const geocoder = new google.maps.Geocoder()
+                                geocoder.geocode({ location: { lat: newLat, lng: newLng } }, (results, status) => {
+                                    if (status === 'OK' && results?.[0]) {
+                                        setLocation(results[0].formatted_address)
+                                    }
+                                })
+                            }
+                        }}
+                        options={{
+                            styles: darkMapStyles,
+                            disableDefaultUI: false,
+                        }}
+                    >
+                        {lat && lng && !isNaN(Number(lat)) && !isNaN(Number(lng)) && (
+                            <Marker position={{ lat: Number(lat), lng: Number(lng) }} />
+                        )}
+                    </GoogleMap>
+                ) : (
+                    <div className="h-full flex items-center justify-center text-white/50">
+                        Loading Map...
+                    </div>
+                )}
+            </div>
+        </div>
+      </Modal>
     </Modal>
   )
 }
+
+const darkMapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+        featureType: "administrative.locality",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+    },
+    {
+        featureType: "poi",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+    },
+    {
+        featureType: "poi.park",
+        elementType: "geometry",
+        stylers: [{ color: "#263c3f" }],
+    },
+    {
+        featureType: "poi.park",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#6b9a76" }],
+    },
+    {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#38414e" }],
+    },
+    {
+        featureType: "road",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#212a37" }],
+    },
+    {
+        featureType: "road",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#9ca5b3" }],
+    },
+    {
+        featureType: "road.highway",
+        elementType: "geometry",
+        stylers: [{ color: "#746855" }],
+    },
+    {
+        featureType: "road.highway",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#1f2835" }],
+    },
+    {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#17263c" }],
+    },
+    {
+        featureType: "water",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#515c6d" }],
+    },
+    {
+        featureType: "water",
+        elementType: "labels.text.stroke",
+        stylers: [{ color: "#17263c" }],
+    },
+]

@@ -30,6 +30,7 @@ Route::prefix('api/app')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('save-location', [AppAuthController::class, 'saveLocation']);
         Route::get('get-profile', [AppAuthController::class, 'getProfile']);
+        Route::post('update-profile', [AppAuthController::class, 'updateProfile']);
         Route::post('submit-feedback', [AppAuthController::class, 'submitFeedback']);
         Route::post('logout', [AppAuthController::class, 'logout']);
 

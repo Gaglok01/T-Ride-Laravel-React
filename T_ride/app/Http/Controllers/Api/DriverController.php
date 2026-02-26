@@ -45,6 +45,8 @@ class DriverController extends Controller
             'cnic' => 'nullable|string',
             'license_number' => 'nullable|string',
             'location' => 'nullable|string',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',
         ]);
 
         // 🔹 At least one of CNIC or License is required
@@ -110,6 +112,8 @@ class DriverController extends Controller
                 'password' => Hash::make($request->password),
                 'phone_number' => $request->phone_number,
                 'driver_id' => $driver->id,
+                'lat' => $request->lat,
+                'lng' => $request->lng,
             ]);
 
             // Assign role using Spatie with api guard
@@ -193,6 +197,8 @@ class DriverController extends Controller
             'cnic' => 'nullable|string',
             'license_number' => 'nullable|string',
             'location' => 'nullable|string',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',
         ]);
 
         // 🔹 At least one of CNIC or License is required
@@ -266,6 +272,13 @@ class DriverController extends Controller
 
                 if ($request->filled('password')) {
                     $userData['password'] = Hash::make($request->password);
+                }
+
+                if ($request->filled('lat')) {
+                    $userData['lat'] = $request->lat;
+                }
+                if ($request->filled('lng')) {
+                    $userData['lng'] = $request->lng;
                 }
 
                 $user->update($userData);

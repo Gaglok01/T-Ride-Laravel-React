@@ -4,11 +4,13 @@ import { Search, Filter, Plus, Eye, Edit, MoreVertical, Star, Car, Bike, Truck, 
 import { Link } from "@inertiajs/react"
 import { Button, IconButton } from "@/components/ui/button"
 import { DriverModal } from "@/components/admin/DriverModal"
+import { Modal, ModalButton, ModalInput, ModalSelect } from "@/components/ui/modal"
 import axios from "@/lib/axios"
 import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
 import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationModal"
-import { ModalInput, ModalSelect } from "@/components/ui/modal"
 import { Check, X } from "lucide-react"
+import { GoogleMap, Marker } from "@react-google-maps/api"
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { DriverDocumentsTab } from "../../components/admin/drivers/DriverDocumentsTab"
@@ -35,10 +37,16 @@ interface Driver {
     type_name: string
     id: number
   }
+  location?: string
+  lat?: number
+  lng?: number
+  documents?: string
   image?: string
   user?: {
     email: string
     phone_number: string
+    lat?: number
+    lng?: number
   }
 }
 
@@ -140,10 +148,14 @@ export default function DriversPage() {
       driverId: ""
   })
   
-  // Status Modal State
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
   const [driverToToggle, setDriverToToggle] = useState<Driver | null>(null)
   const [isToggling, setIsToggling] = useState(false)
+
+  // Location View State
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [locationDriver, setLocationDriver] = useState<Driver | null>(null)
+  const { isLoaded } = useGoogleMaps()
 
   const [activeTab, setActiveTab] = useState("All Drivers")
 
@@ -462,6 +474,10 @@ export default function DriversPage() {
                         onEdit={() => openEditModal(driver)} 
                         onDelete={() => confirmDelete(driver)}
                         onToggleStatus={() => confirmToggleStatus(driver)}
+                        onViewLocation={() => {
+                            setLocationDriver(driver)
+                            setIsLocationModalOpen(true)
+                        }}
                       />
                     ))
                   )}
@@ -495,9 +511,67 @@ export default function DriversPage() {
         onClose={() => setIsStatusModalOpen(false)}
         onConfirm={handleToggleStatus}
         itemName={driverToToggle?.name}
-        currentStatus={driverToToggle?.status?.toLowerCase()} // Modal expects lowercase usually for checking 'inactive'
+        currentStatus={driverToToggle?.status?.toLowerCase()}
         isLoading={isToggling}
       />
+
+      {/* Location View Modal */}
+      <Modal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        title={`Driver Location - ${locationDriver?.name}`}
+        size="lg"
+        footer={
+            <ModalButton variant="primary" onClick={() => setIsLocationModalOpen(false)}>
+                Close
+            </ModalButton>
+        }
+      >
+          <div className="space-y-4">
+              <div className="flex items-start gap-2 bg-tride-hover p-4 rounded-xl border border-tride-border">
+                  <MapPin size={20} className="text-tride-yellow mt-0.5 shrink-0" />
+                  <div>
+                      <p className="text-sm font-medium text-tride-text">{locationDriver?.location || 'No location set'}</p>
+                      <p className="text-xs text-tride-text-muted mt-1">
+                          {locationDriver?.user?.lat && locationDriver?.user?.lng 
+                              ? `Coordinates: ${Number(locationDriver.user.lat).toFixed(6)}, ${Number(locationDriver.user.lng).toFixed(6)}`
+                              : 'Coordinates not available'}
+                      </p>
+                  </div>
+              </div>
+
+              <div className="h-[350px] rounded-2xl overflow-hidden border border-white/10 relative">
+                  {isLoaded ? (
+                      <GoogleMap
+                          mapContainerStyle={{ width: '100%', height: '100%' }}
+                          center={
+                            (locationDriver?.user?.lat && locationDriver?.user?.lng)
+                            ? { lat: Number(locationDriver.user.lat), lng: Number(locationDriver.user.lng) }
+                            : (locationDriver?.lat && locationDriver?.lng)
+                                ? { lat: Number(locationDriver.lat), lng: Number(locationDriver.lng) }
+                                : { lat: 31.5204, lng: 74.3587 }
+                          }
+                          zoom={15}
+                          options={{
+                              styles: darkMapStyles,
+                              disableDefaultUI: false,
+                          }}
+                      >
+                          {(locationDriver?.user?.lat && locationDriver?.user?.lng) && (
+                              <Marker position={{ lat: Number(locationDriver.user.lat), lng: Number(locationDriver.user.lng) }} />
+                          )}
+                          {(!locationDriver?.user?.lat && locationDriver?.lat && locationDriver?.lng) && (
+                               <Marker position={{ lat: Number(locationDriver.lat), lng: Number(locationDriver.lng) }} />
+                          )}
+                      </GoogleMap>
+                  ) : (
+                      <div className="h-full flex items-center justify-center text-white/50 underline">
+                          Loading Map...
+                      </div>
+                  )}
+              </div>
+          </div>
+      </Modal>
     </AdminLayout>
   )
 }
@@ -519,7 +593,7 @@ function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: stri
     )
 }
 
-function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Driver, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void }) {
+function DriverRow({ driver, onEdit, onDelete, onToggleStatus, onViewLocation }: { driver: Driver, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void, onViewLocation: () => void }) {
     return (
         <tr className="hover:bg-tride-hover transition-colors group">
             <td className="px-6 py-4 whitespace-nowrap">
@@ -542,10 +616,30 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
                     {driver.type?.type_name || 'Ride'}
                 </span>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex flex-col">
-                    <div className="text-xs font-bold text-tride-text">{driver.vehicle_model || "Toyota Camry 2022"}</div>
-                    <div className="text-[10px] text-tride-text-muted font-mono uppercase tracking-widest mt-0.5">GR-2345-22</div>
+            <td className="px-6 py-4">
+                <div className="text-sm font-medium text-tride-text">{driver.vehicle_model || "Toyota Camry 2022"}</div>
+                <div className="text-[10px] text-tride-text-muted font-mono uppercase">GR-2345-22</div>
+            </td>
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-2 group/loc">
+                    <span className="text-sm text-tride-text-muted truncate max-w-[120px]" title={driver.location}>
+                        {driver.location || "N/A"}
+                    </span>
+                    {(driver.user?.lat || driver.lat) && (
+                        <button 
+                            onClick={onViewLocation}
+                            className="p-1.5 bg-tride-yellow/10 text-tride-yellow rounded-lg hover:bg-tride-yellow hover:text-black transition-all"
+                            title="View on Map"
+                        >
+                            <MapPin size={14} />
+                        </button>
+                    )}
+                </div>
+            </td>
+            <td className="px-6 py-4 font-mono text-sm text-tride-text">{driver.trips}</td>
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
+                    <Star size={14} fill="currentColor" /> {Number(driver.rating || 0).toFixed(1)}
                 </div>
             </td>
             <td className="px-6 py-4 text-xs font-bold text-tride-text-muted whitespace-nowrap">Accra</td>
@@ -601,3 +695,69 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus }: { driver: Drive
         </tr>
     )
 }
+
+const darkMapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+        featureType: "administrative.locality",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+    },
+    {
+        featureType: "poi",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+    },
+    {
+        featureType: "poi.park",
+        elementType: "geometry",
+        stylers: [{ color: "#263c3f" }],
+    },
+    {
+        featureType: "poi.park",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#6b9a76" }],
+    },
+    {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#38414e" }],
+    },
+    {
+        featureType: "road",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#212a37" }],
+    },
+    {
+        featureType: "road",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#9ca5b3" }],
+    },
+    {
+        featureType: "road.highway",
+        elementType: "geometry",
+        stylers: [{ color: "#746855" }],
+    },
+    {
+        featureType: "road.highway",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#1f2835" }],
+    },
+    {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#17263c" }],
+    },
+    {
+        featureType: "water",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#515c6d" }],
+    },
+    {
+        featureType: "water",
+        elementType: "labels.text.stroke",
+        stylers: [{ color: "#17263c" }],
+    },
+]

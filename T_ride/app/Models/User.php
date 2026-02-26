@@ -30,6 +30,7 @@ class User extends Authenticatable
         'photo',
         'address',
         'city',
+        'region',
         'lat',
         'lng',
         'driver_id',
@@ -60,6 +61,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'lat' => 'float',
+            'lng' => 'float',
         ];
     }
 

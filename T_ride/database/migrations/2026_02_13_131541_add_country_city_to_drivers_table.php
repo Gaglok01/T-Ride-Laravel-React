@@ -9,16 +9,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('drivers', function (Blueprint $table) {
-            $table->string('country')->nullable();
-            $table->string('city')->nullable();
-            $table->string('zone')->nullable(); // East, West, North, South, etc.
+            if (!Schema::hasColumn('drivers', 'country')) {
+                $table->string('country')->nullable();
+            }
+            if (!Schema::hasColumn('drivers', 'city')) {
+                $table->string('city')->nullable();
+            }
+            if (!Schema::hasColumn('drivers', 'zone')) {
+                $table->string('zone')->nullable(); // East, West, North, South, etc.
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('drivers', function (Blueprint $table) {
-            $table->dropColumn(['country', 'city', 'zone']);
+            $columns = [];
+            if (Schema::hasColumn('drivers', 'country')) $columns[] = 'country';
+            if (Schema::hasColumn('drivers', 'city')) $columns[] = 'city';
+            if (Schema::hasColumn('drivers', 'zone')) $columns[] = 'zone';
+            
+            if (!empty($columns)) {
+                $table->dropColumn($columns);
+            }
         });
     }
 };

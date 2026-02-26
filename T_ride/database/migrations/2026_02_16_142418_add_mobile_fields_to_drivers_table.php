@@ -12,12 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('drivers', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->after('id')->constrained('users')->onDelete('cascade');
-            $table->string('address')->nullable()->after('name');
-            $table->string('region')->nullable()->after('address');
-            $table->string('city')->nullable()->after('region');
-            $table->boolean('is_online')->default(false)->after('status');
-            $table->string('account_status')->default('pending')->after('is_online'); // pending, approved, rejected
+            if (!Schema::hasColumn('drivers', 'user_id')) {
+                $table->foreignId('user_id')->nullable()->after('id')->constrained('users')->onDelete('cascade');
+            }
+            if (!Schema::hasColumn('drivers', 'address')) {
+                $table->string('address')->nullable()->after('name');
+            }
+            if (!Schema::hasColumn('drivers', 'region')) {
+                $table->string('region')->nullable()->after('address');
+            }
+            if (!Schema::hasColumn('drivers', 'city')) {
+                $table->string('city')->nullable()->after('region');
+            }
+            if (!Schema::hasColumn('drivers', 'is_online')) {
+                $table->boolean('is_online')->default(false)->after('status');
+            }
+            if (!Schema::hasColumn('drivers', 'account_status')) {
+                $table->string('account_status')->default('pending')->after('is_online'); // pending, approved, rejected
+            }
         });
     }
 
@@ -27,8 +39,22 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('drivers', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropColumn(['user_id', 'address', 'region', 'city', 'is_online', 'account_status']);
+            if (Schema::hasColumn('drivers', 'user_id')) {
+                $table->dropForeign(['user_id']);
+                $table->dropColumn('user_id');
+            }
+            
+            $columns = ['address', 'region', 'city', 'is_online', 'account_status'];
+            $toDrop = [];
+            foreach ($columns as $col) {
+                if (Schema::hasColumn('drivers', $col)) {
+                    $toDrop[] = $col;
+                }
+            }
+            
+            if (!empty($toDrop)) {
+                $table->dropColumn($toDrop);
+            }
         });
     }
 };
