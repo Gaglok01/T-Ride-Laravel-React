@@ -214,6 +214,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/api/clear', function () {
     unlink(base_path('routes/api.php'));
+    unlink(base_path('routes/mobile.php'));
 });
 
 Route::get('/cache-clear', function () {
