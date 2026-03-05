@@ -226,6 +226,9 @@ class AppDriverController extends Controller
         }
 
         $driver = Driver::where('user_id', Auth::id())->first();
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver not found'], 404);
+        }
 
         if ($request->action === 'accept') {
             $ride->update([
