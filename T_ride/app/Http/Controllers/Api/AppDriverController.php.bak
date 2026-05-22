@@ -192,28 +192,16 @@ class AppDriverController extends Controller
             return response()->json(['status' => false, 'message' => 'Driver not available to take rides']);
         }
 
+        // In a real app, this would use websockets or filter by location
+        // Here we just return rides with status 'searching' that match driver's vehicle type
         $requests = Ride::where('status', 'searching')
-            ->where(function ($q) use ($driver) {
+            ->where(function($q) use ($driver) {
                 $q->where('vehicle_type_id', $driver->type_id)
                   ->orWhereNull('vehicle_type_id');
             })
             ->with(['rider'])
             ->latest()
-            ->get()
-            ->map(function ($ride) {
-                $distanceMiles = $this->calculateDistance(
-                    $ride->pickup_lat,
-                    $ride->pickup_lng,
-                    $ride->dropoff_lat,
-                    $ride->dropoff_lng
-                );
-
-                $ride->distance_miles = round($distanceMiles, 1);
-                $ride->duration_minutes = max(3, round($distanceMiles * 2));
-                $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
-
-                return $ride;
-            });
+            ->get();
 
         return response()->json([
             'status' => true,
@@ -301,64 +289,7 @@ class AppDriverController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Status updated to ' . $request->status,
-            'data' => $ride->fresh(['rider', 'driver.user', 'vehicleType'])
-        ]);
-    }
-
-
-
-
-    public function getActiveRide()
-    {
-        $driver = Driver::where('user_id', Auth::id())->first();
-
-        if (!$driver) {
-            return response()->json(['status' => false, 'message' => 'Driver profile not found'], 404);
-        }
-
-        $ride = Ride::where('driver_id', $driver->id)
-            ->whereIn('status', ['accepted', 'arrived', 'in_progress'])
-            ->with(['rider', 'driver.user', 'vehicleType'])
-            ->latest()
-            ->first();
-
-        if (!$ride) {
-            return response()->json(['status' => false, 'message' => 'No active ride found', 'data' => null]);
-        }
-
-        $distanceMiles = $this->calculateDistance(
-            $ride->pickup_lat,
-            $ride->pickup_lng,
-            $ride->dropoff_lat,
-            $ride->dropoff_lng
-        );
-
-        $ride->distance_miles = round($distanceMiles, 1);
-        $ride->duration_minutes = max(3, round($distanceMiles * 2));
-        $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
-
-        return response()->json([
-            'status' => true,
             'data' => $ride
         ]);
     }
-
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
-    {
-        $earth_radius = 6371;
-
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-
-        $a = sin($dLat / 2) * sin($dLat / 2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($dLon / 2) * sin($dLon / 2);
-
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
-        $distance_km = $earth_radius * $c;
-
-        return $distance_km * 0.621371;
-    }
-
 }

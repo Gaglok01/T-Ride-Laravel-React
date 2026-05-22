@@ -78,13 +78,9 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Allow admin and vendor roles to login
-        if (!$user->hasRole('admin') && !$user->hasRole('vendor')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Access denied. Only administrators and vendors can login.'
-            ], 403);
-        }
+        // Allow mobile and dashboard roles to login
+        // Role check temporarily disabled for mobile testing.
+        // The frontend will use returned role/driver data instead.
 
         /* OTP Logic Commented Out
         Otp::where('identifier', $request->identifier)->delete();
@@ -108,6 +104,8 @@ class AuthController extends Controller
         */
 
         // Direct Login Logic
+        $user->load('roles');
+        $driver = \App\Models\Driver::where('user_id', $user->id)->first();
         $token = $user->createToken('login_token')->accessToken;
 
         // Get user roles for frontend redirection
@@ -120,15 +118,47 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => true,
             'message' => 'Login successful',
+            'token' => $token,
+            'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+            'role_name' => $driver ? 'Driver' : optional($user->roles->first())->name,
+            'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
+            'is_driver' => $driver ? true : false,
+            'roles' => $driver ? ['Driver', 'driver'] : $user->roles->pluck('name'),
+            'driver' => $driver,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
+                'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'role_name' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'is_driver' => $driver ? true : false,
+                'roles' => $driver ? [
+                    ['name' => 'Driver'],
+                    ['name' => 'driver']
+                ] : $roles
+            ],
             'data' => [
                 'token' => $token,
+                'driver' => $driver,
+                'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'roles' => $driver ? ['Driver', 'driver'] : $user->roles->pluck('name'),
                 'user'  => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone_number' => $user->phone_number,
-                    'roles' => $roles
+                    'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                    'role_name' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                    'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                    'is_driver' => $driver ? true : false,
+                    'roles' => $driver ? [
+                        ['name' => 'Driver'],
+                        ['name' => 'driver']
+                    ] : $roles
                 ]
             ]
         ], 200);
@@ -168,6 +198,8 @@ class AuthController extends Controller
             ], 403);
         }
 
+        $user->load('roles');
+        $driver = \App\Models\Driver::where('user_id', $user->id)->first();
         $token = $user->createToken('login_token')->accessToken;
 
         // Get user roles for frontend redirection
@@ -180,15 +212,47 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => true,
             'message' => 'Login successful',
+            'token' => $token,
+            'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+            'role_name' => $driver ? 'Driver' : optional($user->roles->first())->name,
+            'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
+            'is_driver' => $driver ? true : false,
+            'roles' => $driver ? ['Driver', 'driver'] : $user->roles->pluck('name'),
+            'driver' => $driver,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
+                'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'role_name' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'is_driver' => $driver ? true : false,
+                'roles' => $driver ? [
+                    ['name' => 'Driver'],
+                    ['name' => 'driver']
+                ] : $roles
+            ],
             'data' => [
                 'token' => $token,
+                'driver' => $driver,
+                'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                'roles' => $driver ? ['Driver', 'driver'] : $user->roles->pluck('name'),
                 'user'  => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone_number' => $user->phone_number,
-                    'roles' => $roles
+                    'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                    'role_name' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                    'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
+                    'is_driver' => $driver ? true : false,
+                    'roles' => $driver ? [
+                        ['name' => 'Driver'],
+                        ['name' => 'driver']
+                    ] : $roles
                 ]
             ]
         ], 200);

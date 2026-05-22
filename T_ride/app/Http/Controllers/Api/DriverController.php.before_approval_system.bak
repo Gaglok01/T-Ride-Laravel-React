@@ -97,8 +97,8 @@ class DriverController extends Controller
                 'license_number' => $request->license_number,
                 'trips' => 0,
                 'rating' => 0,
-                'status' => 'Pending Review',
-                'background_check_status' => 'not_started',
+                'status' => 'Active',
+                'background_check_status' => 'not_checked',
                 // cast to array since model expects array
                 'documents' => $request->documents ? [$request->documents] : [],
                 'image' => $imagePath,
@@ -322,57 +322,19 @@ class DriverController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string'
+            'status' => 'required|in:Active,Inactive'
         ]);
 
         try {
             $driver = Driver::findOrFail($id);
-            $status = strtolower($request->status);
-
-            if ($status === 'approved') {
-                $driver->update([
-                    'status' => 'Active',
-                    'account_status' => 'approved',
-                    'is_online' => 0,
-                ]);
-            } elseif ($status === 'suspended') {
-                $driver->update([
-                    'status' => 'Inactive',
-                    'account_status' => 'suspended',
-                    'is_online' => 0,
-                ]);
-            } elseif ($status === 'rejected') {
-                $driver->update([
-                    'status' => 'Inactive',
-                    'account_status' => 'rejected',
-                    'is_online' => 0,
-                ]);
-            } elseif ($status === 'pending_review' || $status === 'pending') {
-                $driver->update([
-                    'status' => 'Pending Review',
-                    'account_status' => 'pending_review',
-                    'is_online' => 0,
-                ]);
-            } elseif ($status === 'active') {
-                $driver->update([
-                    'status' => 'Active',
-                ]);
-            } elseif ($status === 'inactive') {
-                $driver->update([
-                    'status' => 'Inactive',
-                    'is_online' => 0,
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid driver status'
-                ], 422);
-            }
+            $driver->update([
+                'status' => $request->status
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Driver status updated successfully',
-                'data' => $driver->fresh()
+                'data' => $driver
             ]);
 
         } catch (Exception $e) {

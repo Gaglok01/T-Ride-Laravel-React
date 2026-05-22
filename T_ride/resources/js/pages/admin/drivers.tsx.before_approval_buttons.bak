@@ -240,22 +240,6 @@ export default function DriversPage() {
       setIsModalOpen(true)
   }
 
-  const updateDriverStatus = async (
-    driverId: number,
-    status: string
-  ) => {
-    try {
-      await axios.patch(`/api/admin/drivers/${driverId}/status`, {
-        status,
-      })
-
-      fetchData()
-    } catch (error) {
-      console.error("Failed to update driver status:", error)
-      alert("Failed to update driver status.")
-    }
-  }
-
   const openEditModal = (driver: Driver) => {
       setEditingDriver(driver)
       setIsModalOpen(true)
@@ -304,7 +288,7 @@ export default function DriversPage() {
       const newStatus = driverToToggle.status === 'Active' ? 'Inactive' : 'Active'
       
       // Use PATCH endpoint specific for status update
-      await axios.patch(`/api/admin/drivers/${driverToToggle.id}/status`, {
+      await axios.patch(`/admin/drivers/${driverToToggle.id}/status`, {
           status: newStatus
       })
       
@@ -684,22 +668,6 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus, onViewLocation }:
                             </span>
                         )
                     })()}
-                    <Button
-                        size="sm"
-                        className="h-7 bg-green-600 hover:bg-green-700 text-white text-xs"
-                        onClick={() => updateDriverStatus(driver.id, "approved")}
-                    >
-                        <Check size={13} className="mr-1" />
-                        Approve
-                    </Button>
-                    <Button
-                        size="sm"
-                        className="h-7 bg-red-600 hover:bg-red-700 text-white text-xs"
-                        onClick={() => updateDriverStatus(driver.id, "suspended")}
-                    >
-                        <Ban size={13} className="mr-1" />
-                        Suspend
-                    </Button>
                     <IconButton size="sm" tooltip="View Docs" className="h-6 w-6">
                         <FileText size={10} />
                     </IconButton>

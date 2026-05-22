@@ -52,7 +52,6 @@ class AppAuthController extends Controller
                     ['name' => 'driver']
                 ] : $user->roles->toArray(),
                 'is_driver' => $driver ? true : false,
-                'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
             ]),
             'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
             'roles' => $driver ? ['Driver', 'driver'] : $user->roles->pluck('name'),
@@ -222,9 +221,7 @@ class AppAuthController extends Controller
                 }
 
                 $user = User::create($data);
-                $roleName = strtolower($request->role);
-$role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'api']);
-$user->assignRole($role);
+                $user->assignRole(Role::findByName($request->role, 'api'));
 
                 if (strtolower($request->role) === 'driver') {
                     \App\Models\Driver::create([
@@ -241,8 +238,8 @@ $user->assignRole($role);
                         'completion_rate' => 0,
                         'status' => 'active',
                         'is_online' => 0,
-                        'account_status' => 'pending_review',
-                        'background_check_status' => 'not_started',
+                        'account_status' => 'approved',
+                        'background_check_status' => 'pending',
                     ]);
                 }
 

@@ -89,35 +89,35 @@ Route::prefix('api/app')->group(function () {
             Route::get('ride-requests', [AppDriverController::class, 'getRideRequests']);
             Route::post('ride/{id}/respond', [AppDriverController::class, 'respondToRide']);
             Route::post('ride/{id}/status', [AppDriverController::class, 'updateRideStatus']);
-
-            // Driver App Compatibility Aliases
-            Route::get('requests', [AppDriverController::class, 'getRideRequests']);
-            Route::get('ride/active', [AppDriverController::class, 'getActiveRide']);
-            Route::post('location', [AppAuthController::class, 'saveLocation']);
-            
-            Route::post('ride/{id}/decline', function ($id) {
-                request()->merge(['status' => 'cancelled']);
-                return app(AppDriverController::class)->updateRideStatus(request(), $id);
-            });
-            
-            Route::post('ride/{id}/arrived', function ($id) {
-                request()->merge(['status' => 'arrived']);
-                return app(AppDriverController::class)->updateRideStatus(request(), $id);
-            });
-            
-            Route::post('ride/{id}/start', function ($id) {
-                request()->merge(['status' => 'in_progress']);
-                return app(AppDriverController::class)->updateRideStatus(request(), $id);
-            });
-            
-            Route::post('ride/{id}/bid', function ($id) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Bid received',
-                    'ride_id' => $id,
-                ]);
-            });
         });
+       // Driver App Compatibility Aliases
+Route::get('requests', [AppDriverController::class, 'getPendingOrders']);
+Route::get('ride/active', [AppDriverController::class, 'getActiveWork']);
+Route::post('location', [AppAuthController::class, 'saveLocation']);
+
+Route::post('ride/{id}/decline', function ($id) {
+    request()->merge(['status' => 'cancelled']);
+    return app(AppDriverController::class)->updateRideStatus(request(), $id);
+});
+
+Route::post('ride/{id}/arrived', function ($id) {
+    request()->merge(['status' => 'arrived']);
+    return app(AppDriverController::class)->updateRideStatus(request(), $id);
+});
+
+Route::post('ride/{id}/start', function ($id) {
+    request()->merge(['status' => 'in_progress']);
+    return app(AppDriverController::class)->updateRideStatus(request(), $id);
+});
+
+Route::post('ride/{id}/bid', function ($id) {
+    return response()->json([
+        'status' => true,
+        'message' => 'Bid received',
+        'ride_id' => $id,
+    ]);
+}); 
+       
         // Vendor Food Delivery Routes
         Route::prefix('vendor/food')->group(function () {
             Route::get('profile', [AppVendorFoodController::class, 'getProfile']);

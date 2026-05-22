@@ -241,8 +241,8 @@ $user->assignRole($role);
                         'completion_rate' => 0,
                         'status' => 'active',
                         'is_online' => 0,
-                        'account_status' => 'pending_review',
-                        'background_check_status' => 'not_started',
+                        'account_status' => 'approved',
+                        'background_check_status' => 'pending',
                     ]);
                 }
 

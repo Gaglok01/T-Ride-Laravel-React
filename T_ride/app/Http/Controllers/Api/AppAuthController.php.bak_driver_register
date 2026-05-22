@@ -38,28 +38,10 @@ class AppAuthController extends Controller
             ], 401);
         }
 
-        $user->load('roles');
-        $driver = \App\Models\Driver::where('user_id', $user->id)->first();
-
         return response()->json([
             'status' => true,
-            'message' => 'Login successful',
-            'user' => array_merge($user->toArray(), [
-                'driver_id' => $driver?->id,
-                'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
-                'roles' => $driver ? [
-                    ['name' => 'Driver'],
-                    ['name' => 'driver']
-                ] : $user->roles->toArray(),
-                'is_driver' => $driver ? true : false,
-                'user_type' => $driver ? 'Driver' : optional($user->roles->first())->name,
-            ]),
-            'role' => $driver ? 'Driver' : optional($user->roles->first())->name,
-            'roles' => $driver ? ['Driver', 'driver'] : $user->roles->pluck('name'),
-            'is_driver' => $driver ? true : false,
-            'driver' => $driver,
-            'token' => $user->createToken('MobileApp')->accessToken,
-            'next' => $driver ? 'home' : 'location'
+            'user' => $user,
+            'token' => $user->createToken('MobileApp')->accessToken
         ]);
     }
 
@@ -69,33 +51,25 @@ class AppAuthController extends Controller
             'method' => 'required|in:phone,email,whatsapp',
         ]);
 
-        $method = $request->input('method');
-        $identifier = null;
-        $column = null;
-
-        if ($method === 'phone') {
-            $request->validate(['phone_number' => 'required|string']);
+        if ($request->input('method') === 'phone') {
+            $request->validate([
+                'phone_number' => 'required|string|unique:users,phone_number'
+            ]);
             $identifier = $request->phone_number;
-            $column = 'phone_number';
         }
 
-        if ($method === 'email') {
-            $request->validate(['email' => 'required|email']);
+        if ($request->input('method') === 'email') {
+            $request->validate([
+                'email' => 'required|email|unique:users,email'
+            ]);
             $identifier = $request->email;
-            $column = 'email';
         }
 
-        if ($method === 'whatsapp') {
-            $request->validate(['whatsapp_number' => 'required|string']);
+        if ($request->input('method') === 'whatsapp') {
+            $request->validate([
+                'whatsapp_number' => 'required|string|unique:users,whatsapp_number'
+            ]);
             $identifier = $request->whatsapp_number;
-            $column = 'whatsapp_number';
-        }
-
-        if (User::where($column, $identifier)->exists()) {
-            return response()->json([
-                'status' => false,
-                'message' => ucfirst($method) . ' already registered'
-            ], 409);
         }
 
         $otp = rand(1000, 9999);
@@ -103,18 +77,23 @@ class AppAuthController extends Controller
         Otp::updateOrCreate(
             ['identifier' => $identifier],
             [
-                'method' => $method,
+                'method' => $request->input('method'),
                 'otp' => $otp,
                 'expires_at' => now()->addMinutes(10),
                 'is_used' => false
             ]
         );
 
+        // match ($request->input('method')) {
+        //     'phone' => $this->sendSms($identifier, $otp),
+        //     'whatsapp' => $this->sendWhatsapp($identifier, $otp),
+        //     'email' => $this->sendEmail($identifier, $otp),
+        // };
+
         return response()->json([
             'status' => true,
-            'message' => 'OTP sent: ' . $otp,
+            'message' => 'OTP sent',
             'otp' => $otp,
-            'otp_debug' => $otp,
             'next' => 'verify_otp'
         ]);
     }
@@ -126,14 +105,11 @@ class AppAuthController extends Controller
             'otp' => 'required'
         ]);
 
-        $query = Otp::where('identifier', $request->identifier)
-            ->where('expires_at', '>', now());
-
-        if ((string) $request->otp !== '1234') {
-            $query->where('otp', $request->otp);
-        }
-
-        $otp = $query->latest()->first();
+        $otp = Otp::where('identifier', $request->identifier)
+            ->where('otp', $request->otp)
+            ->where('expires_at', '>', now())
+            ->where('is_used', false)
+            ->first();
 
         if (!$otp) {
             return response()->json([
@@ -146,7 +122,6 @@ class AppAuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'OTP verified successfully',
             'next' => 'role'
         ]);
     }
@@ -167,7 +142,6 @@ class AppAuthController extends Controller
 
         $otp = Otp::where('identifier', $request->identifier)
             ->where('is_used', true)
-            ->latest()
             ->first();
 
         if (!$otp) {
@@ -177,97 +151,43 @@ class AppAuthController extends Controller
             ], 403);
         }
 
-        $column = null;
+        $data = [
+            'name' => $request->name,
+            'password' => Hash::make($request->password),
+            'language_id' => $request->language_id,
+            'address' => $request->address,
+            'city' => $request->city,
+            'region' => $request->region,
+            'status' => 'active',
+        ];
+
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $photoName = time() . '.' . $photo->getClientOriginalExtension();
+            $photo->move(public_path('uploads/photos'), $photoName);
+            $data['photo'] = $photoName;
+        }
 
         if ($otp->method === 'phone') {
-            $column = 'phone_number';
-        } elseif ($otp->method === 'email') {
-            $column = 'email';
-        } elseif ($otp->method === 'whatsapp') {
-            $column = 'whatsapp_number';
+            $data['phone_number'] = $otp->identifier;
         }
 
-        if (!$column) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid OTP method'
-            ], 422);
+        if ($otp->method === 'email') {
+            $data['email'] = $otp->identifier;
         }
 
-        if (User::where($column, $otp->identifier)->exists()) {
-            return response()->json([
-                'status' => false,
-                'message' => ucfirst($otp->method) . ' already registered'
-            ], 409);
+        if ($otp->method === 'whatsapp') {
+            $data['whatsapp_number'] = $otp->identifier;
         }
 
-        try {
-            $user = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $otp, $column) {
-                $data = [
-                    'name' => $request->name,
-                    'password' => Hash::make($request->password),
-                    'language_id' => $request->language_id,
-                    'address' => $request->address,
-                    'city' => $request->city,
-                    'region' => $request->region,
-                    'status' => 'active',
-                    $column => $otp->identifier,
-                ];
+        $user = User::create($data);
+        $user->assignRole(Role::findByName($request->role, 'api'));
 
-                if ($request->hasFile('photo')) {
-                    $photo = $request->file('photo');
-                    $photoName = time() . '.' . $photo->getClientOriginalExtension();
-                    $photo->move(public_path('uploads/photos'), $photoName);
-                    $data['photo'] = $photoName;
-                }
-
-                $user = User::create($data);
-                $roleName = strtolower($request->role);
-$role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'api']);
-$user->assignRole($role);
-
-                if (strtolower($request->role) === 'driver') {
-                    \App\Models\Driver::create([
-                        'user_id' => $user->id,
-                        'driver_id' => 'DRV-' . $user->id,
-                        'name' => $user->name,
-                        'address' => $user->address ?? 'Test address',
-                        'region' => $user->region ?? 'NE',
-                        'city' => $user->city ?? 'Omaha',
-                        'type_id' => 3,
-                        'vehicle_model' => 'Toyota Camry 2022',
-                        'trips' => 0,
-                        'rating' => 0,
-                        'completion_rate' => 0,
-                        'status' => 'active',
-                        'is_online' => 0,
-                        'account_status' => 'pending_review',
-                        'background_check_status' => 'not_started',
-                    ]);
-                }
-
-                return $user;
-            });
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Registration successful',
-                'user' => $user,
-                'driver' => \App\Models\Driver::where('user_id', $user->id)->first(),
-                'token' => $user->createToken('MobileApp')->accessToken,
-                'next' => 'location'
-            ]);
-
-        } catch (\Throwable $e) {
-            Log::error('Registration failed', [
-                'message' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Registration failed. Please try again.'
-            ], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'token' => $user->createToken('MobileApp')->accessToken,
+            'next' => 'location'
+        ]);
     }
 
     public function saveLocation(Request $request)

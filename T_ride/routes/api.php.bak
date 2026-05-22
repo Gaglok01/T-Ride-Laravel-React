@@ -25,7 +25,6 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\TrustComplianceController;
 use App\Http\Controllers\Api\DriverTierController;
 use App\Http\Controllers\Api\DriverRatingController;
-use App\Http\Controllers\Api\AppDriverController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -379,55 +378,5 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
-});
-
-
-
-/*
-|--------------------------------------------------------------------------
-| DRIVER APP REALTIME ROUTES
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware('auth:api')->group(function () {
-
-    Route::post('/app/driver/ride/{id}/accept', function (\Illuminate\Http\Request $request, $id) {
-        $request->merge(['action' => 'accept']);
-        return app(\App\Http\Controllers\Api\AppDriverController::class)
-            ->respondToRide($request, $id);
-    });
-
-    Route::post('/app/driver/ride/{id}/decline', function (\Illuminate\Http\Request $request, $id) {
-        $request->merge(['action' => 'reject']);
-        return app(\App\Http\Controllers\Api\AppDriverController::class)
-            ->respondToRide($request, $id);
-    });
-
-    Route::post('/app/driver/ride/{id}/arrived', function (\Illuminate\Http\Request $request, $id) {
-        $request->merge(['status' => 'arrived']);
-        return app(\App\Http\Controllers\Api\AppDriverController::class)
-            ->updateRideStatus($request, $id);
-    });
-
-    Route::post('/app/driver/ride/{id}/start', function (\Illuminate\Http\Request $request, $id) {
-        $request->merge(['status' => 'in_progress']);
-        return app(\App\Http\Controllers\Api\AppDriverController::class)
-            ->updateRideStatus($request, $id);
-    });
-
-    Route::post('/app/driver/ride/{id}/complete', function (\Illuminate\Http\Request $request, $id) {
-        $request->merge(['status' => 'completed']);
-        return app(\App\Http\Controllers\Api\AppDriverController::class)
-            ->updateRideStatus($request, $id);
-    });
-
-    Route::post('/app/driver/ride/{id}/bid', function (\Illuminate\Http\Request $request, $id) {
-        return response()->json([
-            'status' => true,
-            'message' => 'Bid submitted',
-            'amount' => $request->amount
-        ]);
-    });
-
 });
 
