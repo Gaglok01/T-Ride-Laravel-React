@@ -194,30 +194,105 @@ class AppDriverController extends Controller
      */
     public function getDashboard()
     {
-        $driver = Driver::where('user_id', Auth::id())->first();
+        $driver = Driver::with('tier')
+            ->where('user_id', Auth::id())
+            ->first();
 
         if (!$driver) {
-            return response()->json(['status' => false, 'message' => 'Driver profile not found'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Driver profile not found'
+            ], 404);
         }
 
-        $rides = Ride::where('driver_id', $driver->id)->where('status', 'completed');
+        $rides = Ride::where('driver_id', $driver->id)
+            ->where('status', 'completed');
 
-        $earningsToday = (float)$rides->whereDate('completed_at', Carbon::today())->sum('fare');
-        $earningsWeekly = (float)$rides->where('completed_at', '>=', Carbon::now()->startOfWeek())->sum('fare');
-        $earningsMonthly = (float)$rides->where('completed_at', '>=', Carbon::now()->startOfMonth())->sum('fare');
+        $earningsToday = (float) (clone $rides)
+            ->whereDate('completed_at', Carbon::today())
+            ->sum('fare');
+
+        $earningsWeekly = (float) (clone $rides)
+            ->where('completed_at', '>=', Carbon::now()->startOfWeek())
+            ->sum('fare');
+
+        $earningsMonthly = (float) (clone $rides)
+            ->where('completed_at', '>=', Carbon::now()->startOfMonth())
+            ->sum('fare');
+
+        $totalRequests = Ride::where('driver_id', $driver->id)->count();
+
+        $acceptedRequests = Ride::where('driver_id', $driver->id)
+            ->whereIn('status', ['accepted', 'arrived', 'ongoing', 'completed'])
+            ->count();
+
+        $acceptanceRate = $totalRequests > 0
+            ? round(($acceptedRequests / $totalRequests) * 100, 1)
+            : 0;
+
+        $pendingDocuments = DocumentQueueItem::where('driver_id', $driver->id)
+            ->where('status', 'pending')
+            ->count();
+
+        $approvedDocuments = DocumentQueueItem::where('driver_id', $driver->id)
+            ->where('status', 'approved')
+            ->count();
 
         return response()->json([
             'status' => true,
             'data' => [
-                'is_online' => (bool)$driver->is_online,
+
+                'driver_id' => $driver->id,
+
+                'name' => $driver->name,
+
+                'vehicle_model' => $driver->vehicle_model,
+                'vehicle_plate_number' => $driver->vehicle_plate_number,
+                'vehicle_color' => $driver->vehicle_color,
+
+                'profile_image' => $driver->image
+                    ? asset('storage/' . $driver->image)
+                    : null,
+
+                'rating' => (float) $driver->rating,
+
+                'total_trips' => (int) $driver->trips,
+
+                'wallet_balance' => (float) Auth::user()->wallet_balance,
+
+                'acceptance_rate' => $acceptanceRate,
+
+                'verified' => $driver->account_status === 'approved',
+
                 'account_status' => $driver->account_status,
-                'rating' => (float)$driver->rating,
-                'total_trips' => $driver->trips,
+
+                'driver_status' => $driver->status,
+
+                'background_check_status' => $driver->background_check_status,
+
+                'is_online' => (bool) $driver->is_online,
+
+                'bid_enabled' => (bool) $driver->bid_enabled,
+                'pooling_enabled' => (bool) $driver->pooling_enabled,
+                'courier_enabled' => (bool) $driver->courier_enabled,
+                'delivery_enabled' => (bool) $driver->delivery_enabled,
+                'pet_friendly_enabled' => (bool) $driver->pet_friendly_enabled,
+
+                'pending_documents' => $pendingDocuments,
+
+                'approved_documents' => $approvedDocuments,
+
+                'tier' => $driver->tier?->name ?? 'Standard',
+
+                'can_drive' =>
+                    $driver->account_status === 'approved'
+                    && $driver->status === 'Active',
+
                 'earnings' => [
                     'today' => $earningsToday,
                     'weekly' => $earningsWeekly,
-                    'monthly' => $earningsMonthly
-                ]
+                    'monthly' => $earningsMonthly,
+                ],
             ]
         ]);
     }
@@ -420,5 +495,33 @@ class AppDriverController extends Controller
 
         return $distance_km * 0.621371;
     }
+
+
+    public function updatePreferences(Request $request)
+    {
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Driver profile not found'
+            ], 404);
+        }
+
+        $driver->update([
+            'bid_enabled' => $request->boolean('bid_enabled'),
+            'pooling_enabled' => $request->boolean('pooling_enabled'),
+            'courier_enabled' => $request->boolean('courier_enabled'),
+            'delivery_enabled' => $request->boolean('delivery_enabled'),
+            'pet_friendly_enabled' => $request->boolean('pet_friendly_enabled'),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Preferences updated successfully',
+            'data' => $driver
+        ]);
+    }
+
 
 }
