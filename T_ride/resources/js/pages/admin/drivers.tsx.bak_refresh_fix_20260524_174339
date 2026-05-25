@@ -1,0 +1,800 @@
+import { useState, useEffect } from "react"
+import { AdminLayout } from "@/layouts/admin-layout"
+import { Search, Filter, Plus, Eye, Edit, MoreVertical, Star, Car, Bike, Truck, FileText, Router, Trash2, Download, ShieldCheck, AlertTriangle, UserCheck, UserX, TrendingUp, Clock, Ban, Mail, Phone, MapPin, ChevronDown } from "lucide-react"
+import { Link } from "@inertiajs/react"
+import { Button, IconButton } from "@/components/ui/button"
+import { DriverModal } from "@/components/admin/DriverModal"
+import { Modal, ModalButton, ModalInput, ModalSelect } from "@/components/ui/modal"
+import axios from "@/lib/axios"
+import { DeleteConfirmationModal } from "@/components/admin/DeleteConfirmationModal"
+import { StatusConfirmationModal } from "@/components/admin/StatusConfirmationModal"
+import { Check, X } from "lucide-react"
+import { GoogleMap, Marker } from "@react-google-maps/api"
+import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
+import { DriverDocumentsTab } from "../../components/admin/drivers/DriverDocumentsTab"
+import { DriverEarningsTab } from "../../components/admin/drivers/DriverEarningsTab"
+import { DriverPerformanceTab } from "../../components/admin/drivers/DriverPerformanceTab"
+
+interface Driver {
+  id: number
+  driver_id: string
+  name: string
+  email?: string
+  phone_number?: string
+  status: string
+  rating: number
+  completion_rate?: number
+  driver_tier_id?: number
+  trips: number
+  vehicle_model: string
+  cnic?: string
+  license_number?: string
+  background_check_status?: string
+  background_report_key?: string
+  type?: {
+    type_name: string
+    id: number
+  }
+  location?: string
+  lat?: number
+  lng?: number
+  documents?: string
+  image?: string
+  user?: {
+    email: string
+    phone_number: string
+    lat?: number
+    lng?: number
+  }
+}
+
+interface Type {
+  id: number
+  type_name: string
+  status?: string
+}
+
+export default function DriversPage() {
+  const [drivers, setDrivers] = useState<Driver[]>([])
+  const [types, setTypes] = useState<Type[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingDriver, setEditingDriver] = useState<Driver | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const [isExporting, setIsExporting] = useState(false)
+
+  const handleExport = async () => {
+    try {
+        setIsExporting(true)
+        const params: any = { 
+            all: true,
+            search: searchTerm
+        }
+        if (activeTab !== "All Drivers") params.type = activeTab
+        if (appliedFilters.status !== "All") params.status = appliedFilters.status
+        if (appliedFilters.driverId) params.driver_id = appliedFilters.driverId
+
+        const response = await axios.get("/admin/drivers", { params })
+        
+        let exportData: Driver[] = []
+        if (response.data.success && Array.isArray(response.data.data)) {
+            exportData = response.data.data
+        } else if (response.data.data && Array.isArray(response.data.data.data)) {
+             exportData = response.data.data.data
+        } else if (Array.isArray(response.data)) {
+             exportData = response.data
+        }
+
+        const doc = new jsPDF()
+        doc.setFontSize(20)
+        doc.setTextColor(40, 40, 40)
+        doc.text("T-RIDE", 14, 20)
+        
+        doc.setFontSize(12)
+        doc.setTextColor(100, 100, 100)
+        doc.text("Driver Management Report", 14, 28)
+        
+        doc.setFontSize(10)
+        doc.setTextColor(150, 150, 150)
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 35)
+
+        const tableData = exportData.map(d => [
+            d.driver_id,
+            d.name,
+            d.email || '-',
+            d.phone_number || '-',
+            d.type?.type_name || '-',
+            d.status,
+            d.rating?.toString() || '0',
+            d.trips?.toString() || '0'
+        ])
+
+        autoTable(doc, {
+            head: [["ID", "Name", "Email", "Phone", "Type", "Status", "Rating", "Trips"]],
+            body: tableData,
+            startY: 40,
+            theme: 'grid',
+            headStyles: { fillColor: [245, 197, 24], textColor: [0, 0, 0] }
+        })
+        
+        doc.save(`drivers_export_${Date.now()}.pdf`)
+
+    } catch (e) {
+        console.error("Export failed:", e)
+        alert("Failed to export drivers.")
+    } finally {
+        setIsExporting(false)
+    }
+  }
+
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  
+  // Filtering States
+  const [showFilters, setShowFilters] = useState(false)
+  // Applied filters
+  const [appliedFilters, setAppliedFilters] = useState({
+      status: "All",
+      driverId: ""
+  })
+  // Temporary filters (local state for dropdown)
+  const [tempFilters, setTempFilters] = useState({
+      status: "All",
+      driverId: ""
+  })
+  
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [driverToToggle, setDriverToToggle] = useState<Driver | null>(null)
+  const [isToggling, setIsToggling] = useState(false)
+
+  // Location View State
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [locationDriver, setLocationDriver] = useState<Driver | null>(null)
+  const { isLoaded } = useGoogleMaps()
+
+  const [activeTab, setActiveTab] = useState("All Drivers")
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const [driversRes, typesRes] = await Promise.all([
+        axios.get("/admin/drivers"),
+        axios.get("/admin/types")
+      ])
+      
+      if (driversRes.data.success) {
+        setDrivers(driversRes.data.data)
+      }
+      
+      // Handle Types Response (Direct array or wrapped in data)
+      const typesResult = typesRes.data;
+      if (Array.isArray(typesResult)) {
+        setTypes(typesResult);
+      } else if (typesResult?.data && Array.isArray(typesResult.data)) {
+        setTypes(typesResult.data);
+      } else if (typesResult?.success && Array.isArray(typesResult.data)) {
+         setTypes(typesResult.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSaveDriver = async (formData: FormData) => {
+    try {
+        if (editingDriver) {
+            // Update
+            await axios.post(`/admin/drivers/${editingDriver.id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+        } else {
+            // Create
+            await axios.post("/admin/drivers", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+        }
+        fetchData()
+        setIsModalOpen(false)
+        setEditingDriver(null)
+    } catch (error) {
+        console.error("Failed to save driver:", error)
+        throw error // Re-throw to be caught by modal
+    }
+  }
+
+  const confirmDelete = (driver: Driver) => {
+    setDriverToDelete(driver)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteDriver = async () => {
+      if (!driverToDelete) return
+      
+      try {
+          setIsDeleting(true)
+          await axios.delete(`/admin/drivers/${driverToDelete.id}`)
+          fetchData()
+          setIsDeleteModalOpen(false)
+          setDriverToDelete(null)
+      } catch (error) {
+          console.error("Failed to delete driver:", error)
+          alert("Failed to delete driver. Please try again.")
+      } finally {
+          setIsDeleting(false)
+      }
+  }
+
+  const openCreateModal = () => {
+      setEditingDriver(null)
+      setIsModalOpen(true)
+  }
+
+  const updateDriverStatus = async (
+    driverId: number,
+    status: string
+  ) => {
+    try {
+      await axios.patch(`/api/admin/drivers/${driverId}/status`, {
+        status,
+      })
+
+      fetchData()
+    } catch (error) {
+      console.error("Failed to update driver status:", error)
+      alert("Failed to update driver status.")
+    }
+  }
+
+  const openEditModal = (driver: Driver) => {
+      setEditingDriver(driver)
+      setIsModalOpen(true)
+  }
+
+  const filteredDrivers = drivers.filter((driver: Driver) => {
+    const name = driver.name || ""
+    const dId = driver.driver_id || ""
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          dId.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = appliedFilters.status === "All" || driver.status === appliedFilters.status
+    const matchesDriverId = appliedFilters.driverId === "" || dId.toLowerCase().includes(appliedFilters.driverId.toLowerCase())
+    const matchesType = activeTab === "All Drivers" || 
+                        (activeTab === "Ride Drivers" && driver.type?.type_name === "Ride") ||
+                        (activeTab === "Couriers" && driver.type?.type_name === "Courier") ||
+                        (activeTab === "Delivery" && driver.type?.type_name === "Delivery") ||
+                        (activeTab === "Pending Approval" && driver.status === "Pending")
+
+    return matchesSearch && matchesStatus && matchesType && matchesDriverId
+  })
+
+  // Clear all filters
+  const clearFilters = () => {
+    setAppliedFilters({ status: "All", driverId: "" })
+    setTempFilters({ status: "All", driverId: "" })
+    setShowFilters(false)
+  }
+
+  // Apply filters
+  const applyFilters = () => {
+    setAppliedFilters(tempFilters)
+    setShowFilters(false)
+  }
+
+  const confirmToggleStatus = (driver: Driver) => {
+    setDriverToToggle(driver)
+    setIsStatusModalOpen(true)
+  }
+
+  const handleToggleStatus = async () => {
+    if (!driverToToggle) return
+
+    try {
+      setIsToggling(true)
+      const newStatus = driverToToggle.status === 'Active' ? 'Inactive' : 'Active'
+      
+      // Use PATCH endpoint specific for status update
+      await axios.patch(`/api/admin/drivers/${driverToToggle.id}/status`, {
+          status: newStatus
+      })
+      
+      fetchData()
+      setIsStatusModalOpen(false)
+      setDriverToToggle(null)
+    } catch (error) {
+       console.error("Failed to update driver status:", error)
+       alert("Failed to update status")
+    } finally {
+      setIsToggling(false)
+    }
+  }
+
+  return (
+    <AdminLayout
+      title="Driver Management"
+      description="Manage drivers, couriers, and delivery partners"
+      actions={
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Button variant="secondary" onClick={handleExport} disabled={isExporting}>
+            {isExporting ? (
+              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+            ) : (
+              <Download size={18} />
+            )}
+            Export
+          </Button>
+          <Button onClick={openCreateModal}>
+            <Plus size={18} />
+            Add Driver
+          </Button>
+        </div>
+      }
+    >
+      {/* Dashboard Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <StatsCard 
+          label="Total Drivers" 
+          value={drivers.length.toString()} 
+          trend="+6.2%" 
+          trendUp={true} 
+          icon={<Car size={20} className="text-tride-text" />} 
+          iconBg="bg-tride-hover" 
+        />
+        <StatsCard 
+          label="Online Now" 
+          value="156" 
+          trend="+12%" 
+          trendUp={true} 
+          icon={<div className="w-5 h-5 rounded-full border-2 border-green-500 relative flex items-center justify-center"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div></div>} 
+          iconBg="bg-green-500/10" 
+        />
+        <StatsCard 
+          label="Pending Approval" 
+          value="45" 
+          trend="+8" 
+          trendUp={true} 
+          icon={<Clock size={20} className="text-orange-500" />} 
+          iconBg="bg-orange-500/10" 
+        />
+        <StatsCard 
+          label="Avg Rating" 
+          value="4.8" 
+          trend="+0.1" 
+          trendUp={true} 
+          icon={<Star size={20} className="text-amber-500" />} 
+          iconBg="bg-amber-500/10" 
+        />
+        <StatsCard 
+          label="Today's Earnings" 
+          value="$2,450" 
+          trend="+15%" 
+          trendUp={true} 
+          icon={<TrendingUp size={20} className="text-blue-500" />} 
+          iconBg="bg-blue-500/10" 
+        />
+      </div>
+
+      <div className="bg-tride-card border border-tride-border rounded-[2.5rem] overflow-hidden shadow-sm">
+        {/* View Switching Tabs - Now Inside Card */}
+        <div className="flex gap-1 p-4 border-b border-tride-border overflow-x-auto no-scrollbar scrollbar-hide">
+          {["All Drivers", "Ride Drivers", "Couriers", "Delivery", "Pending Approval", "Documents", "Earnings", "Performance"].map((tab) => (
+            <Button
+              key={tab}
+              variant={activeTab === tab ? "default" : "ghost"}
+              className={`rounded-xl whitespace-nowrap px-6 transition-all duration-200 h-10 ${
+                activeTab === tab 
+                ? "bg-tride-yellow text-black shadow-sm font-bold" 
+                : "text-tride-text-muted hover:text-tride-text hover:bg-tride-hover"
+              }`}
+              onClick={() => { setActiveTab(tab); }}
+            >
+              {tab}
+            </Button>
+          ))}
+        </div>
+
+        {activeTab === "Documents" ? (
+          <div>
+            <DriverDocumentsTab />
+          </div>
+        ) : activeTab === "Earnings" ? (
+          <div>
+            <DriverEarningsTab />
+          </div>
+        ) : activeTab === "Performance" ? (
+          <div>
+            <DriverPerformanceTab />
+          </div>
+        ) : (
+          <div className="py-6 space-y-6">
+            {/* Search and Filters Bar - Now Inside Card */}
+            <div className="px-6 flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-tride-text-muted" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Search by name, vehicle, or plate..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-tride-hover border border-tride-border rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-tride-yellow transition-all font-medium"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                 <div className="relative group">
+                  <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-xs font-bold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors uppercase tracking-wider">
+                    Type: All
+                    <ChevronDown size={14} className="text-tride-text-muted" />
+                  </button>
+                 </div>
+                 <div className="relative group">
+                  <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-xs font-bold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors uppercase tracking-wider">
+                    City: All
+                    <ChevronDown size={14} className="text-tride-text-muted" />
+                  </button>
+                 </div>
+                 <div className="relative group">
+                  <button className="flex items-center gap-3 bg-tride-hover border border-tride-border px-4 py-3 rounded-2xl text-xs font-bold text-tride-text min-w-[120px] justify-between hover:border-tride-yellow transition-colors uppercase tracking-wider">
+                    Status: All
+                    <ChevronDown size={14} className="text-tride-text-muted" />
+                  </button>
+                 </div>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-tride-border text-left text-tride-text-muted text-[11px] bg-tride-hover font-black uppercase tracking-wider">
+                    <th className="px-6 py-4 whitespace-nowrap">Driver</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Type</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Vehicle</th>
+                    <th className="px-6 py-4 whitespace-nowrap">City</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Trips</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Rating</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Earnings</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Documents</th>
+                    <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                    <th className="px-6 py-4 whitespace-nowrap text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-tride-border">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={10} className="text-center py-20">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="animate-spin h-5 w-5 border-2 border-tride-yellow border-t-transparent rounded-full"></div>
+                          <span className="text-sm font-medium text-tride-text-muted">Loading drivers...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filteredDrivers.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="text-center py-20 text-tride-text-muted">No drivers found.</td>
+                    </tr>
+                  ) : (
+                    filteredDrivers.map(driver => (
+                      <DriverRow 
+                        key={driver.id} 
+                        driver={driver} 
+                        onEdit={() => openEditModal(driver)} 
+                        onDelete={() => confirmDelete(driver)}
+                        onToggleStatus={() => confirmToggleStatus(driver)}
+                        onViewLocation={() => {
+                            setLocationDriver(driver)
+                            setIsLocationModalOpen(true)
+                        }}
+                      />
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <DriverModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveDriver}
+        types={types}
+        initialData={editingDriver}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteDriver}
+        title="Delete Driver"
+        description="Are you sure you want to permanently delete this driver account?"
+        itemName={driverToDelete?.name}
+        isLoading={isDeleting}
+      />
+
+      <StatusConfirmationModal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        onConfirm={handleToggleStatus}
+        itemName={driverToToggle?.name}
+        currentStatus={driverToToggle?.status?.toLowerCase()}
+        isLoading={isToggling}
+      />
+
+      {/* Location View Modal */}
+      <Modal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        title={`Driver Location - ${locationDriver?.name}`}
+        size="lg"
+        footer={
+            <ModalButton variant="primary" onClick={() => setIsLocationModalOpen(false)}>
+                Close
+            </ModalButton>
+        }
+      >
+          <div className="space-y-4">
+              <div className="flex items-start gap-2 bg-tride-hover p-4 rounded-xl border border-tride-border">
+                  <MapPin size={20} className="text-tride-yellow mt-0.5 shrink-0" />
+                  <div>
+                      <p className="text-sm font-medium text-tride-text">{locationDriver?.location || 'No location set'}</p>
+                      <p className="text-xs text-tride-text-muted mt-1">
+                          {locationDriver?.user?.lat && locationDriver?.user?.lng 
+                              ? `Coordinates: ${Number(locationDriver.user.lat).toFixed(6)}, ${Number(locationDriver.user.lng).toFixed(6)}`
+                              : 'Coordinates not available'}
+                      </p>
+                  </div>
+              </div>
+
+              <div className="h-[350px] rounded-2xl overflow-hidden border border-white/10 relative">
+                  {isLoaded ? (
+                      <GoogleMap
+                          mapContainerStyle={{ width: '100%', height: '100%' }}
+                          center={
+                            (locationDriver?.user?.lat && locationDriver?.user?.lng)
+                            ? { lat: Number(locationDriver.user.lat), lng: Number(locationDriver.user.lng) }
+                            : (locationDriver?.lat && locationDriver?.lng)
+                                ? { lat: Number(locationDriver.lat), lng: Number(locationDriver.lng) }
+                                : { lat: 31.5204, lng: 74.3587 }
+                          }
+                          zoom={15}
+                          options={{
+                              styles: darkMapStyles,
+                              disableDefaultUI: false,
+                          }}
+                      >
+                          {(locationDriver?.user?.lat && locationDriver?.user?.lng) && (
+                              <Marker position={{ lat: Number(locationDriver.user.lat), lng: Number(locationDriver.user.lng) }} />
+                          )}
+                          {(!locationDriver?.user?.lat && locationDriver?.lat && locationDriver?.lng) && (
+                               <Marker position={{ lat: Number(locationDriver.lat), lng: Number(locationDriver.lng) }} />
+                          )}
+                      </GoogleMap>
+                  ) : (
+                      <div className="h-full flex items-center justify-center text-white/50 underline">
+                          Loading Map...
+                      </div>
+                  )}
+              </div>
+          </div>
+      </Modal>
+    </AdminLayout>
+  )
+}
+
+function StatsCard({ label, value, trend, trendUp, icon, iconBg }: { label: string, value: string, trend: string, trendUp: boolean, icon: React.ReactNode, iconBg?: string }) {
+    return (
+        <div className="bg-tride-card border border-tride-border p-5 rounded-3xl flex items-start justify-between shadow-sm">
+            <div>
+                <p className="text-tride-text-muted text-xs font-medium mb-1">{label}</p>
+                <div className="text-2xl font-bold mb-2 text-tride-text">{value}</div>
+                <div className={`text-xs font-medium ${trendUp ? 'text-green-500' : 'text-red-500'} flex items-center gap-1`}>
+                    <span className="text-sm">{trendUp ? '↗' : '↘'}</span> {trend}
+                </div>
+            </div>
+            <div className={`w-10 h-10 ${iconBg || 'bg-tride-hover'} rounded-xl flex items-center justify-center text-tride-text`}>
+                {icon}
+            </div>
+        </div>
+    )
+}
+
+function DriverRow({ driver, onEdit, onDelete, onToggleStatus, onViewLocation }: { driver: Driver, onEdit: () => void, onDelete: () => void, onToggleStatus: () => void, onViewLocation: () => void }) {
+    return (
+        <tr className="hover:bg-tride-hover transition-colors group">
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-tride-hover rounded-full flex items-center justify-center text-base font-bold text-tride-text overflow-hidden border border-tride-border shrink-0">
+                        {driver.image ? (
+                             <img src={`/storage/${driver.image}`} alt={driver.name} className="w-full h-full object-cover" />
+                        ) : (
+                            driver.name.charAt(0)
+                        )}
+                    </div>
+                    <div>
+                        <div className="font-bold text-tride-text text-[13px]">{driver.name}</div>
+                        <div className="text-[10px] text-tride-text-muted uppercase tracking-tighter">{driver.driver_id}</div>
+                    </div>
+                </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <span className="px-3 py-1 rounded-full border border-tride-border text-[10px] font-black text-tride-text capitalize bg-tride-hover/30">
+                    {driver.type?.type_name || 'Ride'}
+                </span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-[11px] font-bold text-tride-text">{driver.vehicle_model || "Toyota Camry 2022"}</div>
+                <div className="text-[10px] text-tride-text-muted font-mono uppercase tracking-widest mt-0.5">GR-2345-22</div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-tride-text-muted truncate max-w-[80px]" title={driver.location}>
+                        {driver.location || "N/A"}
+                    </span>
+                    {(driver.user?.lat || driver.lat) && (
+                        <button 
+                            onClick={onViewLocation}
+                            className="p-1 bg-tride-yellow/10 text-tride-yellow rounded hover:bg-tride-yellow hover:text-black transition-all"
+                        >
+                            <MapPin size={10} />
+                        </button>
+                    )}
+                </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <span className="font-mono text-[11px] font-black text-tride-text">{driver.trips}</span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-1 text-amber-500 font-black text-[11px]">
+                    <Star size={12} fill="currentColor" /> {Number(driver.rating || 0).toFixed(1)}
+                </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <span className="text-[11px] font-black text-tride-text">$12,450</span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                    {(() => {
+                        const status = driver.background_check_status || 'verified'
+                        const styles: Record<string, string> = {
+                            verified: 'bg-blue-600 text-white',
+                            pending: 'bg-amber-500/20 text-amber-500 border-amber-500/20',
+                            failed: 'bg-red-500 text-white',
+                            not_checked: 'bg-white/5 text-tride-text-muted border-white/10',
+                        }
+                        const labels: Record<string, string> = {
+                            verified: 'Verified',
+                            pending: 'Pending',
+                            failed: 'Failed',
+                            not_checked: 'No Docs',
+                        }
+                        return (
+                            <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border border-transparent ${styles[status]}`}>
+                                {labels[status]}
+                            </span>
+                        )
+                    })()}
+                    <Button
+                        size="sm"
+                        className="h-7 bg-green-600 hover:bg-green-700 text-white text-xs"
+                        onClick={() => updateDriverStatus(driver.id, "approved")}
+                    >
+                        <Check size={13} className="mr-1" />
+                        Approve
+                    </Button>
+                    <Button
+                        size="sm"
+                        className="h-7 bg-red-600 hover:bg-red-700 text-white text-xs"
+                        onClick={() => updateDriverStatus(driver.id, "suspended")}
+                    >
+                        <Ban size={13} className="mr-1" />
+                        Suspend
+                    </Button>
+                    <IconButton size="sm" tooltip="View Docs" className="h-6 w-6">
+                        <FileText size={10} />
+                    </IconButton>
+                </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+                <button 
+                    onClick={onToggleStatus}
+                    className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                >
+                    <div className={`w-2 h-2 rounded-full ${driver.status === 'Active' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500'}`}></div>
+                    <span className="text-[10px] font-black text-tride-text uppercase">{driver.status === 'Active' ? 'Online' : 'Offline'}</span>
+                </button>
+            </td>
+            <td className="px-6 py-4 text-right whitespace-nowrap">
+                <div className="flex items-center justify-end gap-2 text-tride-text-muted">
+                    <Link href={`/admin/drivers/${driver.id}`}>
+                        <IconButton tooltip="View Profile" size="sm">
+                            <Eye size={14} />
+                        </IconButton>
+                    </Link>
+                    <IconButton tooltip="Edit Details" size="sm" onClick={onEdit}>
+                        <Edit size={14} />
+                    </IconButton>
+                    <IconButton tooltip="Delete Account" size="sm" variant="danger" onClick={onDelete}>
+                        <Trash2 size={14} />
+                    </IconButton>
+                </div>
+            </td>
+        </tr>
+    )
+}
+
+const darkMapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+        featureType: "administrative.locality",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+    },
+    {
+        featureType: "poi",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+    },
+    {
+        featureType: "poi.park",
+        elementType: "geometry",
+        stylers: [{ color: "#263c3f" }],
+    },
+    {
+        featureType: "poi.park",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#6b9a76" }],
+    },
+    {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#38414e" }],
+    },
+    {
+        featureType: "road",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#212a37" }],
+    },
+    {
+        featureType: "road",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#9ca5b3" }],
+    },
+    {
+        featureType: "road.highway",
+        elementType: "geometry",
+        stylers: [{ color: "#746855" }],
+    },
+    {
+        featureType: "road.highway",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#1f2835" }],
+    },
+    {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#17263c" }],
+    },
+    {
+        featureType: "water",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#515c6d" }],
+    },
+    {
+        featureType: "water",
+        elementType: "labels.text.stroke",
+        stylers: [{ color: "#17263c" }],
+    },
+]
