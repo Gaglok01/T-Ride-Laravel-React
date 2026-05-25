@@ -179,20 +179,32 @@ export default function ViewDriver({ id }: { id: number }) {
                              <FileText size={18} className="text-tride-text-muted" />
                              Documents & Licenses
                         </h3>
-                        {driver.documents && driver.documents.length > 0 ? (
+                        {driver.documents && Object.keys(driver.documents).length > 0 ? (
                             <div className="space-y-3">
-                                {driver.documents.map((doc, idx) => (
+                                {Object.entries(driver.documents).map(([key, doc], idx) => (
                                     <div key={idx} className="flex items-center justify-between p-4 bg-tride-hover rounded-xl border border-tride-border hover:border-tride-yellow/50 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
                                                 <FileText size={20} />
                                             </div>
                                             <div>
-                                                <p className="font-medium text-tride-text text-sm">Document #{idx + 1}</p>
+                                                <p className="font-medium text-tride-text text-sm">{key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</p>
                                                 <p className="text-xs text-tride-text-muted">Verified</p>
                                             </div>
                                         </div>
-                                        <div className="px-3 py-1 bg-green-500/10 text-green-400 text-xs rounded-lg border border-green-500/20 font-medium">Valid</div>
+                                        <div className="flex items-center gap-2">
+    <a
+        href={`/storage/${String(doc)}`}
+        target="_blank"
+        className="px-3 py-1 bg-blue-500/10 text-blue-400 text-xs rounded-lg border border-blue-500/20 font-medium"
+    >
+        View
+    </a>
+
+    <div className="px-3 py-1 bg-green-500/10 text-green-400 text-xs rounded-lg border border-green-500/20 font-medium">
+        Valid
+    </div>
+</div>
                                     </div>
                                 ))}
                             </div>

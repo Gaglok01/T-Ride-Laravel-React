@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
 use App\Models\Driver;
+use App\Models\DocumentQueueItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -70,6 +71,7 @@ class AppDriverController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'cnic_front' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'cnic_back' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'license_front' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -85,18 +87,37 @@ class AppDriverController extends Controller
 
         $docs = $driver->documents ?? [];
 
-        $fileFields = ['cnic_front', 'cnic_back', 'license_front', 'license_back', 'vehicle_registration', 'vehicle_photo', 'insurance'];
+        $fileFields = ['image', 'cnic_front', 'cnic_back', 'license_front', 'license_back', 'vehicle_registration', 'vehicle_photo', 'insurance'];
 
         foreach ($fileFields as $field) {
             if ($request->hasFile($field)) {
                 $path = $request->file($field)->store('driver_docs', 'public');
-                $docs[$field] = $path;
+
+                if ($field === 'image') {
+                    $driver->image = $path;
+                } else {
+                    $docs[$field] = $path;
+                }
+
+                DocumentQueueItem::updateOrCreate(
+                    [
+                        'driver_id' => $driver->id,
+                        'document_type' => $field,
+                    ],
+                    [
+                        'file_path' => $path,
+                        'city' => $driver->city ?? null,
+                        'status' => 'pending',
+                        'rejection_reason' => null,
+                    ]
+                );
             }
         }
 
         $driver->update([
             'documents' => $docs,
-            'account_status' => 'pending' // Re-trigger review if needed
+            'image' => $driver->image,
+            'account_status' => $driver->account_status
         ]);
 
         return response()->json([
@@ -119,8 +140,19 @@ class AppDriverController extends Controller
 
         return response()->json([
             'status' => true,
+            'message' => 'Driver status loaded',
             'account_status' => $driver->account_status,
-            'is_online' => (bool)$driver->is_online
+            'driver_status' => $driver->status,
+            'background_check_status' => $driver->background_check_status,
+            'is_online' => (bool)$driver->is_online,
+            'data' => [
+                'id' => $driver->id,
+                'account_status' => $driver->account_status,
+                'driver_status' => $driver->status,
+                'background_check_status' => $driver->background_check_status,
+                'is_online' => (bool)$driver->is_online,
+                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
+            ],
         ]);
     }
 
@@ -140,11 +172,20 @@ class AppDriverController extends Controller
         }
 
         $driver->update(['is_online' => $request->is_online]);
+        $driver->refresh();
 
         return response()->json([
             'status' => true,
             'message' => $request->is_online ? 'You are now online' : 'You are now offline',
-            'is_online' => (bool)$driver->is_online
+            'account_status' => $driver->account_status,
+            'driver_status' => $driver->status,
+            'is_online' => (bool)$driver->is_online,
+            'data' => [
+                'account_status' => $driver->account_status,
+                'driver_status' => $driver->status,
+                'is_online' => (bool)$driver->is_online,
+                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
+            ],
         ]);
     }
 
@@ -278,21 +319,42 @@ class AppDriverController extends Controller
         }
 
         $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver not found'], 404);
+        }
+
         $ride = Ride::where('id', $id)->where('driver_id', $driver->id)->first();
 
         if (!$ride) {
             return response()->json(['status' => false, 'message' => 'Ride not found'], 404);
         }
 
-        $updateData = ['status' => $request->status];
+        $current = strtolower((string) $ride->status);
+        $next = strtolower((string) $request->status);
 
-        if ($request->status === 'in_progress') {
+        $allowed = [
+            'accepted' => ['arrived', 'cancelled'],
+            'arrived' => ['in_progress', 'cancelled'],
+            'in_progress' => ['completed', 'cancelled'],
+        ];
+
+        if (!isset($allowed[$current]) || !in_array($next, $allowed[$current], true)) {
+            return response()->json([
+                'status' => false,
+                'message' => "Invalid ride flow: {$current} cannot go to {$next}",
+            ], 422);
+        }
+
+        $updateData = ['status' => $next];
+
+        if ($next === 'in_progress') {
             $updateData['started_at'] = now();
-        } elseif ($request->status === 'completed') {
+        }
+
+        if ($next === 'completed') {
             $updateData['completed_at'] = now();
-            $updateData['payment_status'] = 'paid'; // Assuming cash or auto-deduct
-            
-            // Update driver trip count
+            $updateData['payment_status'] = 'paid';
             $driver->increment('trips');
         }
 
@@ -300,12 +362,10 @@ class AppDriverController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Status updated to ' . $request->status,
+            'message' => 'Status updated to ' . $next,
             'data' => $ride->fresh(['rider', 'driver.user', 'vehicleType'])
         ]);
     }
-
-
 
 
     public function getActiveRide()

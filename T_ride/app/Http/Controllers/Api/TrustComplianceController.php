@@ -126,7 +126,32 @@ class TrustComplianceController extends Controller
         }
         $item->save();
 
-        // Here you would typically update the Driver's document field or status
+        $driver = $item->driver;
+
+        if ($driver) {
+            if ($status === 'rejected') {
+                $driver->update([
+                    'account_status' => 'rejected',
+                ]);
+            }
+
+            if ($status === 'approved') {
+                $remainingPending = DocumentQueueItem::where('driver_id', $driver->id)
+                    ->where('status', 'pending')
+                    ->count();
+
+                $remainingRejected = DocumentQueueItem::where('driver_id', $driver->id)
+                    ->where('status', 'rejected')
+                    ->count();
+
+                if ($remainingPending === 0 && $remainingRejected === 0) {
+                    $driver->update([
+                        'account_status' => 'approved',
+                        'status' => 'Active',
+                    ]);
+                }
+            }
+        }
         
         return response()->json(['status' => true, 'message' => "Document " . ucfirst($status)]);
     }
