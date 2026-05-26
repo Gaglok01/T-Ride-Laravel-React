@@ -27,7 +27,6 @@ interface DriverData {
     license_number?: string
     background_check_status?: string
     background_report_key?: string
-    admin_override?: boolean
     created_at: string
 }
 
@@ -116,13 +115,6 @@ export default function ViewDriver({ id }: { id: number }) {
                                    <ShieldCheck size={12} /> {driver.background_check_status.replace(/_/g, ' ')}
                                 </span>
                              )}
-
-                             {driver.admin_override && (
-                                <span className="px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider flex items-center gap-1 bg-blue-500/20 text-blue-400 border-blue-500/20">
-                                   <AlertTriangle size={12} />
-                                   ADMIN OVERRIDE ACTIVE
-                                </span>
-                             )}
                         </div>
 
                         <div className="w-full space-y-3">
@@ -169,40 +161,6 @@ export default function ViewDriver({ id }: { id: number }) {
                                 </Button>
                             </div>
                         )}
-
-                        <div className="mt-4 w-full">
-                            <Button
-                                variant={driver.admin_override ? "destructive" : "default"}
-                                className="w-full justify-center"
-                                onClick={async () => {
-                                    try {
-                                        const res = await axios.post(
-                                            `/api/admin/trust-compliance/toggle-admin-override/${driver.id}`
-                                        )
-
-                                        if (res.data.status) {
-                                            setDriver(prev =>
-                                                prev ? ({
-                                                    ...prev,
-                                                    admin_override: res.data.data.admin_override,
-                                                    status: res.data.data.driver_status,
-                                                }) : null
-                                            )
-
-                                            alert(res.data.message)
-                                        }
-                                    } catch (e) {
-                                        console.error(e)
-                                        alert("Failed to toggle admin override")
-                                    }
-                                }}
-                            >
-                                <AlertTriangle size={14} className="mr-2" />
-                                {driver.admin_override
-                                    ? 'Disable Admin Override'
-                                    : 'Enable Admin Override'}
-                            </Button>
-                        </div>
                     </div>
                 </div>
 
@@ -256,40 +214,6 @@ export default function ViewDriver({ id }: { id: number }) {
                                 No documents submitted.
                             </div>
                         )}
-
-                        <div className="mt-4 w-full">
-                            <Button
-                                variant={driver.admin_override ? "destructive" : "default"}
-                                className="w-full justify-center"
-                                onClick={async () => {
-                                    try {
-                                        const res = await axios.post(
-                                            `/api/admin/trust-compliance/toggle-admin-override/${driver.id}`
-                                        )
-
-                                        if (res.data.status) {
-                                            setDriver(prev =>
-                                                prev ? ({
-                                                    ...prev,
-                                                    admin_override: res.data.data.admin_override,
-                                                    status: res.data.data.driver_status,
-                                                }) : null
-                                            )
-
-                                            alert(res.data.message)
-                                        }
-                                    } catch (e) {
-                                        console.error(e)
-                                        alert("Failed to toggle admin override")
-                                    }
-                                }}
-                            >
-                                <AlertTriangle size={14} className="mr-2" />
-                                {driver.admin_override
-                                    ? 'Disable Admin Override'
-                                    : 'Enable Admin Override'}
-                            </Button>
-                        </div>
                     </div>
                 </div>
             </div>

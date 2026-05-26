@@ -178,34 +178,6 @@ class TrustComplianceController extends Controller
         ]);
     }
 
-    public function toggleAdminOverride($id)
-    {
-        $driver = Driver::findOrFail($id);
-
-        $driver->admin_override = !$driver->admin_override;
-
-        if ($driver->admin_override) {
-            $driver->account_status = 'approved';
-            $driver->status = 'Active';
-        }
-
-        $driver->save();
-
-        return response()->json([
-            'status' => true,
-            'message' => $driver->admin_override
-                ? 'Admin override enabled'
-                : 'Admin override disabled',
-            'data' => [
-                'id' => $driver->id,
-                'admin_override' => (bool) $driver->admin_override,
-                'account_status' => $driver->account_status,
-                'driver_status' => $driver->status,
-            ],
-        ]);
-    }
-
-
     public function suspendDriverForTesting($id)
     {
         $driver = Driver::findOrFail($id);

@@ -171,7 +171,7 @@ class AppDriverController extends Controller
                 'driver_status' => $driver->status,
                 'background_check_status' => $driver->background_check_status,
                 'is_online' => (bool)$driver->is_online,
-                'can_drive' => $canDrive,
+                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
             ],
         ]);
     }
@@ -191,55 +191,7 @@ class AppDriverController extends Controller
             return response()->json(['status' => false, 'message' => 'Your account is not approved yet'], 403);
         }
 
-        $requiredDocumentTypes = [
-            'license_front',
-            'license_back',
-            'insurance',
-            'vehicle_registration',
-            'image',
-        ];
-
-        $approvedRequiredDocuments = DocumentQueueItem::where('driver_id', $driver->id)
-            ->whereIn('document_type', $requiredDocumentTypes)
-            ->where('status', 'approved')
-            ->distinct('document_type')
-            ->count('document_type');
-
-        $requiredDocsApproved = $approvedRequiredDocuments >= count($requiredDocumentTypes);
-
-        $backgroundCheckApproved = in_array($driver->background_check_status, [
-            'approved',
-            'clear',
-            'completed',
-        ]);
-
-        $adminOverride = $driver->account_status === 'approved'
-            && $driver->status === 'Active';
-
-        $canDrive = $adminOverride || (
-            $driver->account_status === 'approved'
-            && $driver->status === 'Active'
-            && $requiredDocsApproved
-            && $backgroundCheckApproved
-        );
-
-        if ($request->is_online && !$canDrive) {
-            $driver->update(['is_online' => false]);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Driver is not eligible to go online yet.',
-                'eligibility' => [
-                    'account_approved' => $driver->account_status === 'approved',
-                    'driver_active' => $driver->status === 'Active',
-                    'documents_approved' => $requiredDocsApproved,
-                    'background_check_approved' => $backgroundCheckApproved,
-                    'admin_override' => (bool) $driver->admin_override,
-                ],
-            ], 422);
-        }
-
-        $driver->update(['is_online' => (bool) $request->is_online]);
+        $driver->update(['is_online' => $request->is_online]);
         $driver->refresh();
 
         return response()->json([
@@ -252,7 +204,7 @@ class AppDriverController extends Controller
                 'account_status' => $driver->account_status,
                 'driver_status' => $driver->status,
                 'is_online' => (bool)$driver->is_online,
-                'can_drive' => $canDrive,
+                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
             ],
         ]);
     }
@@ -336,15 +288,10 @@ class AppDriverController extends Controller
             'completed',
         ]);
 
-        $adminOverride = $driver->account_status === 'approved'
-            && $driver->status === 'Active';
-
-        $canDrive = $adminOverride || (
-            $driver->account_status === 'approved'
+        $canDrive = $driver->account_status === 'approved'
             && $driver->status === 'Active'
             && $requiredDocsApproved
-            && $backgroundCheckApproved
-        );
+            && $backgroundCheckApproved;
 
         return response()->json([
             'status' => true,
@@ -411,7 +358,6 @@ class AppDriverController extends Controller
                     'driver_active' => $driver->status === 'Active',
                     'documents_approved' => $requiredDocsApproved,
                     'background_check_approved' => $backgroundCheckApproved,
-                    'admin_override' => (bool) $driver->admin_override,
                 ],
 
                 'earnings' => [

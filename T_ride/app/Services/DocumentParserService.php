@@ -50,6 +50,27 @@ class DocumentParserService
     {
         $data = [];
 
+        // Reject obvious app screenshots
+        $suspiciousWords = [
+            'GO ONLINE',
+            'EARNINGS TODAY',
+            'READY TO ROLL',
+            'WAITING FOR NEW REQUESTS',
+            'COURIER REQUESTS',
+            'OFFLINE',
+            'HELLO, DRIVER',
+        ];
+
+        foreach ($suspiciousWords as $word) {
+            if (stripos($text, $word) !== false) {
+                return [
+                    '_document_rejected' => true,
+                    '_rejection_reason' => 'Screenshot detected instead of real document',
+                ];
+            }
+        }
+
+
         // VIN
         if (preg_match('/\b([A-HJ-NPR-Z0-9]{17})\b/', $text, $m)) {
             $data['vehicle_vin'] = $m[1];
@@ -87,7 +108,9 @@ class DocumentParserService
         if (preg_match('/\b(19[8-9][0-9]|20[0-3][0-9])\s+(HONDA|TOYOTA|FORD|CHEVROLET|CHEVY|NISSAN|HYUNDAI|KIA|BMW|MERCEDES|LEXUS|MAZDA|DODGE|JEEP|SUBARU|VOLKSWAGEN)\s+([A-Z0-9\-\s]{1,30})/i', $text, $m)) {
             $data['vehicle_year'] = $m[1];
             $data['vehicle_make'] = ucfirst(strtolower($m[2]));
-            $data['vehicle_model'] = trim($m[3]);
+            $model = trim($m[3]);
+            $model = preg_replace('/\b(MSRP|SPORT|UTILITY|VEHICLE|SUV|SEDAN|GASOLINE|REGISTRATION).*$/i', '', $model);
+            $data['vehicle_model'] = trim($model);
         }
 
         // Vehicle color

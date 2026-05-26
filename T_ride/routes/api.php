@@ -344,6 +344,7 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/process-document/{id}', [TrustComplianceController::class, 'processDocument']);
             Route::post('/approve-driver/{id}', [TrustComplianceController::class, 'approveDriverForTesting']);
             Route::post('/suspend-driver/{id}', [TrustComplianceController::class, 'suspendDriverForTesting']);
+            Route::post('/toggle-admin-override/{id}', [TrustComplianceController::class, 'toggleAdminOverride']);
         });
 
         // Driver Tiers & Rewards
