@@ -684,22 +684,6 @@ function DriverRow({ driver, onEdit, onDelete, onToggleStatus, onViewLocation }:
                             </span>
                         )
                     })()}
-                    <Button
-                        size="sm"
-                        className="h-7 bg-green-600 hover:bg-green-700 text-white text-xs"
-                        onClick={() => updateDriverStatus(driver.id, "approved")}
-                    >
-                        <Check size={13} className="mr-1" />
-                        Approve
-                    </Button>
-                    <Button
-                        size="sm"
-                        className="h-7 bg-red-600 hover:bg-red-700 text-white text-xs"
-                        onClick={() => updateDriverStatus(driver.id, "suspended")}
-                    >
-                        <Ban size={13} className="mr-1" />
-                        Suspend
-                    </Button>
                     <IconButton size="sm" tooltip="View Docs" className="h-6 w-6">
                         <FileText size={10} />
                     </IconButton>
