@@ -270,6 +270,40 @@ export default function TrustCompliancePage() {
                                                                 <Eye size={16} />
                                                             </IconButton>
                                                         </Link>
+                                                        <Button
+                                                            onClick={async () => {
+                                                                try {
+                                                                    await axios.post(`/admin/trust-compliance/approve-driver/${row.db_id || row.id}`)
+                                                                    alert('Driver approved successfully')
+                                                                    fetchAllData()
+                                                                } catch (error) {
+                                                                    alert('Approval failed. Check console.')
+                                                                    console.error('Approval failed:', error)
+                                                                }
+                                                            }}
+                                                            className="h-9 px-3 text-xs font-bold bg-green-600 hover:bg-green-700 text-white"
+                                                        >
+                                                            <Check size={14} className="mr-1.5" />
+                                                            Approve
+                                                        </Button>
+
+                                                        <Button
+                                                            onClick={async () => {
+                                                                try {
+                                                                    await axios.post(`/admin/trust-compliance/suspend-driver/${row.db_id || row.id}`)
+                                                                    alert('Driver suspended successfully')
+                                                                    fetchAllData()
+                                                                } catch (error) {
+                                                                    alert('Suspend failed. Check console.')
+                                                                    console.error('Suspend failed:', error)
+                                                                }
+                                                            }}
+                                                            className="h-9 px-3 text-xs font-bold bg-red-600 hover:bg-red-700 text-white"
+                                                        >
+                                                            <XCircle size={14} className="mr-1.5" />
+                                                            Suspend
+                                                        </Button>
+
                                                         <IconButton 
                                                             tooltip="Edit Compliance"
                                                             onClick={() => handleEditCompliance(row)}

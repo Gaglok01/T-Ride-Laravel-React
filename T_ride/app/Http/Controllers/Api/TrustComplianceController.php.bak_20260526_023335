@@ -148,11 +148,6 @@ class TrustComplianceController extends Controller
                     $driver->update([
                         'account_status' => 'approved',
                         'status' => 'Active',
-                        'license_status' => 'Valid',
-                        'insurance_status' => 'Valid',
-                        'vehicle_status' => 'Valid',
-                        'background_check_status' => $driver->background_check_status ?: 'cleared',
-                        'status' => 'Active',
                     ]);
                 }
             }
@@ -160,39 +155,4 @@ class TrustComplianceController extends Controller
         
         return response()->json(['status' => true, 'message' => "Document " . ucfirst($status)]);
     }
-    public function approveDriverForTesting($id)
-    {
-        $driver = Driver::findOrFail($id);
-
-        $driver->update([
-            'account_status' => 'approved',
-            'status' => 'Active',
-            'background_check_status' => 'not_started',
-            'is_online' => false,
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Driver approved successfully',
-            'data' => $driver->fresh(),
-        ]);
-    }
-
-    public function suspendDriverForTesting($id)
-    {
-        $driver = Driver::findOrFail($id);
-
-        $driver->update([
-            'account_status' => 'suspended',
-            'status' => 'Active',
-            'is_online' => false,
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Driver suspended successfully',
-            'data' => $driver->fresh(),
-        ]);
-    }
-
 }

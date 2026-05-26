@@ -342,6 +342,8 @@ Route::middleware('auth:api')->group(function () {
             Route::get('/enforcement-rules', [TrustComplianceController::class, 'getEnforcementRules']);
             Route::patch('/enforcement-rules/{id}/toggle', [TrustComplianceController::class, 'toggleEnforcementRule']);
             Route::post('/process-document/{id}', [TrustComplianceController::class, 'processDocument']);
+            Route::post('/approve-driver/{id}', [TrustComplianceController::class, 'approveDriverForTesting']);
+            Route::post('/suspend-driver/{id}', [TrustComplianceController::class, 'suspendDriverForTesting']);
         });
 
         // Driver Tiers & Rewards

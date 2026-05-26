@@ -1,0 +1,527 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Ride;
+use App\Models\Driver;
+use App\Models\DocumentQueueItem;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
+
+class AppDriverController extends Controller
+{
+    /**
+     * Driver Profile Setup
+     */
+    public function setupProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'address' => 'required|string',
+            'region' => 'required|string',
+            'city' => 'required|string',
+            'type_id' => 'required|exists:types,id',
+            'vehicle_model' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
+        }
+
+        $driver = Driver::updateOrCreate(
+            ['user_id' => Auth::id()],
+            [
+                'driver_id' => 'DRV-' . strtoupper(substr(md5(Auth::id()), 0, 8)),
+                'name' => $request->name,
+                'address' => $request->address,
+                'region' => $request->region,
+                'city' => $request->city,
+                'type_id' => $request->type_id,
+                'vehicle_model' => $request->vehicle_model,
+                'account_status' => 'pending'
+            ]
+        );
+
+        // Link driver back to user
+        $user = Auth::user();
+        $user->driver_id = $driver->driver_id;
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile setup successfully, please upload documents',
+            'data' => $driver
+        ]);
+    }
+
+    /**
+     * Upload Driver Documents
+     */
+    public function uploadDocuments(Request $request)
+    {
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver profile not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'cnic_front' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'cnic_back' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'license_front' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'license_back' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'vehicle_registration' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'vehicle_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'insurance' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
+        }
+
+        $docs = $driver->documents ?? [];
+
+        $fileFields = ['image', 'cnic_front', 'cnic_back', 'license_front', 'license_back', 'vehicle_registration', 'vehicle_photo', 'insurance'];
+
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                $path = $request->file($field)->store('driver_docs', 'public');
+
+                if ($field === 'image') {
+                    $driver->image = $path;
+                } else {
+                    $docs[$field] = $path;
+                }
+
+                DocumentQueueItem::updateOrCreate(
+                    [
+                        'driver_id' => $driver->id,
+                        'document_type' => $field,
+                    ],
+                    [
+                        'file_path' => $path,
+                        'city' => $driver->city ?? null,
+                        'status' => 'pending',
+                        'rejection_reason' => null,
+                    ]
+                );
+            }
+        }
+
+        $driver->update([
+            'documents' => $docs,
+            'image' => $driver->image,
+            'account_status' => $driver->account_status
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Documents uploaded successfully',
+            'data' => $driver
+        ]);
+    }
+
+    /**
+     * Get Driver Current Status
+     */
+    public function getStatus()
+    {
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver profile not found'], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Driver status loaded',
+            'account_status' => $driver->account_status,
+            'driver_status' => $driver->status,
+            'background_check_status' => $driver->background_check_status,
+            'is_online' => (bool)$driver->is_online,
+            'data' => [
+                'id' => $driver->id,
+                'account_status' => $driver->account_status,
+                'driver_status' => $driver->status,
+                'background_check_status' => $driver->background_check_status,
+                'is_online' => (bool)$driver->is_online,
+                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
+            ],
+        ]);
+    }
+
+    /**
+     * Toggle Online/Offline Status
+     */
+    public function toggleOnline(Request $request)
+    {
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver profile not found'], 404);
+        }
+
+        if ($driver->account_status !== 'approved') {
+            return response()->json(['status' => false, 'message' => 'Your account is not approved yet'], 403);
+        }
+
+        $driver->update(['is_online' => $request->is_online]);
+        $driver->refresh();
+
+        return response()->json([
+            'status' => true,
+            'message' => $request->is_online ? 'You are now online' : 'You are now offline',
+            'account_status' => $driver->account_status,
+            'driver_status' => $driver->status,
+            'is_online' => (bool)$driver->is_online,
+            'data' => [
+                'account_status' => $driver->account_status,
+                'driver_status' => $driver->status,
+                'is_online' => (bool)$driver->is_online,
+                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
+            ],
+        ]);
+    }
+
+    /**
+     * Driver Dashboard Stats
+     */
+    public function getDashboard()
+    {
+        $driver = Driver::with('tier')
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$driver) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Driver profile not found'
+            ], 404);
+        }
+
+        $rides = Ride::where('driver_id', $driver->id)
+            ->where('status', 'completed');
+
+        $earningsToday = (float) (clone $rides)
+            ->whereDate('completed_at', Carbon::today())
+            ->sum('fare');
+
+        $earningsWeekly = (float) (clone $rides)
+            ->where('completed_at', '>=', Carbon::now()->startOfWeek())
+            ->sum('fare');
+
+        $earningsMonthly = (float) (clone $rides)
+            ->where('completed_at', '>=', Carbon::now()->startOfMonth())
+            ->sum('fare');
+
+        $totalRequests = Ride::where('driver_id', $driver->id)->count();
+
+        $acceptedRequests = Ride::where('driver_id', $driver->id)
+            ->whereIn('status', ['accepted', 'arrived', 'ongoing', 'completed'])
+            ->count();
+
+        $acceptanceRate = $totalRequests > 0
+            ? round(($acceptedRequests / $totalRequests) * 100, 1)
+            : 0;
+
+        $pendingDocuments = DocumentQueueItem::where('driver_id', $driver->id)
+            ->where('status', 'pending')
+            ->count();
+
+        $approvedDocuments = DocumentQueueItem::where('driver_id', $driver->id)
+            ->where('status', 'approved')
+            ->count();
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+
+                'driver_id' => $driver->id,
+
+                'name' => $driver->name,
+
+                'vehicle_model' => $driver->vehicle_model,
+                'vehicle_plate_number' => $driver->vehicle_plate_number,
+                'vehicle_color' => $driver->vehicle_color,
+
+                'profile_image' => $driver->image
+                    ? asset('storage/' . $driver->image)
+                    : null,
+
+                'rating' => (float) $driver->rating,
+
+                'total_trips' => (int) $driver->trips,
+
+                'wallet_balance' => (float) Auth::user()->wallet_balance,
+
+                'acceptance_rate' => $acceptanceRate,
+
+                'verified' => $driver->account_status === 'approved',
+
+                'account_status' => $driver->account_status,
+
+                'driver_status' => $driver->status,
+
+                'background_check_status' => $driver->background_check_status,
+
+                'is_online' => (bool) $driver->is_online,
+
+                'bid_enabled' => (bool) $driver->bid_enabled,
+                'pooling_enabled' => (bool) $driver->pooling_enabled,
+                'courier_enabled' => (bool) $driver->courier_enabled,
+                'delivery_enabled' => (bool) $driver->delivery_enabled,
+                'pet_friendly_enabled' => (bool) $driver->pet_friendly_enabled,
+
+                'pending_documents' => $pendingDocuments,
+
+                'approved_documents' => $approvedDocuments,
+
+                'tier' => $driver->tier?->name ?? 'Standard',
+
+                'can_drive' =>
+                    $driver->account_status === 'approved'
+                    && $driver->status === 'Active',
+
+                'earnings' => [
+                    'today' => $earningsToday,
+                    'weekly' => $earningsWeekly,
+                    'monthly' => $earningsMonthly,
+                ],
+            ]
+        ]);
+    }
+
+    /**
+     * Get New Ride Requests (Finding rides)
+     */
+    public function getRideRequests()
+    {
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver || !$driver->is_online || $driver->account_status !== 'approved') {
+            return response()->json(['status' => false, 'message' => 'Driver not available to take rides']);
+        }
+
+        $requests = Ride::where('status', 'searching')
+            ->where(function ($q) use ($driver) {
+                $q->where('vehicle_type_id', $driver->type_id)
+                  ->orWhereNull('vehicle_type_id');
+            })
+            ->with(['rider'])
+            ->latest()
+            ->get()
+            ->map(function ($ride) {
+                $distanceMiles = $this->calculateDistance(
+                    $ride->pickup_lat,
+                    $ride->pickup_lng,
+                    $ride->dropoff_lat,
+                    $ride->dropoff_lng
+                );
+
+                $ride->distance_miles = round($distanceMiles, 1);
+                $ride->duration_minutes = max(3, round($distanceMiles * 2));
+                $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
+
+                return $ride;
+            });
+
+        return response()->json([
+            'status' => true,
+            'data' => $requests
+        ]);
+    }
+
+    /**
+     * Respond to Ride Request (Accept/Reject)
+     */
+    public function respondToRide(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'action' => 'required|in:accept,reject',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
+        }
+
+        $ride = Ride::find($id);
+
+        if (!$ride || $ride->status !== 'searching') {
+            return response()->json(['status' => false, 'message' => 'Ride is no longer available'], 404);
+        }
+
+        $driver = Driver::where('user_id', Auth::id())->first();
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver not found'], 404);
+        }
+
+        if ($request->action === 'accept') {
+            $ride->update([
+                'driver_id' => $driver->id,
+                'status' => 'accepted'
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Ride accepted successfully',
+                'data' => $ride->fresh(['rider', 'driver.user', 'vehicleType'])
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Ride rejected'
+        ]);
+    }
+
+    /**
+     * Update Ride Status (arrived, in_progress, completed)
+     */
+    public function updateRideStatus(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:arrived,in_progress,completed,cancelled',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
+        }
+
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver not found'], 404);
+        }
+
+        $ride = Ride::where('id', $id)->where('driver_id', $driver->id)->first();
+
+        if (!$ride) {
+            return response()->json(['status' => false, 'message' => 'Ride not found'], 404);
+        }
+
+        $current = strtolower((string) $ride->status);
+        $next = strtolower((string) $request->status);
+
+        $allowed = [
+            'accepted' => ['arrived', 'cancelled'],
+            'arrived' => ['in_progress', 'cancelled'],
+            'in_progress' => ['completed', 'cancelled'],
+        ];
+
+        if (!isset($allowed[$current]) || !in_array($next, $allowed[$current], true)) {
+            return response()->json([
+                'status' => false,
+                'message' => "Invalid ride flow: {$current} cannot go to {$next}",
+            ], 422);
+        }
+
+        $updateData = ['status' => $next];
+
+        if ($next === 'in_progress') {
+            $updateData['started_at'] = now();
+        }
+
+        if ($next === 'completed') {
+            $updateData['completed_at'] = now();
+            $updateData['payment_status'] = 'paid';
+            $driver->increment('trips');
+        }
+
+        $ride->update($updateData);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Status updated to ' . $next,
+            'data' => $ride->fresh(['rider', 'driver.user', 'vehicleType'])
+        ]);
+    }
+
+
+    public function getActiveRide()
+    {
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json(['status' => false, 'message' => 'Driver profile not found'], 404);
+        }
+
+        $ride = Ride::where('driver_id', $driver->id)
+            ->whereIn('status', ['accepted', 'arrived', 'in_progress'])
+            ->with(['rider', 'driver.user', 'vehicleType'])
+            ->latest()
+            ->first();
+
+        if (!$ride) {
+            return response()->json(['status' => false, 'message' => 'No active ride found', 'data' => null]);
+        }
+
+        $distanceMiles = $this->calculateDistance(
+            $ride->pickup_lat,
+            $ride->pickup_lng,
+            $ride->dropoff_lat,
+            $ride->dropoff_lng
+        );
+
+        $ride->distance_miles = round($distanceMiles, 1);
+        $ride->duration_minutes = max(3, round($distanceMiles * 2));
+        $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
+
+        return response()->json([
+            'status' => true,
+            'data' => $ride
+        ]);
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earth_radius = 6371;
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        $distance_km = $earth_radius * $c;
+
+        return $distance_km * 0.621371;
+    }
+
+
+    public function updatePreferences(Request $request)
+    {
+        $driver = Driver::where('user_id', Auth::id())->first();
+
+        if (!$driver) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Driver profile not found'
+            ], 404);
+        }
+
+        $driver->update([
+            'bid_enabled' => $request->boolean('bid_enabled'),
+            'pooling_enabled' => $request->boolean('pooling_enabled'),
+            'courier_enabled' => $request->boolean('courier_enabled'),
+            'delivery_enabled' => $request->boolean('delivery_enabled'),
+            'pet_friendly_enabled' => $request->boolean('pet_friendly_enabled'),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Preferences updated successfully',
+            'data' => $driver
+        ]);
+    }
+
+
+}
