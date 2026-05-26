@@ -171,7 +171,7 @@ class AppDriverController extends Controller
                 'driver_status' => $driver->status,
                 'background_check_status' => $driver->background_check_status,
                 'is_online' => (bool)$driver->is_online,
-                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
+                'can_drive' => $canDrive,
             ],
         ]);
     }
@@ -191,7 +191,49 @@ class AppDriverController extends Controller
             return response()->json(['status' => false, 'message' => 'Your account is not approved yet'], 403);
         }
 
-        $driver->update(['is_online' => $request->is_online]);
+        $requiredDocumentTypes = [
+            'license_front',
+            'license_back',
+            'insurance',
+            'vehicle_registration',
+            'image',
+        ];
+
+        $approvedRequiredDocuments = DocumentQueueItem::where('driver_id', $driver->id)
+            ->whereIn('document_type', $requiredDocumentTypes)
+            ->where('status', 'approved')
+            ->distinct('document_type')
+            ->count('document_type');
+
+        $requiredDocsApproved = $approvedRequiredDocuments >= count($requiredDocumentTypes);
+
+        $backgroundCheckApproved = in_array($driver->background_check_status, [
+            'approved',
+            'clear',
+            'completed',
+        ]);
+
+        $canDrive = $driver->account_status === 'approved'
+            && $driver->status === 'Active'
+            && $requiredDocsApproved
+            && $backgroundCheckApproved;
+
+        if ($request->is_online && !$canDrive) {
+            $driver->update(['is_online' => false]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Driver is not eligible to go online yet.',
+                'eligibility' => [
+                    'account_approved' => $driver->account_status === 'approved',
+                    'driver_active' => $driver->status === 'Active',
+                    'documents_approved' => $requiredDocsApproved,
+                    'background_check_approved' => $backgroundCheckApproved,
+                ],
+            ], 422);
+        }
+
+        $driver->update(['is_online' => (bool) $request->is_online]);
         $driver->refresh();
 
         return response()->json([
@@ -204,7 +246,7 @@ class AppDriverController extends Controller
                 'account_status' => $driver->account_status,
                 'driver_status' => $driver->status,
                 'is_online' => (bool)$driver->is_online,
-                'can_drive' => $driver->account_status === 'approved' && $driver->status === 'Active',
+                'can_drive' => $canDrive,
             ],
         ]);
     }
@@ -258,6 +300,41 @@ class AppDriverController extends Controller
             ->where('status', 'approved')
             ->count();
 
+        $documentStatuses = DocumentQueueItem::where('driver_id', $driver->id)
+            ->pluck('status', 'document_type')
+            ->toArray();
+
+        $todayTrips = Ride::where('driver_id', $driver->id)
+            ->whereDate('completed_at', Carbon::today())
+            ->count();
+
+        $requiredDocumentTypes = [
+            'license_front',
+            'license_back',
+            'insurance',
+            'vehicle_registration',
+            'image',
+        ];
+
+        $approvedRequiredDocuments = DocumentQueueItem::where('driver_id', $driver->id)
+            ->whereIn('document_type', $requiredDocumentTypes)
+            ->where('status', 'approved')
+            ->distinct('document_type')
+            ->count('document_type');
+
+        $requiredDocsApproved = $approvedRequiredDocuments >= count($requiredDocumentTypes);
+
+        $backgroundCheckApproved = in_array($driver->background_check_status, [
+            'approved',
+            'clear',
+            'completed',
+        ]);
+
+        $canDrive = $driver->account_status === 'approved'
+            && $driver->status === 'Active'
+            && $requiredDocsApproved
+            && $backgroundCheckApproved;
+
         return response()->json([
             'status' => true,
             'data' => [
@@ -267,8 +344,16 @@ class AppDriverController extends Controller
                 'name' => $driver->name,
 
                 'vehicle_model' => $driver->vehicle_model,
+                'vehicle_make' => $driver->vehicle_make,
+                'vehicle_year' => $driver->vehicle_year,
                 'vehicle_plate_number' => $driver->vehicle_plate_number,
+                'vehicle_vin' => $driver->vehicle_vin,
                 'vehicle_color' => $driver->vehicle_color,
+                'license_number' => $driver->license_number,
+                'license_expiration' => optional($driver->license_expiration)->toDateString(),
+                'insurance_expiration' => optional($driver->insurance_expiration)->toDateString(),
+                'insurance_policy_number' => $driver->insurance_policy_number,
+                'parsed_documents' => $driver->parsed_documents,
 
                 'profile_image' => $driver->image
                     ? asset('storage/' . $driver->image)
@@ -302,11 +387,20 @@ class AppDriverController extends Controller
 
                 'approved_documents' => $approvedDocuments,
 
-                'tier' => $driver->tier?->name ?? 'Standard',
+                'document_statuses' => $documentStatuses,
 
-                'can_drive' =>
-                    $driver->account_status === 'approved'
-                    && $driver->status === 'Active',
+                'today_trips' => $todayTrips,
+
+                'tier' => $driver->tier?->name ?? 'Silver',
+
+                'can_drive' => $canDrive,
+
+                'eligibility' => [
+                    'account_approved' => $driver->account_status === 'approved',
+                    'driver_active' => $driver->status === 'Active',
+                    'documents_approved' => $requiredDocsApproved,
+                    'background_check_approved' => $backgroundCheckApproved,
+                ],
 
                 'earnings' => [
                     'today' => $earningsToday,
