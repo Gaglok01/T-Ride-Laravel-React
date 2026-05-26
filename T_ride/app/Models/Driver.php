@@ -19,8 +19,18 @@ class Driver extends Model
         'type_id',
         'driver_tier_id',
         'vehicle_model',
+        'vehicle_make',
+        'vehicle_year',
+        'vehicle_plate_number',
+        'vehicle_vin',
+        'insurance_provider',
+        'insurance_policy_number',
+        'insurance_expiration',
         'cnic',
         'license_number',
+        'license_expiration',
+        'date_of_birth',
+        'parsed_documents',
         'trips',
         'rating',
         'completion_rate',
@@ -36,6 +46,10 @@ class Driver extends Model
 
     protected $casts = [
         'documents' => 'array',
+        'parsed_documents' => 'array',
+        'license_expiration' => 'date',
+        'insurance_expiration' => 'date',
+        'date_of_birth' => 'date',
     ];
 
     public function type()

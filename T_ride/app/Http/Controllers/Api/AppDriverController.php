@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Services\DocumentParserService;
 
 class AppDriverController extends Controller
 {
@@ -26,7 +27,7 @@ class AppDriverController extends Controller
             'region' => 'required|string',
             'city' => 'required|string',
             'type_id' => 'required|exists:types,id',
-            'vehicle_model' => 'required|string',
+            'vehicle_model' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -111,6 +112,25 @@ class AppDriverController extends Controller
                         'rejection_reason' => null,
                     ]
                 );
+
+                // Auto parse uploaded documents
+                $parser = new DocumentParserService();
+
+                $ocrText = $parser->extractTextFromStoragePath($path);
+
+                $parsed = $parser->parseText($ocrText);
+
+                if (!empty($parsed)) {
+                    $driver->forceFill($parsed);
+
+                    $existingParsed = $driver->parsed_documents ?? [];
+
+                    $existingParsed[$field] = $parsed;
+
+                    $driver->parsed_documents = $existingParsed;
+
+                    $driver->save();
+                }
             }
         }
 
