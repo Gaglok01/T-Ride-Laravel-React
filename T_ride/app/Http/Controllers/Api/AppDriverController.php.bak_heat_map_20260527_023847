@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
 use App\Models\Driver;
-use App\Models\ServiceZone;
 use App\Models\DocumentQueueItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -262,36 +261,6 @@ class AppDriverController extends Controller
             ],
         ]);
     }
-
-
-    public function getHeatMap()
-    {
-        $zones = ServiceZone::where('status', 'active')
-            ->whereNotNull('center_lat')
-            ->whereNotNull('center_lng')
-            ->get()
-            ->map(function ($zone) {
-                return [
-                    'id' => $zone->id,
-                    'name' => $zone->name,
-                    'description' => $zone->description,
-                    'lat' => (float) $zone->center_lat,
-                    'lng' => (float) $zone->center_lng,
-                    'radius_meters' => (int) $zone->radius_meters,
-                    'demand_level' => $zone->demand_level ?? 'normal',
-                    'surge_multiplier' => (float) $zone->surge_multiplier,
-                    'price_multiplier' => (float) $zone->price_multiplier,
-                ];
-            })
-            ->values();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Driver heat map loaded',
-            'data' => $zones,
-        ]);
-    }
-
 
     /**
      * Driver Dashboard Stats

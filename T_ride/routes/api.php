@@ -399,7 +399,9 @@ Route::middleware('auth:api')->group(function () {
 
 Route::middleware('auth:api')->group(function () {
 
-    Route::post('/app/driver/ride/{id}/accept', function (\Illuminate\Http\Request $request, $id) {
+        Route::get('/app/driver/heat-map', [AppDriverController::class, 'getHeatMap']);
+
+Route::post('/app/driver/ride/{id}/accept', function (\Illuminate\Http\Request $request, $id) {
         $request->merge(['action' => 'accept']);
         return app(\App\Http\Controllers\Api\AppDriverController::class)
             ->respondToRide($request, $id);
