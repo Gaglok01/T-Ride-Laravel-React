@@ -104,18 +104,34 @@ class AppRideController extends Controller
                 $driver->user->lng
             );
 
-            if ($dist <= 5) {
+            $distanceMiles = $dist * 0.621371;
+
+            if ($distanceMiles <= 8) {
+                $longPickup = $distanceMiles > 5;
+                $pickupFee = 0;
+
+                if ($distanceMiles > 5) {
+                    $pickupFee += ($distanceMiles - 5) * 1.25;
+                }
+
                 $availableDrivers[] = [
                     'id' => $driver->id,
                     'name' => $driver->name,
                     'rating' => $driver->rating ?? 5.0,
                     'vehicle' => $driver->vehicle_model,
                     'photo' => $driver->image_url,
-                    'eta' => round(($dist / 30) * 60) . ' mins', // Assuming 30km/h avg speed
-                    'distance' => round($dist, 2) . ' km'
+                    'eta' => round(($dist / 30) * 60) . ' mins',
+                    'distance' => round($distanceMiles, 1) . ' miles',
+                    'pickup_distance_miles' => round($distanceMiles, 2),
+                    'long_pickup' => $longPickup,
+                    'pickup_fee' => round($pickupFee, 2),
                 ];
             }
         }
+
+        usort($availableDrivers, function ($a, $b) {
+            return floatval($a['pickup_distance_miles']) <=> floatval($b['pickup_distance_miles']);
+        });
 
         return response()->json([
             'status' => true,
