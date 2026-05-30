@@ -471,11 +471,6 @@ class AppDriverController extends Controller
             return response()->json(['status' => false, 'message' => 'Driver not available to take rides']);
         }
 
-        $driverUser = $driver->user ?? \App\Models\User::find($driver->user_id);
-        $driverLat = $driverUser->lat ?? null;
-        $driverLng = $driverUser->lng ?? null;
-        $maxPickupMiles = 25;
-
         $requests = Ride::where('status', 'searching')
             ->where(function ($q) use ($driver) {
                 $q->where('vehicle_type_id', $driver->type_id)
@@ -484,40 +479,20 @@ class AppDriverController extends Controller
             ->with(['rider'])
             ->latest()
             ->get()
-            ->map(function ($ride) use ($driverLat, $driverLng) {
-                $tripDistanceMiles = $this->calculateDistance(
+            ->map(function ($ride) {
+                $distanceMiles = $this->calculateDistance(
                     $ride->pickup_lat,
                     $ride->pickup_lng,
                     $ride->dropoff_lat,
                     $ride->dropoff_lng
                 );
 
-                $pickupDistanceMiles = null;
-                if ($driverLat !== null && $driverLng !== null) {
-                    $pickupDistanceMiles = $this->calculateDistance(
-                        $driverLat,
-                        $driverLng,
-                        $ride->pickup_lat,
-                        $ride->pickup_lng
-                    );
-                }
-
-                $ride->distance_miles = round($tripDistanceMiles, 1);
-                $ride->pickup_distance_miles = $pickupDistanceMiles === null ? null : round($pickupDistanceMiles, 1);
-                $ride->duration_minutes = max(3, round($tripDistanceMiles * 2));
+                $ride->distance_miles = round($distanceMiles, 1);
+                $ride->duration_minutes = max(3, round($distanceMiles * 2));
                 $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
 
                 return $ride;
-            })
-            ->filter(function ($ride) use ($driverLat, $driverLng, $maxPickupMiles) {
-                if ($driverLat === null || $driverLng === null) {
-                    return false;
-                }
-
-                return $ride->pickup_distance_miles !== null
-                    && $ride->pickup_distance_miles <= $maxPickupMiles;
-            })
-            ->values();
+            });
 
         return response()->json([
             'status' => true,

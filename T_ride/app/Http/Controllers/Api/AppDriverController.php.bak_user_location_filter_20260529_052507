@@ -471,9 +471,8 @@ class AppDriverController extends Controller
             return response()->json(['status' => false, 'message' => 'Driver not available to take rides']);
         }
 
-        $driverUser = $driver->user ?? \App\Models\User::find($driver->user_id);
-        $driverLat = $driverUser->lat ?? null;
-        $driverLng = $driverUser->lng ?? null;
+        $driverLat = $driver->latitude ?? $driver->lat ?? null;
+        $driverLng = $driver->longitude ?? $driver->lng ?? null;
         $maxPickupMiles = 25;
 
         $requests = Ride::where('status', 'searching')

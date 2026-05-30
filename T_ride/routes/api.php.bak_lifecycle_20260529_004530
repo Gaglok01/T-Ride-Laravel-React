@@ -420,7 +420,7 @@ Route::post('/app/driver/ride/{id}/accept', function (\Illuminate\Http\Request $
     });
 
     Route::post('/app/driver/ride/{id}/start', function (\Illuminate\Http\Request $request, $id) {
-        $request->merge(['status' => 'started']);
+        $request->merge(['status' => 'in_progress']);
         return app(\App\Http\Controllers\Api\AppDriverController::class)
             ->updateRideStatus($request, $id);
     });

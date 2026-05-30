@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { AdminLayout } from "@/layouts/admin-layout"
 import { Car, Package, Truck, Users, Clock, Plus, RefreshCw, MapPin, Phone, User, Router, TrendingUp, AlertTriangle, Search, Star, Eye, Shield, Zap, Globe, History, Signal, Navigation, Lock, Activity, Settings, BarChart3, Radio, Target, Gauge, Timer, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -71,10 +71,8 @@ export default function DispatchPage() {
     const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([])
     const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
     const [availableDrivers, setAvailableDrivers] = useState<AvailableDriver[]>([])
-    const [heatZones, setHeatZones] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
-    const dispatchMapRef = useRef<google.maps.Map | null>(null)
 
     // Modal states
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
@@ -94,8 +92,8 @@ export default function DispatchPage() {
     }
 
     const center = {
-        lat: 41.2565, // Default fallback Omaha
-        lng: -95.9345
+        lat: 31.5204, // Default to Lahore
+        lng: 74.3587
     }
 
     useEffect(() => {
@@ -105,31 +103,6 @@ export default function DispatchPage() {
     const fetchAllData = async () => {
         setLoading(true)
         try {
-            const heatmapResponse = await axios.get('/api/public/driver/heat-map')
-            if (heatmapResponse.data?.status) {
-                const zones = heatmapResponse.data.data || []
-                setHeatZones(zones)
-
-                if (zones.length > 0) {
-                    const bounds = new google.maps.LatLngBounds()
-                    zones.forEach((zone: any) => {
-                        bounds.extend({
-                            lat: Number(zone.lat),
-                            lng: Number(zone.lng),
-                        })
-                    })
-
-                    if (dispatchMapRef.current) {
-                        dispatchMapRef.current.fitBounds(bounds)
-                    } else {
-                        setCenter({
-                            lat: Number(zones[0].lat),
-                            lng: Number(zones[0].lng),
-                        })
-                    }
-                }
-            }
-
             const [statsRes, ordersRes, activeRes, driversRes] = await Promise.all([
                 axios.get('/admin/dispatch/stats'),
                 axios.get('/admin/dispatch/pending-orders'),
@@ -232,7 +205,6 @@ export default function DispatchPage() {
                             <GoogleMap
                                 mapContainerStyle={mapContainerStyle}
                                 center={center}
-                                onLoad={(map) => { dispatchMapRef.current = map }}
                                 zoom={12}
                                 options={{
                                     styles: darkMapStyles,
@@ -671,48 +643,34 @@ export default function DispatchPage() {
                         <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
                             <h3 className="text-lg font-semibold text-tride-text mb-1">Demand Heatmap</h3>
                             <p className="text-sm text-tride-text-muted mb-6">Real-time demand intensity across service zones</p>
-                            <div className="rounded-2xl overflow-hidden h-[350px]">
-                                <GoogleMap
-                                    mapContainerStyle={{ width: "100%", height: "350px" }}
-                                    center={{ lat: 41.2565, lng: -95.9345 }}
-                                    zoom={11}
-                                    options={{
-                                        streetViewControl: false,
-                                        mapTypeControl: false,
-                                        fullscreenControl: false,
-                                    }}
-                                >
-                                    {heatZones.map((zone, i) => (
-                                        <Marker
-                                            key={i}
-                                            position={{
-                                                lat: Number(zone.lat),
-                                                lng: Number(zone.lng),
-                                            }}
-                                            title={`${zone.name} (${zone.surge_multiplier}x)`}
-                                        />
-                                    ))}
-                                </GoogleMap>
+                            <div className="border-2 border-dashed border-tride-border rounded-2xl h-[350px] flex flex-col items-center justify-center text-tride-text-muted">
+                                <Globe size={48} className="mb-3 opacity-50" />
+                                <p className="font-medium">Live demand heatmap</p>
+                                <p className="text-xs">Color intensity = request density</p>
+                                <div className="mt-6 bg-tride-hover rounded-xl p-4">
+                                    <p className="text-xs font-medium text-tride-text mb-2">Demand Scale</p>
+                                    <div className="flex gap-1">
+                                        {['bg-green-300','bg-green-500','bg-yellow-400','bg-orange-400','bg-red-400','bg-red-600'].map((c,i) => (
+                                            <div key={i} className={`w-8 h-4 rounded ${c}`} />
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between text-[10px] mt-1"><span>Low</span><span>High</span></div>
+                                </div>
                             </div>
                         </div>
                         <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
                             <h3 className="text-lg font-semibold text-tride-text mb-6">Hot Zones (Live)</h3>
                             <div className="space-y-3">
-                                {heatZones.length === 0 && (
-                                    <div className="p-4 rounded-2xl border border-tride-border text-tride-text-muted">
-                                        No live zones found.
-                                    </div>
-                                )}
-                                {heatZones.map((z, i) => (
-                                    <div key={i} className={`p-4 rounded-2xl border ${Number(z.surge_multiplier) > 1.5 ? 'border-red-500/30 bg-red-500/5' : Number(z.surge_multiplier) > 1 ? 'border-orange-500/20 bg-orange-500/5' : 'border-tride-border'}`}>
+                                {[{name:'Airport Terminal 1',req:89,drv:12,gap:77,surge:'2.1x'},{name:'Central Business District',req:156,drv:89,gap:67,surge:'1.8x'},{name:'University Area',req:67,drv:28,gap:39,surge:'1.5x'},{name:'Mall of Africa',req:45,drv:34,gap:11,surge:'1.2x'},{name:'Industrial Park',req:23,drv:45,gap:-22,surge:'1.0x'},{name:'Residential North',req:34,drv:41,gap:-7,surge:'1.0x'}].map((z, i) => (
+                                    <div key={i} className={`p-4 rounded-2xl border ${z.gap > 30 ? 'border-red-500/30 bg-red-500/5' : z.gap > 10 ? 'border-orange-500/20 bg-orange-500/5' : 'border-tride-border'}`}>
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className="font-semibold text-tride-text">{z.name}</h4>
-                                                <p className="text-xs text-tride-text-muted">{z.demand_level} demand • Surge {z.surge_multiplier}x</p>
+                                                <p className="text-xs text-tride-text-muted">{z.req} requests    {z.drv} drivers</p>
                                             </div>
-                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${Number(z.surge_multiplier) > 1.5 ? 'bg-red-500 text-white' : 'bg-tride-hover text-tride-text'}`}>{z.surge_multiplier}x</span>
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${parseFloat(z.surge) > 1.5 ? 'bg-red-500 text-white' : 'bg-tride-hover text-tride-text'}`}>{z.surge}</span>
                                         </div>
-                                        <p className="text-xs font-medium mt-1 text-orange-400">Radius: {z.radius_meters}m</p>
+                                        <p className={`text-xs font-medium mt-1 ${z.gap > 0 ? 'text-red-400' : 'text-green-500'}`}>Gap: {z.gap > 0 ? '+' : ''}{z.gap}</p>
                                     </div>
                                 ))}
                             </div>

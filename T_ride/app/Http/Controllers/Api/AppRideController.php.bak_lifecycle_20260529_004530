@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
-use App\Services\FirestoreRideSyncService;
 use App\Models\PricingZone;
 use App\Models\Type;
 use App\Models\Driver;
@@ -167,7 +166,7 @@ class AppRideController extends Controller
         $ride = Ride::create([
             'ride_custom_id' => 'TR-' . strtoupper(Str::random(8)),
             'rider_id' => Auth::id(),
-            'driver_id' => null,
+            'driver_id' => $request->driver_id,
             'vehicle_type_id' => $request->vehicle_type_id,
             'pickup_address' => $request->pickup_address,
             'pickup_lat' => $request->pickup_lat,
@@ -177,19 +176,13 @@ class AppRideController extends Controller
             'dropoff_lng' => $request->dropoff_lng,
             'fare' => $request->fare,
             'payment_method' => $request->payment_method,
-            'status' => 'searching',
-            'started_at' => null,
+            'status' => $request->driver_id ? 'accepted' : 'searching',
+            'started_at' => $request->driver_id ? now() : null,
         ]);
-
-        try {
-            app(FirestoreRideSyncService::class)->sync($ride, 'searching');
-        } catch (\Throwable $e) {
-            \Log::error('Firestore searching sync failed', ['ride_id' => $ride->id, 'error' => $e->getMessage()]);
-        }
 
         return response()->json([
             'status' => true,
-            'message' => 'Ride requested, searching for driver...',
+            'message' => $request->driver_id ? 'Ride confirmed with driver' : 'Ride requested, searching for driver...',
             'data' => $ride
         ]);
     }

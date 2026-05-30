@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Ride;
+use Kreait\Firebase\Factory;
+
+class FirestoreRideSyncService
+{
+    protected $firestore;
+
+    public function __construct()
+    {
+        $this->firestore = (new Factory)
+            ->withServiceAccount(storage_path('app/firebase-service-account.json'))
+            ->createFirestore()
+            ->database();
+    }
+
+    public function sync(Ride $ride, string $status): void
+    {
+        $ride = $ride->fresh(['rider', 'driver.user', 'vehicleType']);
+
+        $firestoreStatus = $status === 'in_progress' ? 'started' : $status;
+
+        $data = [
+            'ride_id' => (int) $ride->id,
+            'service_type' => 'ride',
+            'status' => $firestoreStatus,
+            'general_status' => $firestoreStatus,
+
+            'rider_id' => (int) $ride->rider_id,
+            'driver_id' => $ride->driver_id ? (int) $ride->driver_id : null,
+            'assigned_driver_id' => $ride->driver_id ? (int) $ride->driver_id : null,
+
+            'driver_name' => optional(optional($ride->driver)->user)->name,
+            'driver_phone' => optional(optional($ride->driver)->user)->phone,
+
+            'pickup' => [
+                'address' => $ride->pickup_address,
+                'latitude' => (float) $ride->pickup_lat,
+                'longitude' => (float) $ride->pickup_lng,
+            ],
+            'dropoff' => [
+                'address' => $ride->dropoff_address,
+                'latitude' => (float) $ride->dropoff_lat,
+                'longitude' => (float) $ride->dropoff_lng,
+            ],
+
+            'fare' => (float) $ride->fare,
+            'payment_method' => $ride->payment_method,
+            'payment_status' => $ride->payment_status,
+            'updated_at' => now()->toIso8601String(),
+        ];
+
+        if ($firestoreStatus === 'searching') $data['created_at'] = now()->toIso8601String();
+        if ($firestoreStatus === 'accepted') $data['accepted_at'] = now()->toIso8601String();
+        if ($firestoreStatus === 'arrived') $data['arrived_at'] = now()->toIso8601String();
+        if ($firestoreStatus === 'started') $data['started_at'] = now()->toIso8601String();
+        if ($firestoreStatus === 'completed') $data['completed_at'] = now()->toIso8601String();
+
+        $this->firestore
+            ->collection('active_rides')
+            ->document((string) $ride->id)
+            ->set($data, ['merge' => true]);
+    }
+}

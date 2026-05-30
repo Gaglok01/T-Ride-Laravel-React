@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
-use App\Services\FirestoreRideSyncService;
 use App\Models\PricingZone;
 use App\Models\Type;
 use App\Models\Driver;
@@ -180,12 +179,6 @@ class AppRideController extends Controller
             'status' => 'searching',
             'started_at' => null,
         ]);
-
-        try {
-            app(FirestoreRideSyncService::class)->sync($ride, 'searching');
-        } catch (\Throwable $e) {
-            \Log::error('Firestore searching sync failed', ['ride_id' => $ride->id, 'error' => $e->getMessage()]);
-        }
 
         return response()->json([
             'status' => true,

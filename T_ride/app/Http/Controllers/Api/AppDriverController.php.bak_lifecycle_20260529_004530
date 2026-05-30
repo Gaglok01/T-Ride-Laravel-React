@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
-use App\Services\FirestoreRideSyncService;
 use App\Models\Driver;
 use App\Models\ServiceZone;
 use App\Models\DocumentQueueItem;
@@ -471,11 +470,6 @@ class AppDriverController extends Controller
             return response()->json(['status' => false, 'message' => 'Driver not available to take rides']);
         }
 
-        $driverUser = $driver->user ?? \App\Models\User::find($driver->user_id);
-        $driverLat = $driverUser->lat ?? null;
-        $driverLng = $driverUser->lng ?? null;
-        $maxPickupMiles = 25;
-
         $requests = Ride::where('status', 'searching')
             ->where(function ($q) use ($driver) {
                 $q->where('vehicle_type_id', $driver->type_id)
@@ -484,40 +478,20 @@ class AppDriverController extends Controller
             ->with(['rider'])
             ->latest()
             ->get()
-            ->map(function ($ride) use ($driverLat, $driverLng) {
-                $tripDistanceMiles = $this->calculateDistance(
+            ->map(function ($ride) {
+                $distanceMiles = $this->calculateDistance(
                     $ride->pickup_lat,
                     $ride->pickup_lng,
                     $ride->dropoff_lat,
                     $ride->dropoff_lng
                 );
 
-                $pickupDistanceMiles = null;
-                if ($driverLat !== null && $driverLng !== null) {
-                    $pickupDistanceMiles = $this->calculateDistance(
-                        $driverLat,
-                        $driverLng,
-                        $ride->pickup_lat,
-                        $ride->pickup_lng
-                    );
-                }
-
-                $ride->distance_miles = round($tripDistanceMiles, 1);
-                $ride->pickup_distance_miles = $pickupDistanceMiles === null ? null : round($pickupDistanceMiles, 1);
-                $ride->duration_minutes = max(3, round($tripDistanceMiles * 2));
+                $ride->distance_miles = round($distanceMiles, 1);
+                $ride->duration_minutes = max(3, round($distanceMiles * 2));
                 $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
 
                 return $ride;
-            })
-            ->filter(function ($ride) use ($driverLat, $driverLng, $maxPickupMiles) {
-                if ($driverLat === null || $driverLng === null) {
-                    return false;
-                }
-
-                return $ride->pickup_distance_miles !== null
-                    && $ride->pickup_distance_miles <= $maxPickupMiles;
-            })
-            ->values();
+            });
 
         return response()->json([
             'status' => true,
@@ -555,12 +529,6 @@ class AppDriverController extends Controller
                 'status' => 'accepted'
             ]);
 
-            try {
-                app(FirestoreRideSyncService::class)->sync($ride, 'accepted');
-            } catch (\Throwable $e) {
-                \Log::error('Firestore accepted sync failed', ['ride_id' => $ride->id, 'error' => $e->getMessage()]);
-            }
-
             return response()->json([
                 'status' => true,
                 'message' => 'Ride accepted successfully',
@@ -580,7 +548,7 @@ class AppDriverController extends Controller
     public function updateRideStatus(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'status' => 'required|in:arrived,started,in_progress,completed,cancelled',
+            'status' => 'required|in:arrived,in_progress,completed,cancelled',
         ]);
 
         if ($validator->fails()) {
@@ -601,9 +569,6 @@ class AppDriverController extends Controller
 
         $current = strtolower((string) $ride->status);
         $next = strtolower((string) $request->status);
-        if ($next === 'started') {
-            $next = 'in_progress';
-        }
 
         $allowed = [
             'accepted' => ['arrived', 'cancelled'],
@@ -631,12 +596,6 @@ class AppDriverController extends Controller
         }
 
         $ride->update($updateData);
-
-        try {
-            app(FirestoreRideSyncService::class)->sync($ride, $next);
-        } catch (\Throwable $e) {
-            \Log::error('Firestore status sync failed', ['ride_id' => $ride->id, 'status' => $next, 'error' => $e->getMessage()]);
-        }
 
         return response()->json([
             'status' => true,

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
-use App\Services\FirestoreRideSyncService;
 use App\Models\PricingZone;
 use App\Models\Type;
 use App\Models\Driver;
@@ -105,39 +104,18 @@ class AppRideController extends Controller
                 $driver->user->lng
             );
 
-            $distanceMiles = $dist * 0.621371;
-
-            if ($distanceMiles <= 8) {
-                $longPickup = $distanceMiles > 5;
-                $pickupFee = 0;
-
-                if ($distanceMiles > 5) {
-                    $pickupFee += ($distanceMiles - 5) * 1.25;
-                }
-
+            if ($dist <= 5) {
                 $availableDrivers[] = [
                     'id' => $driver->id,
                     'name' => $driver->name,
                     'rating' => $driver->rating ?? 5.0,
-                    'vehicle' => trim(($driver->vehicle_color ? $driver->vehicle_color . ' ' : '') . ($driver->vehicle_make ? $driver->vehicle_make . ' ' : '') . ($driver->vehicle_model ?? '')),
-                    'vehicle_make' => $driver->vehicle_make,
-                    'vehicle_model' => $driver->vehicle_model,
-                    'vehicle_year' => $driver->vehicle_year,
-                    'vehicle_color' => $driver->vehicle_color,
-                    'vehicle_plate_number' => $driver->vehicle_plate_number,
+                    'vehicle' => $driver->vehicle_model,
                     'photo' => $driver->image_url,
-                    'eta' => round(($dist / 30) * 60) . ' mins',
-                    'distance' => round($distanceMiles, 1) . ' miles',
-                    'pickup_distance_miles' => round($distanceMiles, 2),
-                    'long_pickup' => $longPickup,
-                    'pickup_fee' => round($pickupFee, 2),
+                    'eta' => round(($dist / 30) * 60) . ' mins', // Assuming 30km/h avg speed
+                    'distance' => round($dist, 2) . ' km'
                 ];
             }
         }
-
-        usort($availableDrivers, function ($a, $b) {
-            return floatval($a['pickup_distance_miles']) <=> floatval($b['pickup_distance_miles']);
-        });
 
         return response()->json([
             'status' => true,
@@ -167,7 +145,7 @@ class AppRideController extends Controller
         $ride = Ride::create([
             'ride_custom_id' => 'TR-' . strtoupper(Str::random(8)),
             'rider_id' => Auth::id(),
-            'driver_id' => null,
+            'driver_id' => $request->driver_id,
             'vehicle_type_id' => $request->vehicle_type_id,
             'pickup_address' => $request->pickup_address,
             'pickup_lat' => $request->pickup_lat,
@@ -177,19 +155,13 @@ class AppRideController extends Controller
             'dropoff_lng' => $request->dropoff_lng,
             'fare' => $request->fare,
             'payment_method' => $request->payment_method,
-            'status' => 'searching',
-            'started_at' => null,
+            'status' => $request->driver_id ? 'accepted' : 'searching',
+            'started_at' => $request->driver_id ? now() : null,
         ]);
-
-        try {
-            app(FirestoreRideSyncService::class)->sync($ride, 'searching');
-        } catch (\Throwable $e) {
-            \Log::error('Firestore searching sync failed', ['ride_id' => $ride->id, 'error' => $e->getMessage()]);
-        }
 
         return response()->json([
             'status' => true,
-            'message' => 'Ride requested, searching for driver...',
+            'message' => $request->driver_id ? 'Ride confirmed with driver' : 'Ride requested, searching for driver...',
             'data' => $ride
         ]);
     }

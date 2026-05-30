@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Ride;
+use Kreait\Firebase\Factory;
+
+class FirestoreRideSyncService
+{
+    protected $firestore;
+
+    public function __construct()
+    {
+        $keyPath = storage_path('app/firebase-service-account.json');
+
+        $this->firestore = (new Factory)
+            ->withServiceAccount($keyPath)
+            ->createFirestore()
+            ->database();
+    }
+
+    public function sync(Ride $ride, string $status): void
+    {
+        $ride = $ride->fresh(['rider', 'driver.user', 'vehicleType']);
+
+        $firestoreStatus = $status === 'in_progress' ? 'started' : $status;
+
+        $data = [
+            'ride_id' => (string) $ride->id,
+            'status' => $firestoreStatus,
+            'driver_id' => $ride->driver_id ? (string) $ride->driver_id : null,
+            'driver_name' => optional(optional($ride->driver)->user)->name,
+            'driver_phone' => optional(optional($ride->driver)->user)->phone,
+            'updated_at' => now()->toIso8601String(),
+        ];
+
+        if ($firestoreStatus === 'accepted') {
+            $data['accepted_at'] = now()->toIso8601String();
+        }
+
+        if ($firestoreStatus === 'arrived') {
+            $data['arrived_at'] = now()->toIso8601String();
+        }
+
+        if ($firestoreStatus === 'started') {
+            $data['started_at'] = now()->toIso8601String();
+        }
+
+        if ($firestoreStatus === 'completed') {
+            $data['completed_at'] = now()->toIso8601String();
+        }
+
+        $this->firestore
+            ->collection('active_rides')
+            ->document((string) $ride->id)
+            ->set($data, ['merge' => true]);
+    }
+}
