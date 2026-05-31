@@ -46,4 +46,9 @@ return [
         'sandbox'   => env('BACKGROUNDCHECKS_SANDBOX', true),
     ],
 
+
+    'firebase' => [
+        'server_key' => env('FCM_SERVER_KEY'),
+    ],
+
 ];

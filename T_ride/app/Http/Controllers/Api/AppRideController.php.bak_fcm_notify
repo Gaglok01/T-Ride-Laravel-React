@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
 use App\Services\FirestoreRideSyncService;
-use App\Services\FcmNotificationService;
 use App\Models\PricingZone;
 use App\Models\Type;
 use App\Models\Driver;
@@ -186,36 +185,6 @@ class AppRideController extends Controller
             app(FirestoreRideSyncService::class)->sync($ride, 'searching');
         } catch (\Throwable $e) {
             \Log::error('Firestore searching sync failed', ['ride_id' => $ride->id, 'error' => $e->getMessage()]);
-        }
-
-        try {
-            $drivers = Driver::where('is_online', 1)
-                ->with('user')
-                ->get();
-
-            foreach ($drivers as $driver) {
-                $token = optional($driver->user)->fcm_token;
-
-                if (!$token) {
-                    continue;
-                }
-
-                app(FcmNotificationService::class)->sendToToken(
-                    $token,
-                    'New T-Ride request',
-                    'A rider is requesting a trip near you.',
-                    [
-                        'type' => 'ride_request',
-                        'ride_id' => (string) $ride->id,
-                        'status' => 'searching',
-                    ]
-                );
-            }
-        } catch (\Throwable $e) {
-            \Log::error('FCM ride request notification failed', [
-                'ride_id' => $ride->id,
-                'error' => $e->getMessage(),
-            ]);
         }
 
         return response()->json([
