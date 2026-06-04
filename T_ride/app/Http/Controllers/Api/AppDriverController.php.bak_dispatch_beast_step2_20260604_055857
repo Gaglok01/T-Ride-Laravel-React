@@ -476,13 +476,7 @@ class AppDriverController extends Controller
         $driverLng = $driverUser->lng ?? null;
         $maxPickupMiles = 25;
 
-        $requests = Ride::where(function ($q) use ($driver) {
-                $q->where('status', 'searching')
-                  ->orWhere(function ($x) use ($driver) {
-                      $x->where('status', 'assigned')
-                        ->where('driver_id', $driver->id);
-                  });
-            })
+        $requests = Ride::where('status', 'searching')
             ->where(function ($q) use ($driver) {
                 $q->where('vehicle_type_id', $driver->type_id)
                   ->orWhereNull('vehicle_type_id');

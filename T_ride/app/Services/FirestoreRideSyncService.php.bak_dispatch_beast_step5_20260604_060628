@@ -33,12 +33,8 @@ class FirestoreRideSyncService
             'driver_id' => $ride->driver_id ? (int) $ride->driver_id : null,
             'assigned_driver_id' => $ride->driver_id ? (int) $ride->driver_id : null,
 
-            'driver_name' => in_array($firestoreStatus, ['accepted', 'arrived', 'started', 'completed'], true)
-                ? optional(optional($ride->driver)->user)->name
-                : null,
-            'driver_phone' => in_array($firestoreStatus, ['accepted', 'arrived', 'started', 'completed'], true)
-                ? optional(optional($ride->driver)->user)->phone
-                : null,
+            'driver_name' => optional(optional($ride->driver)->user)->name,
+            'driver_phone' => optional(optional($ride->driver)->user)->phone,
 
             'pickup' => [
                 'address' => $ride->pickup_address,

@@ -476,13 +476,7 @@ class AppDriverController extends Controller
         $driverLng = $driverUser->lng ?? null;
         $maxPickupMiles = 25;
 
-        $requests = Ride::where(function ($q) use ($driver) {
-                $q->where('status', 'searching')
-                  ->orWhere(function ($x) use ($driver) {
-                      $x->where('status', 'assigned')
-                        ->where('driver_id', $driver->id);
-                  });
-            })
+        $requests = Ride::where('status', 'searching')
             ->where(function ($q) use ($driver) {
                 $q->where('vehicle_type_id', $driver->type_id)
                   ->orWhereNull('vehicle_type_id');
@@ -546,20 +540,13 @@ class AppDriverController extends Controller
 
         $ride = Ride::find($id);
 
-        if (!$ride || !in_array($ride->status, ['searching', 'assigned'], true)) {
+        if (!$ride || $ride->status !== 'searching') {
             return response()->json(['status' => false, 'message' => 'Ride is no longer available'], 404);
         }
 
         $driver = Driver::where('user_id', Auth::id())->first();
         if (!$driver) {
             return response()->json(['status' => false, 'message' => 'Driver not found'], 404);
-        }
-
-        if ($ride->status === 'assigned' && (int) $ride->driver_id !== (int) $driver->id) {
-            return response()->json([
-                'status' => false,
-                'message' => 'This ride is assigned to another driver'
-            ], 403);
         }
 
         if ($request->action === 'accept') {

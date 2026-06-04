@@ -404,7 +404,7 @@ class DispatchController extends Controller
 
         // Active Rides
         $rides = Ride::whereIn('status', ['accepted', 'in_progress'])
-            ->with(['driver.user', 'rider'])
+            ->with(['driver', 'user'])
             ->latest()
             ->get()
             ->map(function ($ride) {
@@ -417,13 +417,14 @@ class DispatchController extends Controller
                     'eta' => 'Dynamic', // Would need real-time logic
                     'dist' => 'Dynamic',
                     'dur' => 'Dynamic',
-                    'fare' => '$' . number_format((float)($ride->total_fare ?? $ride->fare ?? 0), 2),
+                    'fare' => '$' . number_format($ride->total_fare, 2),
                 ];
             });
         $activeOrders = $activeOrders->merge($rides);
 
         // Active Courier Orders
         $couriers = Order::whereIn('status', ['In Transit'])
+            ->with(['driver', 'user'])
             ->latest()
             ->get()
             ->map(function ($order) {
@@ -431,12 +432,12 @@ class DispatchController extends Controller
                     'id' => $order->id,
                     'order_id' => 'PKG-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
                     'type' => 'Courier',
-                    'driver' => $order->courier ?? 'Unassigned',
+                    'driver' => $order->driver?->name ?? 'Unassigned',
                     'status' => 'In Transit',
                     'eta' => 'Dynamic',
                     'dist' => 'Dynamic',
                     'dur' => 'Dynamic',
-                    'fare' => '$' . number_format((float)($order->price ?? 0), 2),
+                    'fare' => '$' . number_format($order->price, 2),
                 ];
             });
         $activeOrders = $activeOrders->merge($couriers);
@@ -452,7 +453,7 @@ class DispatchController extends Controller
                         'id' => $order->id,
                         'order_id' => 'DEL-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
                         'type' => 'Delivery',
-                        'driver' => $order->courier ?? 'Unassigned',
+                        'driver' => $order->driver?->name ?? 'Unassigned',
                         'status' => $order->status === 'on_the_way' ? 'Delivering' : 'At Vendor',
                         'eta' => 'Dynamic',
                         'dist' => 'Dynamic',

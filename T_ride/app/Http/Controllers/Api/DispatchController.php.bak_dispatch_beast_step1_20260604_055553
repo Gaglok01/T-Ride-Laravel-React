@@ -22,7 +22,6 @@ class DispatchController extends Controller
      */
     public function getStats()
     {
-        \Log::info('DISPATCH getStats HIT');
         // Active Rides count
         $activeRides = Ride::whereIn('status', ['pending', 'accepted', 'in_progress'])->count();
         
@@ -36,11 +35,11 @@ class DispatchController extends Controller
         $activeCouriers = Order::whereIn('status', ['Pending', 'In Transit'])->count();
         
         // Online Drivers
-        $onlineDrivers = Driver::whereIn('status', ['active', 'Active'])->where('is_online', 1)->count();
+        $onlineDrivers = Driver::where('status', 'active')->count();
         
         // Pending Assignment
         $pendingAssignment = 0;
-        $pendingAssignment += Ride::where('status', 'searching')->whereNull('driver_id')->count();
+        $pendingAssignment += Ride::where('status', 'pending')->whereNull('driver_id')->count();
         $pendingAssignment += Order::where('status', 'Pending')->count();
         $pendingAssignment += ManualBooking::where('status', 'pending')->count();
         if (class_exists(DeliveryOrder::class)) {
@@ -79,11 +78,10 @@ class DispatchController extends Controller
      */
     public function getPendingOrders()
     {
-        \Log::info('DISPATCH getPendingOrders HIT');
         $pendingOrders = collect();
 
         // Get pending rides
-        $rides = Ride::where('status', 'searching')
+        $rides = Ride::where('status', 'pending')
             ->whereNull('driver_id')
             ->latest()
             ->get()
@@ -182,17 +180,14 @@ class DispatchController extends Controller
      */
     public function getAvailableDrivers()
     {
-        \Log::info('DISPATCH getAvailableDrivers HIT');
-        $drivers = Driver::whereIn('status', ['active', 'Active'])
-            ->where('is_online', 1)
-            ->where('account_status', 'approved')
-            ->with(['type', 'user'])
+        $drivers = Driver::where('status', 'active')
+            ->with('type')
             ->get()
             ->map(function ($driver) {
                 return [
                     'id' => $driver->id,
-                    'name' => $driver->name ?: optional($driver->user)->name,
-                    'phone' => $driver->phone ?: optional($driver->user)->phone,
+                    'name' => $driver->name,
+                    'phone' => $driver->phone,
                     'vehicle_type' => $driver->type?->type_name ?? 'N/A',
                     'service_type' => $driver->type?->service_type ?? 'ride',
                     'rating' => $driver->rating ?? 4.5,
@@ -240,48 +235,8 @@ class DispatchController extends Controller
                     $order = Ride::find($request->order_id);
                     if ($order) {
                         $order->driver_id = $request->driver_id;
-                        $order->status = 'assigned';
+                        $order->status = 'accepted';
                         $order->save();
-
-                        try {
-                            app(\App\Services\FirestoreRideSyncService::class)->sync($order, 'assigned');
-                        } catch (\Throwable $e) {
-                            \Log::error('Firestore assigned sync failed', [
-                                'ride_id' => $order->id,
-                                'driver_id' => $request->driver_id,
-                                'error' => $e->getMessage()
-                            ]);
-                        }
-
-                        try {
-                            $token = optional($driver->user)->fcm_token;
-
-                            if ($token) {
-                                \Log::info('Dispatch assigned notification sending', [
-                                    'ride_id' => $order->id,
-                                    'driver_id' => $driver->id,
-                                    'type' => 'ride_assigned',
-                                ]);
-
-                                app(\App\Services\FcmNotificationService::class)
-                                    ->sendToToken(
-                                        $token,
-                                        'New ride assigned',
-                                        'A dispatcher assigned a ride to you.',
-                                        [
-                                            'type' => 'ride_assigned',
-                                            'ride_id' => (string)$order->id,
-                                            'status' => 'assigned',
-                                        ]
-                                    );
-                            }
-                        } catch (\Throwable $e) {
-                            \Log::error('Assigned ride FCM failed', [
-                                'ride_id' => $order->id,
-                                'driver_id' => $request->driver_id,
-                                'error' => $e->getMessage()
-                            ]);
-                        }
                     }
                     break;
 
@@ -399,12 +354,11 @@ class DispatchController extends Controller
      */
     public function getActiveOrders()
     {
-        \Log::info('DISPATCH getActiveOrders HIT');
         $activeOrders = collect();
 
         // Active Rides
         $rides = Ride::whereIn('status', ['accepted', 'in_progress'])
-            ->with(['driver.user', 'rider'])
+            ->with(['driver', 'user'])
             ->latest()
             ->get()
             ->map(function ($ride) {
@@ -417,13 +371,14 @@ class DispatchController extends Controller
                     'eta' => 'Dynamic', // Would need real-time logic
                     'dist' => 'Dynamic',
                     'dur' => 'Dynamic',
-                    'fare' => '$' . number_format((float)($ride->total_fare ?? $ride->fare ?? 0), 2),
+                    'fare' => '$' . number_format($ride->total_fare, 2),
                 ];
             });
         $activeOrders = $activeOrders->merge($rides);
 
         // Active Courier Orders
         $couriers = Order::whereIn('status', ['In Transit'])
+            ->with(['driver', 'user'])
             ->latest()
             ->get()
             ->map(function ($order) {
@@ -431,12 +386,12 @@ class DispatchController extends Controller
                     'id' => $order->id,
                     'order_id' => 'PKG-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
                     'type' => 'Courier',
-                    'driver' => $order->courier ?? 'Unassigned',
+                    'driver' => $order->driver?->name ?? 'Unassigned',
                     'status' => 'In Transit',
                     'eta' => 'Dynamic',
                     'dist' => 'Dynamic',
                     'dur' => 'Dynamic',
-                    'fare' => '$' . number_format((float)($order->price ?? 0), 2),
+                    'fare' => '$' . number_format($order->price, 2),
                 ];
             });
         $activeOrders = $activeOrders->merge($couriers);
@@ -452,7 +407,7 @@ class DispatchController extends Controller
                         'id' => $order->id,
                         'order_id' => 'DEL-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
                         'type' => 'Delivery',
-                        'driver' => $order->courier ?? 'Unassigned',
+                        'driver' => $order->driver?->name ?? 'Unassigned',
                         'status' => $order->status === 'on_the_way' ? 'Delivering' : 'At Vendor',
                         'eta' => 'Dynamic',
                         'dist' => 'Dynamic',

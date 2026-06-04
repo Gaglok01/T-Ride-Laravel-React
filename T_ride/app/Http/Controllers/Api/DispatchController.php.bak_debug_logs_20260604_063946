@@ -22,7 +22,6 @@ class DispatchController extends Controller
      */
     public function getStats()
     {
-        \Log::info('DISPATCH getStats HIT');
         // Active Rides count
         $activeRides = Ride::whereIn('status', ['pending', 'accepted', 'in_progress'])->count();
         
@@ -79,7 +78,6 @@ class DispatchController extends Controller
      */
     public function getPendingOrders()
     {
-        \Log::info('DISPATCH getPendingOrders HIT');
         $pendingOrders = collect();
 
         // Get pending rides
@@ -182,7 +180,6 @@ class DispatchController extends Controller
      */
     public function getAvailableDrivers()
     {
-        \Log::info('DISPATCH getAvailableDrivers HIT');
         $drivers = Driver::whereIn('status', ['active', 'Active'])
             ->where('is_online', 1)
             ->where('account_status', 'approved')
@@ -399,12 +396,11 @@ class DispatchController extends Controller
      */
     public function getActiveOrders()
     {
-        \Log::info('DISPATCH getActiveOrders HIT');
         $activeOrders = collect();
 
         // Active Rides
         $rides = Ride::whereIn('status', ['accepted', 'in_progress'])
-            ->with(['driver.user', 'rider'])
+            ->with(['driver', 'user'])
             ->latest()
             ->get()
             ->map(function ($ride) {
@@ -417,13 +413,14 @@ class DispatchController extends Controller
                     'eta' => 'Dynamic', // Would need real-time logic
                     'dist' => 'Dynamic',
                     'dur' => 'Dynamic',
-                    'fare' => '$' . number_format((float)($ride->total_fare ?? $ride->fare ?? 0), 2),
+                    'fare' => '$' . number_format($ride->total_fare, 2),
                 ];
             });
         $activeOrders = $activeOrders->merge($rides);
 
         // Active Courier Orders
         $couriers = Order::whereIn('status', ['In Transit'])
+            ->with(['driver', 'user'])
             ->latest()
             ->get()
             ->map(function ($order) {
@@ -431,12 +428,12 @@ class DispatchController extends Controller
                     'id' => $order->id,
                     'order_id' => 'PKG-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
                     'type' => 'Courier',
-                    'driver' => $order->courier ?? 'Unassigned',
+                    'driver' => $order->driver?->name ?? 'Unassigned',
                     'status' => 'In Transit',
                     'eta' => 'Dynamic',
                     'dist' => 'Dynamic',
                     'dur' => 'Dynamic',
-                    'fare' => '$' . number_format((float)($order->price ?? 0), 2),
+                    'fare' => '$' . number_format($order->price, 2),
                 ];
             });
         $activeOrders = $activeOrders->merge($couriers);
@@ -452,7 +449,7 @@ class DispatchController extends Controller
                         'id' => $order->id,
                         'order_id' => 'DEL-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
                         'type' => 'Delivery',
-                        'driver' => $order->courier ?? 'Unassigned',
+                        'driver' => $order->driver?->name ?? 'Unassigned',
                         'status' => $order->status === 'on_the_way' ? 'Delivering' : 'At Vendor',
                         'eta' => 'Dynamic',
                         'dist' => 'Dynamic',
