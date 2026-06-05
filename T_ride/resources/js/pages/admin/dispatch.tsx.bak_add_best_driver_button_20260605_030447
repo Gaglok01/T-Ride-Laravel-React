@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import axios from "@/lib/axios"
 import { Modal, ModalButton, ModalError, ModalInput, ModalSelect } from "@/components/ui/modal"
-import { GoogleMap, Marker, Autocomplete, DirectionsRenderer, Circle } from "@react-google-maps/api"
+import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api"
 import { useGoogleMaps } from "@/providers/GoogleMapsProvider"
 import { Switch } from "@headlessui/react"
 
@@ -72,7 +72,6 @@ export default function DispatchPage() {
     const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([])
     const [availableDrivers, setAvailableDrivers] = useState<AvailableDriver[]>([])
     const [heatZones, setHeatZones] = useState<any[]>([])
-    const [dispatchZones, setDispatchZones] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
     const dispatchMapRef = useRef<google.maps.Map | null>(null)
@@ -81,16 +80,11 @@ export default function DispatchPage() {
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
     const [selectedOrder, setSelectedOrder] = useState<PendingOrder | null>(null)
-    const [routeDirections, setRouteDirections] = useState<google.maps.DirectionsResult | null>(null)
-    const [routeInfo, setRouteInfo] = useState<any | null>(null)
     const [isAssigning, setIsAssigning] = useState(false)
+    const [suggestedDriverId, setSuggestedDriverId] = useState<number | null>(null)
 
     const [activeTab, setActiveTab] = useState("Pending Assignment")
     const [driverSearch, setDriverSearch] = useState("")
-    const [dispatchSettings, setDispatchSettings] = useState<any | null>(null)
-    const [savingSettings, setSavingSettings] = useState(false)
-    const [commissionSettings, setCommissionSettings] = useState<any[]>([])
-    const [savingCommissions, setSavingCommissions] = useState(false)
 
     const { isLoaded } = useGoogleMaps()
 
@@ -141,13 +135,10 @@ export default function DispatchPage() {
                 axios.get('/admin/dispatch/stats'),
                 axios.get('/admin/dispatch/pending-orders'),
                 axios.get('/admin/dispatch/active-orders'),
-                axios.get('/admin/dispatch/available-drivers'),
-                axios.get('/admin/dispatch/settings'),
-                axios.get('/admin/dispatch/zones'),
-                axios.get('/admin/dispatch/commission-settings')
+                axios.get('/admin/dispatch/available-drivers')
             ])
 
-            const [statsRes, ordersRes, activeRes, driversRes, settingsRes, zonesRes, commissionRes] = results
+            const [statsRes, ordersRes, activeRes, driversRes] = results
 
             if (statsRes.status === 'fulfilled' && statsRes.value.data.status) {
                 setStats(statsRes.value.data.data)
@@ -167,18 +158,6 @@ export default function DispatchPage() {
             if (driversRes.status === 'fulfilled' && driversRes.value.data.status) {
                 setAvailableDrivers(driversRes.value.data.data)
             }
-
-            if (settingsRes?.status === 'fulfilled' && settingsRes.value.data.status) {
-                setDispatchSettings(settingsRes.value.data.data)
-            }
-
-            if (zonesRes?.status === 'fulfilled' && zonesRes.value.data.status) {
-                setDispatchZones(zonesRes.value.data.data)
-            }
-
-            if (commissionRes?.status === 'fulfilled' && commissionRes.value.data.status) {
-                setCommissionSettings(commissionRes.value.data.data)
-            }
         } catch (error) {
             console.error("Failed to fetch dispatch data:", error)
         } finally {
@@ -193,101 +172,28 @@ export default function DispatchPage() {
     }
 
     const openAssignModal = (order: PendingOrder) => {
+        setSuggestedDriverId(null)
         setSelectedOrder(order)
         setIsAssignModalOpen(true)
     }
 
-    const showOrderRoute = (order: any) => {
-        if (!window.google || !availableDrivers.length) return
-
+    const openBestDriverModal = (order: any) => {
         const pickupLat = Number(order.pickup_lat ?? order.pickup_latitude ?? order.lat)
         const pickupLng = Number(order.pickup_lng ?? order.pickup_longitude ?? order.lng)
-        const dropoffLat = Number(order.dropoff_lat ?? order.dropoff_latitude)
-        const dropoffLng = Number(order.dropoff_lng ?? order.dropoff_longitude)
 
-        if (!Number.isFinite(pickupLat) || !Number.isFinite(pickupLng) || !Number.isFinite(dropoffLat) || !Number.isFinite(dropoffLng)) return
-
-        const nearestDriver = availableDrivers
+        const nearest = availableDrivers
             .map((driver: any) => {
                 const lat = Number(driver.current_lat ?? driver.lat ?? driver.latitude)
                 const lng = Number(driver.current_lng ?? driver.lng ?? driver.longitude)
                 const score = Math.abs(lat - pickupLat) + Math.abs(lng - pickupLng)
                 return { ...driver, lat, lng, score }
             })
-            .filter((driver: any) => Number.isFinite(driver.lat) && Number.isFinite(driver.lng))
+            .filter((driver: any) => Number.isFinite(driver.lat) && Number.isFinite(driver.lng) && Number.isFinite(driver.score))
             .sort((a: any, b: any) => a.score - b.score)[0]
 
-        if (!nearestDriver) return
-
-        new google.maps.DirectionsService().route(
-            {
-                origin: { lat: nearestDriver.lat, lng: nearestDriver.lng },
-                destination: { lat: dropoffLat, lng: dropoffLng },
-                waypoints: [{ location: { lat: pickupLat, lng: pickupLng }, stopover: true }],
-                travelMode: google.maps.TravelMode.DRIVING,
-            },
-            (result, status) => {
-                if (status === google.maps.DirectionsStatus.OK && result) {
-                    const legs = result.routes?.[0]?.legs || []
-
-                    setSelectedOrder(order)
-                    setRouteDirections(result)
-                    setRouteInfo({
-                        orderId: order.order_id,
-                        driverName: nearestDriver.name,
-                        toPickupEta: legs[0]?.duration?.text || 'N/A',
-                        toPickupDistance: legs[0]?.distance?.text || 'N/A',
-                        tripEta: legs[1]?.duration?.text || 'N/A',
-                        tripDistance: legs[1]?.distance?.text || 'N/A',
-                    })
-                }
-            }
-        )
-    }
-
-    const updateDispatchSetting = (key: string, value: any) => {
-        setDispatchSettings((prev: any) => ({ ...(prev || {}), [key]: value }))
-    }
-
-    const saveDispatchSettings = async () => {
-        if (!dispatchSettings) return
-        setSavingSettings(true)
-        try {
-            const res = await axios.post('/admin/dispatch/settings', dispatchSettings)
-            if (res.data?.status) {
-                setDispatchSettings(res.data.data)
-            }
-        } catch (error) {
-            console.error('Failed to save dispatch settings:', error)
-            window.alert('Failed to save dispatch settings.')
-        } finally {
-            setSavingSettings(false)
-        }
-    }
-
-    const updateCommissionSetting = (serviceType: string, value: number) => {
-        setCommissionSettings((prev: any[]) =>
-            prev.map((item: any) =>
-                item.service_type === serviceType
-                    ? { ...item, commission_percent: value }
-                    : item
-            )
-        )
-    }
-
-    const saveCommissionSettings = async () => {
-        setSavingCommissions(true)
-        try {
-            const res = await axios.post('/admin/dispatch/commission-settings', {
-                commissions: commissionSettings,
-            })
-            if (res.data?.status) setCommissionSettings(res.data.data)
-        } catch (error) {
-            console.error('Failed to save commission settings:', error)
-            window.alert('Failed to save commission settings.')
-        } finally {
-            setSavingCommissions(false)
-        }
+        setSuggestedDriverId(nearest?.id ?? null)
+        setSelectedOrder(order)
+        setIsAssignModalOpen(true)
     }
 
     const handleAssignDriver = async (driverId: number) => {
@@ -372,45 +278,6 @@ export default function DispatchPage() {
                                 }}
                             >
 
-                                {routeDirections && (
-                                    <>
-                                        <DirectionsRenderer directions={routeDirections} options={{ preserveViewport: false }} />
-                                        <div className="absolute top-4 right-4 z-20">
-                                            <Button
-                                                variant="secondary"
-                                                size="sm"
-                                                className="bg-tride-card/90 backdrop-blur border border-tride-border"
-                                                onClick={() => {
-                                                    setRouteDirections(null)
-                                                    setRouteInfo(null)
-                                                    setSelectedOrder(null)
-                                                }}
-                                            >
-                                                Clear Route
-                                            </Button>
-                                        </div>
-                                    </>
-                                )}
-
-                                {dispatchZones.map((zone: any) => (
-                                    <Circle
-                                        key={`zone-${zone.id}`}
-                                        center={{
-                                            lat: Number(zone.center_lat),
-                                            lng: Number(zone.center_lng),
-                                        }}
-                                        radius={Number(zone.radius_meters)}
-                                        options={{
-                                            fillColor: zone.heat_level === 'high' ? '#ef4444' : zone.heat_level === 'medium' ? '#f59e0b' : '#22c55e',
-                                            fillOpacity: zone.heat_level === 'high' ? 0.18 : 0.10,
-                                            strokeColor: zone.heat_level === 'high' ? '#ef4444' : zone.heat_level === 'medium' ? '#f59e0b' : '#22c55e',
-                                            strokeOpacity: 0.65,
-                                            strokeWeight: 2,
-                                            clickable: false,
-                                        }}
-                                    />
-                                ))}
-
                                 {availableDrivers
                                     .filter((driver: any) => {
                                         const lat = Number(driver.current_lat ?? driver.lat ?? driver.latitude)
@@ -421,14 +288,6 @@ export default function DispatchPage() {
                                         const lat = Number(driver.current_lat ?? driver.lat ?? driver.latitude)
                                         const lng = Number(driver.current_lng ?? driver.lng ?? driver.longitude)
 
-                                        const driverStatus = String(driver.status ?? driver.availability_status ?? 'available').toLowerCase()
-                                        const driverIcon =
-                                            driverStatus.includes('busy') || driverStatus.includes('trip') || driverStatus.includes('ride')
-                                                ? "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                                                : driverStatus.includes('offline') || driverStatus.includes('inactive')
-                                                    ? "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
-                                                    : "https://maps.google.com/mapfiles/ms/icons/green-dot.png"
-
                                         return (
                                             <Marker
                                                 key={`driver-${driver.id}`}
@@ -436,8 +295,8 @@ export default function DispatchPage() {
                                                     lat: lat + ((index + 1) * 0.00012),
                                                     lng: lng + ((index + 1) * 0.00012),
                                                 }}
-                                                icon={{ url: driverIcon }}
-                                                title={`DRIVER: ${driver.name} • ${driverStatus}`}
+                                                icon={{ url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png" }}
+                                                title={`DRIVER: ${driver.name}`}
                                             />
                                         )
                                     })}
@@ -455,7 +314,6 @@ export default function DispatchPage() {
                                         return (
                                             <Marker
                                                 key={`pending-${order.source_type}-${order.source_id}`}
-                                                onClick={() => showOrderRoute(order)}
                                                 position={{
                                                     lat: lat - ((index + 1) * 0.00012),
                                                     lng: lng - ((index + 1) * 0.00012),
@@ -473,45 +331,6 @@ export default function DispatchPage() {
                                 <p>Loading map...</p>
                             </div>
                         )}
-                        {routeInfo && (
-                            <div className="absolute top-4 left-4 bg-tride-card/95 backdrop-blur border border-tride-border p-4 rounded-2xl text-xs shadow-xl w-[280px] z-20">
-                                <div className="flex items-start justify-between mb-3">
-                                    <div>
-                                        <h4 className="font-bold text-tride-text">Dispatch Intelligence</h4>
-                                        <p className="text-tride-text-muted">Order {routeInfo.orderId}</p>
-                                    </div>
-                                    <button
-                                        className="text-tride-text-muted hover:text-white"
-                                        onClick={() => {
-                                            setRouteInfo(null)
-                                            setRouteDirections(null)
-                                        }}
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-
-                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-2">
-                                    <p className="text-emerald-400 font-semibold">Nearest Driver</p>
-                                    <p className="text-tride-text font-bold">{routeInfo.driverName}</p>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                                        <p className="text-blue-400 font-semibold">To Pickup</p>
-                                        <p className="text-tride-text font-bold">{routeInfo.toPickupEta}</p>
-                                        <p className="text-tride-text-muted">{routeInfo.toPickupDistance}</p>
-                                    </div>
-
-                                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                                        <p className="text-amber-400 font-semibold">Trip</p>
-                                        <p className="text-tride-text font-bold">{routeInfo.tripEta}</p>
-                                        <p className="text-tride-text-muted">{routeInfo.tripDistance}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                         <div className="absolute bottom-4 left-4 bg-tride-card/90 backdrop-blur border border-tride-border p-3 rounded-xl text-xs space-y-1">
                             <h4 className="font-semibold mb-1">Legend</h4>
                             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Available Drivers</div>
@@ -660,7 +479,7 @@ export default function DispatchPage() {
                                         <tr><td colSpan={9} className="text-center py-8 text-tride-text-muted">No pending orders</td></tr>
                                     ) : (
                                         pendingOrders.map(order => (
-                                            <tr key={`${order.source_type}-${order.source_id}`} onClick={() => showOrderRoute(order)} className="border-b border-tride-border/50 hover:bg-tride-hover/30 transition-colors group cursor-pointer">
+                                            <tr key={`${order.source_type}-${order.source_id}`} className="border-b border-tride-border/50 hover:bg-tride-hover/30 transition-colors group">
                                                 <td className="px-4 py-4 font-mono font-medium">
                                                     {order.order_id}
                                                 </td>
@@ -692,7 +511,7 @@ export default function DispatchPage() {
                                                 </td>
                                                 <td className="px-4 py-4 text-right">
                                                     <div className="flex justify-end gap-2">
-                                                        <Button variant="secondary" size="sm" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); showOrderRoute(order) }}>Route</Button>
+                                                        <Button variant="secondary" size="sm" className="h-7 text-xs">View Drivers</Button>
                                                         <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700" onClick={() => openAssignModal(order)}>Assign</Button>
                                                     </div>
                                                 </td>
@@ -780,11 +599,7 @@ export default function DispatchPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {routeDirections && (
-                                    <DirectionsRenderer directions={routeDirections} options={{ preserveViewport: false }} />
-                                )}
-
-                                {availableDrivers.map(driver => (
+                                    {availableDrivers.map(driver => (
                                         <tr key={driver.id} className="border-b border-tride-border/50 hover:bg-tride-hover/30 transition-colors">
                                             <td className="px-4 py-4">
                                                 <div className="flex items-center gap-3">
@@ -878,154 +693,55 @@ export default function DispatchPage() {
                 )}
 
                 {activeTab === "AI Routing Config" && (
-                    <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 className="text-lg font-semibold text-tride-text">AI Routing Config</h3>
-                                <p className="text-sm text-tride-text-muted">Real backend settings from dispatch_settings table</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+                            <h3 className="text-lg font-semibold text-tride-text mb-6">Matching Algorithm</h3>
+                            <div className="space-y-4">
+                                {[{label:'Max Search Radius',val:'5 km',desc:'Maximum distance to find drivers'},{label:'Priority Weight: Distance',val:'40%',desc:'How much driver proximity matters'},{label:'Priority Weight: Rating',val:'25%',desc:'Driver rating importance'},{label:'Priority Weight: Vehicle Match',val:'20%',desc:'Vehicle type preference'},{label:'Priority Weight: Acceptance Rate',val:'15%',desc:'Historical accept rate'},{label:'Max Wait Before Escalation',val:'5 min',desc:'Time before widening search'},{label:'Driver Batch Size',val:'5',desc:'Drivers notified simultaneously'},{label:'Accept Timeout',val:'15 sec',desc:'Time for driver to accept'}].map((item, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 border border-tride-border rounded-xl">
+                                        <div>
+                                            <p className="font-medium text-sm text-tride-text">{item.label}</p>
+                                            <p className="text-xs text-tride-text-muted">{item.desc}</p>
+                                        </div>
+                                        <span className="bg-tride-hover px-3 py-1 rounded-lg text-sm font-mono font-medium text-tride-text">{item.val}</span>
+                                    </div>
+                                ))}
                             </div>
-                            <Button size="sm" onClick={saveDispatchSettings} disabled={savingSettings || !dispatchSettings}>
-                                {savingSettings ? 'Saving...' : 'Save Config'}
-                            </Button>
                         </div>
-
-                        {!dispatchSettings ? (
-                            <div className="text-tride-text-muted">Loading dispatch settings...</div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Max Search Radius Miles</label>
-                                    <Input type="number" value={dispatchSettings.max_search_radius_miles ?? ''} onChange={(e) => updateDispatchSetting('max_search_radius_miles', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Accept Timeout Seconds</label>
-                                    <Input type="number" value={dispatchSettings.accept_timeout_seconds ?? ''} onChange={(e) => updateDispatchSetting('accept_timeout_seconds', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Driver Batch Size</label>
-                                    <Input type="number" value={dispatchSettings.driver_batch_size ?? ''} onChange={(e) => updateDispatchSetting('driver_batch_size', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Stale Order Minutes</label>
-                                    <Input type="number" value={dispatchSettings.stale_order_minutes ?? ''} onChange={(e) => updateDispatchSetting('stale_order_minutes', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Distance Weight</label>
-                                    <Input type="number" value={dispatchSettings.distance_weight ?? ''} onChange={(e) => updateDispatchSetting('distance_weight', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Rating Weight</label>
-                                    <Input type="number" value={dispatchSettings.rating_weight ?? ''} onChange={(e) => updateDispatchSetting('rating_weight', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Vehicle Match Weight</label>
-                                    <Input type="number" value={dispatchSettings.vehicle_match_weight ?? ''} onChange={(e) => updateDispatchSetting('vehicle_match_weight', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Acceptance Rate Weight</label>
-                                    <Input type="number" value={dispatchSettings.acceptance_rate_weight ?? ''} onChange={(e) => updateDispatchSetting('acceptance_rate_weight', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Surge Multiplier</label>
-                                    <Input type="number" value={dispatchSettings.surge_multiplier ?? ''} onChange={(e) => updateDispatchSetting('surge_multiplier', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Dispatch Mode</label>
-                                    <select
-                                        value={dispatchSettings.dispatch_mode ?? 'balanced'}
-                                        onChange={(e) => updateDispatchSetting('dispatch_mode', e.target.value)}
-                                        className="w-full mt-2 bg-tride-hover border border-tride-border rounded-xl px-3 py-2 text-sm text-tride-text"
-                                    >
-                                        <option value="nearest">Nearest Driver</option>
-                                        <option value="balanced">Balanced Score</option>
-                                        <option value="rating_priority">Rating Priority</option>
-                                    </select>
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Max Retry Attempts</label>
-                                    <Input type="number" value={dispatchSettings.max_retry_attempts ?? ''} onChange={(e) => updateDispatchSetting('max_retry_attempts', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl">
-                                    <label className="text-sm font-medium text-tride-text">Driver Reject Cooldown Seconds</label>
-                                    <Input type="number" value={dispatchSettings.driver_reject_cooldown_seconds ?? ''} onChange={(e) => updateDispatchSetting('driver_reject_cooldown_seconds', Number(e.target.value))} />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-tride-text">Auto Dispatch Enabled</p>
-                                        <p className="text-xs text-tride-text-muted">Allow the dispatch engine to assign orders automatically.</p>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={Boolean(dispatchSettings.auto_dispatch_enabled)}
-                                        onChange={(e) => updateDispatchSetting('auto_dispatch_enabled', e.target.checked)}
-                                        className="w-5 h-5"
-                                    />
-                                </div>
-
-                                <div className="p-4 border border-tride-border rounded-xl flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-tride-text">Surge Enabled</p>
-                                        <p className="text-xs text-tride-text-muted">Enable surge multiplier logic.</p>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={Boolean(dispatchSettings.surge_enabled)}
-                                        onChange={(e) => updateDispatchSetting('surge_enabled', e.target.checked)}
-                                        className="w-5 h-5"
-                                    />
-                                </div>
-
-                                <div className="p-4 border border-red-500/30 bg-red-500/5 rounded-xl flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-red-400">Emergency Stop</p>
-                                        <p className="text-xs text-tride-text-muted">Stop all auto-dispatch activity immediately.</p>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={Boolean(dispatchSettings.emergency_stop)}
-                                        onChange={(e) => updateDispatchSetting('emergency_stop', e.target.checked)}
-                                        className="w-5 h-5"
-                                    />
+                        <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+                            <h3 className="text-lg font-semibold text-tride-text mb-6">Rebalancing Strategy</h3>
+                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 mb-6">
+                                <h4 className="font-semibold text-blue-400 mb-1">Active Strategy: Predictive Rebalancing</h4>
+                                <p className="text-xs text-tride-text-muted mb-4">ML model predicts demand 30 minutes ahead and nudges drivers to high-demand zones</p>
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                    <div className="flex justify-between"><span className="text-tride-text-muted">Model Accuracy</span><span className="font-medium text-tride-text">87%</span></div>
+                                    <div className="flex justify-between"><span className="text-tride-text-muted">Prediction Window</span><span className="font-medium text-tride-text">30 min</span></div>
+                                    <div className="flex justify-between"><span className="text-tride-text-muted">Nudges Sent Today</span><span className="font-medium text-tride-text">234</span></div>
+                                    <div className="flex justify-between"><span className="text-tride-text-muted">Driver Compliance</span><span className="font-medium text-tride-text">62%</span></div>
                                 </div>
                             </div>
-                        )}
-                        <div className="bg-tride-card border border-tride-border rounded-3xl p-6 mt-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-tride-text">Platform Commission Settings</h3>
-                                    <p className="text-sm text-tride-text-muted">Controls T-Ride share and driver payout.</p>
-                                </div>
-                                <Button size="sm" onClick={saveCommissionSettings} disabled={savingCommissions || commissionSettings.length === 0}>
-                                    {savingCommissions ? 'Saving...' : 'Save Commission'}
-                                </Button>
+                            <div className="space-y-3">
+                                {[{zone:'Airport: Deploy 15 more drivers',time:'Next 30 min'},{zone:'CBD: Reduce by 10 drivers',time:'Now'},{zone:'Stadium: Pre-position 25 drivers',time:'In 2 hours'}].map((cmd, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 border border-tride-border rounded-xl">
+                                        <div>
+                                            <p className="font-medium text-sm text-tride-text">{cmd.zone}</p>
+                                            <p className="text-xs text-tride-text-muted">{cmd.time}</p>
+                                        </div>
+                                        <Button variant="secondary" size="sm">Execute</Button>
+                                    </div>
+                                ))}
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {commissionSettings.map((item: any) => (
-                                    <div key={item.service_type} className="p-4 border border-tride-border rounded-xl">
-                                        <label className="text-sm font-medium text-tride-text capitalize">
-                                            {item.service_type} Commission %
-                                        </label>
-                                        <Input
-                                            type="number"
-                                            value={item.commission_percent ?? ''}
-                                            onChange={(e) => updateCommissionSetting(item.service_type, Number(e.target.value))}
-                                        />
-                                        <p className="text-xs text-tride-text-muted mt-2">
-                                            Driver gets {100 - Number(item.commission_percent || 0)}%
-                                        </p>
+                        </div>
+                        <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+                            <h3 className="text-lg font-semibold text-tride-text mb-6">Performance Metrics</h3>
+                            <div className="space-y-4">
+                                {[{label:'Avg Match Time',val:'1.8s',target:'target < 5s'},{label:'First Accept Rate',val:'78%',target:'target > 75%'},{label:'Escalation Rate',val:'8%',target:'target < 15%'},{label:'Ghost Rides',val:'0.3%',target:'target < 1%'},{label:'Route Efficiency',val:'92%',target:'target > 90%'},{label:'Driver Idle Time',val:'12 min',target:'target < 15 min'},{label:'Cancel After Match',val:'4.2%',target:'target < 5%'}].map((m, i) => (
+                                    <div key={i} className="flex items-center justify-between py-2 border-b border-tride-border/50 last:border-0">
+                                        <span className="text-sm text-tride-text">{m.label}</span>
+                                        <div className="text-right">
+                                            <span className="font-bold text-tride-text font-mono">{m.val}</span>
+                                            <span className="text-xs text-tride-text-muted ml-2">({m.target})</span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -1049,21 +765,14 @@ export default function DispatchPage() {
                                         fullscreenControl: false,
                                     }}
                                 >
-                                    {dispatchZones.map((zone: any) => (
-                                        <Circle
-                                            key={`heat-zone-${zone.id}`}
-                                            center={{
-                                                lat: Number(zone.center_lat),
-                                                lng: Number(zone.center_lng),
+                                    {heatZones.map((zone, i) => (
+                                        <Marker
+                                            key={i}
+                                            position={{
+                                                lat: Number(zone.lat),
+                                                lng: Number(zone.lng),
                                             }}
-                                            radius={Number(zone.radius_meters)}
-                                            options={{
-                                                fillColor: zone.heat_level === 'high' ? '#ef4444' : zone.heat_level === 'medium' ? '#f59e0b' : '#22c55e',
-                                                fillOpacity: zone.heat_level === 'high' ? 0.22 : zone.heat_level === 'medium' ? 0.16 : 0.10,
-                                                strokeColor: zone.heat_level === 'high' ? '#ef4444' : zone.heat_level === 'medium' ? '#f59e0b' : '#22c55e',
-                                                strokeOpacity: 0.70,
-                                                strokeWeight: 2,
-                                            }}
+                                            title={`${zone.name} (${zone.surge_multiplier}x)`}
                                         />
                                     ))}
                                 </GoogleMap>
@@ -1072,44 +781,21 @@ export default function DispatchPage() {
                         <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
                             <h3 className="text-lg font-semibold text-tride-text mb-6">Hot Zones (Live)</h3>
                             <div className="space-y-3">
-                                {dispatchZones.length === 0 && (
+                                {heatZones.length === 0 && (
                                     <div className="p-4 rounded-2xl border border-tride-border text-tride-text-muted">
-                                        No dispatch zones found.
+                                        No live zones found.
                                     </div>
                                 )}
-                                {dispatchZones.map((z: any) => (
-                                    <div
-                                        key={z.id}
-                                        className={`p-4 rounded-2xl border ${
-                                            z.heat_level === 'high'
-                                                ? 'border-red-500/30 bg-red-500/5'
-                                                : z.heat_level === 'medium'
-                                                    ? 'border-orange-500/20 bg-orange-500/5'
-                                                    : 'border-emerald-500/20 bg-emerald-500/5'
-                                        }`}
-                                    >
+                                {heatZones.map((z, i) => (
+                                    <div key={i} className={`p-4 rounded-2xl border ${Number(z.surge_multiplier) > 1.5 ? 'border-red-500/30 bg-red-500/5' : Number(z.surge_multiplier) > 1 ? 'border-orange-500/20 bg-orange-500/5' : 'border-tride-border'}`}>
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className="font-semibold text-tride-text">{z.name}</h4>
-                                                <p className="text-xs text-tride-text-muted">
-                                                    {z.heat_level} demand · {z.pending_orders_count} orders · {z.drivers_count} drivers
-                                                </p>
+                                                <p className="text-xs text-tride-text-muted">{z.demand_level} demand • Surge {z.surge_multiplier}x</p>
                                             </div>
-                                            <span
-                                                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                                    z.heat_level === 'high'
-                                                        ? 'bg-red-500 text-white'
-                                                        : z.heat_level === 'medium'
-                                                            ? 'bg-orange-500 text-white'
-                                                            : 'bg-emerald-500 text-white'
-                                                }`}
-                                            >
-                                                {z.heat_level}
-                                            </span>
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${Number(z.surge_multiplier) > 1.5 ? 'bg-red-500 text-white' : 'bg-tride-hover text-tride-text'}`}>{z.surge_multiplier}x</span>
                                         </div>
-                                        <p className="text-xs font-medium mt-1 text-orange-400">
-                                            Radius: {z.radius_meters}m · Surge {z.surge_multiplier}x · Score {z.heat_score}
-                                        </p>
+                                        <p className="text-xs font-medium mt-1 text-orange-400">Radius: {z.radius_meters}m</p>
                                     </div>
                                 ))}
                             </div>
@@ -1173,6 +859,7 @@ export default function DispatchPage() {
                 }}
                 order={selectedOrder}
                 drivers={availableDrivers}
+                suggestedDriverId={suggestedDriverId}
                 onAssign={handleAssignDriver}
                 isAssigning={isAssigning}
             />
@@ -1441,21 +1128,27 @@ function ManualBookingModal({ isOpen, onClose, onSave, isLoaded }: {
     )
 }
 
-function AssignDriverModal({ isOpen, onClose, order, drivers, onAssign, isAssigning }: {
+function AssignDriverModal({ isOpen, onClose, order, drivers, suggestedDriverId, onAssign, isAssigning }: {
     isOpen: boolean
     onClose: () => void
     order: PendingOrder | null
     drivers: AvailableDriver[]
+    suggestedDriverId?: number | null
     onAssign: (driverId: number) => void
     isAssigning: boolean
 }) {
     const [selectedDriverId, setSelectedDriverId] = useState<string>("")
 
     useEffect(() => {
-        if (isOpen) {
+        if (!isOpen) {
             setSelectedDriverId("")
+            return
         }
-    }, [isOpen])
+
+        if (suggestedDriverId) {
+            setSelectedDriverId(String(suggestedDriverId))
+        }
+    }, [isOpen, suggestedDriverId])
 
     // Filter drivers based on order type
     const filteredDrivers = drivers.filter(driver => {

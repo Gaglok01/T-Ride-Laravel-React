@@ -8,8 +8,6 @@ use App\Models\Ride;
 use App\Services\FirestoreRideSyncService;
 use App\Services\FcmNotificationService;
 use App\Models\PricingZone;
-use App\Models\DispatchZone;
-use App\Models\DispatchSetting;
 use App\Models\Type;
 use App\Models\Driver;
 use Illuminate\Support\Facades\Auth;
@@ -41,12 +39,6 @@ class AppRideController extends Controller
 
         $zone = PricingZone::with('vehicleMultipliers')->first();
 
-        $dispatchSettings = DispatchSetting::current();
-        $surgeZone = $this->findDispatchSurgeZone((float) $request->pickup_lat, (float) $request->pickup_lng);
-        $surgeMultiplier = ($dispatchSettings->surge_enabled && $surgeZone)
-            ? max((float) $dispatchSettings->surge_multiplier, (float) $surgeZone->surge_multiplier)
-            : 1.00;
-
         if (!$zone) {
             return response()->json(['status' => false, 'message' => 'No pricing zone found'], 404);
         }
@@ -60,7 +52,6 @@ class AppRideController extends Controller
 
             $fare = $zone->base_fare + ($distance * $zone->per_km);
             $fare = $fare * $multiplier;
-            $fare = $fare * $surgeMultiplier;
 
             if ($fare < $zone->min_fare) {
                 $fare = $zone->min_fare;
@@ -72,10 +63,7 @@ class AppRideController extends Controller
                 'image' => $type->photo ? asset('storage/' . $type->photo) : null,
                 'fare' => round($fare, 2),
                 'distance' => round($distance, 2),
-                'eta' => rand(2, 10) . ' mins',
-                'surge_multiplier' => round($surgeMultiplier, 2),
-                'surge_enabled' => (bool) $dispatchSettings->surge_enabled,
-                'surge_zone' => $surgeZone?->name
+                'eta' => rand(2, 10) . ' mins'
             ];
         }
 
@@ -297,32 +285,6 @@ class AppRideController extends Controller
             'status' => true,
             'message' => 'Rating submitted, thank you!'
         ]);
-    }
-
-
-    private function findDispatchSurgeZone(float $lat, float $lng): ?DispatchZone
-    {
-        $zones = DispatchZone::where('is_active', true)->get();
-        $matched = null;
-
-        foreach ($zones as $zone) {
-            $distanceKm = $this->calculateDistance(
-                $lat,
-                $lng,
-                (float) $zone->center_lat,
-                (float) $zone->center_lng
-            );
-
-            $meters = $distanceKm * 1000;
-
-            if ($meters <= (float) $zone->radius_meters) {
-                if (!$matched || (float) $zone->surge_multiplier > (float) $matched->surge_multiplier) {
-                    $matched = $zone;
-                }
-            }
-        }
-
-        return $matched;
     }
 
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)

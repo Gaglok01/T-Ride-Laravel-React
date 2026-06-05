@@ -11,7 +11,6 @@ use App\Models\Ride;
 use App\Models\DeliveryOrder;
 use App\Models\DispatchSetting;
 use App\Models\DispatchZone;
-use App\Models\PlatformCommissionSetting;
 use App\Models\DispatchAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -159,49 +158,6 @@ class DispatchController extends Controller
         ]);
     }
 
-
-
-    public function getCommissionSettings()
-    {
-        foreach (['ride' => 20, 'courier' => 20, 'delivery' => 15] as $service => $percent) {
-            PlatformCommissionSetting::firstOrCreate(
-                ['service_type' => $service],
-                ['commission_percent' => $percent, 'is_active' => true]
-            );
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Commission settings fetched successfully',
-            'data' => PlatformCommissionSetting::orderBy('service_type')->get(),
-        ]);
-    }
-
-    public function updateCommissionSettings(Request $request)
-    {
-        $data = $request->validate([
-            'commissions' => 'required|array',
-            'commissions.*.service_type' => 'required|in:ride,courier,delivery',
-            'commissions.*.commission_percent' => 'required|numeric|min:0|max:50',
-            'commissions.*.is_active' => 'nullable|boolean',
-        ]);
-
-        foreach ($data['commissions'] as $item) {
-            PlatformCommissionSetting::updateOrCreate(
-                ['service_type' => $item['service_type']],
-                [
-                    'commission_percent' => $item['commission_percent'],
-                    'is_active' => $item['is_active'] ?? true,
-                ]
-            );
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Commission settings updated successfully',
-            'data' => PlatformCommissionSetting::orderBy('service_type')->get(),
-        ]);
-    }
 
     /**
      * Get dispatch dashboard stats

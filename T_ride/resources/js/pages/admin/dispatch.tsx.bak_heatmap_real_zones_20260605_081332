@@ -89,8 +89,6 @@ export default function DispatchPage() {
     const [driverSearch, setDriverSearch] = useState("")
     const [dispatchSettings, setDispatchSettings] = useState<any | null>(null)
     const [savingSettings, setSavingSettings] = useState(false)
-    const [commissionSettings, setCommissionSettings] = useState<any[]>([])
-    const [savingCommissions, setSavingCommissions] = useState(false)
 
     const { isLoaded } = useGoogleMaps()
 
@@ -143,11 +141,10 @@ export default function DispatchPage() {
                 axios.get('/admin/dispatch/active-orders'),
                 axios.get('/admin/dispatch/available-drivers'),
                 axios.get('/admin/dispatch/settings'),
-                axios.get('/admin/dispatch/zones'),
-                axios.get('/admin/dispatch/commission-settings')
+                axios.get('/admin/dispatch/zones')
             ])
 
-            const [statsRes, ordersRes, activeRes, driversRes, settingsRes, zonesRes, commissionRes] = results
+            const [statsRes, ordersRes, activeRes, driversRes, settingsRes, zonesRes] = results
 
             if (statsRes.status === 'fulfilled' && statsRes.value.data.status) {
                 setStats(statsRes.value.data.data)
@@ -174,10 +171,6 @@ export default function DispatchPage() {
 
             if (zonesRes?.status === 'fulfilled' && zonesRes.value.data.status) {
                 setDispatchZones(zonesRes.value.data.data)
-            }
-
-            if (commissionRes?.status === 'fulfilled' && commissionRes.value.data.status) {
-                setCommissionSettings(commissionRes.value.data.data)
             }
         } catch (error) {
             console.error("Failed to fetch dispatch data:", error)
@@ -262,31 +255,6 @@ export default function DispatchPage() {
             window.alert('Failed to save dispatch settings.')
         } finally {
             setSavingSettings(false)
-        }
-    }
-
-    const updateCommissionSetting = (serviceType: string, value: number) => {
-        setCommissionSettings((prev: any[]) =>
-            prev.map((item: any) =>
-                item.service_type === serviceType
-                    ? { ...item, commission_percent: value }
-                    : item
-            )
-        )
-    }
-
-    const saveCommissionSettings = async () => {
-        setSavingCommissions(true)
-        try {
-            const res = await axios.post('/admin/dispatch/commission-settings', {
-                commissions: commissionSettings,
-            })
-            if (res.data?.status) setCommissionSettings(res.data.data)
-        } catch (error) {
-            console.error('Failed to save commission settings:', error)
-            window.alert('Failed to save commission settings.')
-        } finally {
-            setSavingCommissions(false)
         }
     }
 
@@ -1001,35 +969,6 @@ export default function DispatchPage() {
                                 </div>
                             </div>
                         )}
-                        <div className="bg-tride-card border border-tride-border rounded-3xl p-6 mt-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-tride-text">Platform Commission Settings</h3>
-                                    <p className="text-sm text-tride-text-muted">Controls T-Ride share and driver payout.</p>
-                                </div>
-                                <Button size="sm" onClick={saveCommissionSettings} disabled={savingCommissions || commissionSettings.length === 0}>
-                                    {savingCommissions ? 'Saving...' : 'Save Commission'}
-                                </Button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {commissionSettings.map((item: any) => (
-                                    <div key={item.service_type} className="p-4 border border-tride-border rounded-xl">
-                                        <label className="text-sm font-medium text-tride-text capitalize">
-                                            {item.service_type} Commission %
-                                        </label>
-                                        <Input
-                                            type="number"
-                                            value={item.commission_percent ?? ''}
-                                            onChange={(e) => updateCommissionSetting(item.service_type, Number(e.target.value))}
-                                        />
-                                        <p className="text-xs text-tride-text-muted mt-2">
-                                            Driver gets {100 - Number(item.commission_percent || 0)}%
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 )}
 
@@ -1049,21 +988,14 @@ export default function DispatchPage() {
                                         fullscreenControl: false,
                                     }}
                                 >
-                                    {dispatchZones.map((zone: any) => (
-                                        <Circle
-                                            key={`heat-zone-${zone.id}`}
-                                            center={{
-                                                lat: Number(zone.center_lat),
-                                                lng: Number(zone.center_lng),
+                                    {heatZones.map((zone, i) => (
+                                        <Marker
+                                            key={i}
+                                            position={{
+                                                lat: Number(zone.lat),
+                                                lng: Number(zone.lng),
                                             }}
-                                            radius={Number(zone.radius_meters)}
-                                            options={{
-                                                fillColor: zone.heat_level === 'high' ? '#ef4444' : zone.heat_level === 'medium' ? '#f59e0b' : '#22c55e',
-                                                fillOpacity: zone.heat_level === 'high' ? 0.22 : zone.heat_level === 'medium' ? 0.16 : 0.10,
-                                                strokeColor: zone.heat_level === 'high' ? '#ef4444' : zone.heat_level === 'medium' ? '#f59e0b' : '#22c55e',
-                                                strokeOpacity: 0.70,
-                                                strokeWeight: 2,
-                                            }}
+                                            title={`${zone.name} (${zone.surge_multiplier}x)`}
                                         />
                                     ))}
                                 </GoogleMap>
@@ -1072,44 +1004,21 @@ export default function DispatchPage() {
                         <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
                             <h3 className="text-lg font-semibold text-tride-text mb-6">Hot Zones (Live)</h3>
                             <div className="space-y-3">
-                                {dispatchZones.length === 0 && (
+                                {heatZones.length === 0 && (
                                     <div className="p-4 rounded-2xl border border-tride-border text-tride-text-muted">
-                                        No dispatch zones found.
+                                        No live zones found.
                                     </div>
                                 )}
-                                {dispatchZones.map((z: any) => (
-                                    <div
-                                        key={z.id}
-                                        className={`p-4 rounded-2xl border ${
-                                            z.heat_level === 'high'
-                                                ? 'border-red-500/30 bg-red-500/5'
-                                                : z.heat_level === 'medium'
-                                                    ? 'border-orange-500/20 bg-orange-500/5'
-                                                    : 'border-emerald-500/20 bg-emerald-500/5'
-                                        }`}
-                                    >
+                                {heatZones.map((z, i) => (
+                                    <div key={i} className={`p-4 rounded-2xl border ${Number(z.surge_multiplier) > 1.5 ? 'border-red-500/30 bg-red-500/5' : Number(z.surge_multiplier) > 1 ? 'border-orange-500/20 bg-orange-500/5' : 'border-tride-border'}`}>
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className="font-semibold text-tride-text">{z.name}</h4>
-                                                <p className="text-xs text-tride-text-muted">
-                                                    {z.heat_level} demand · {z.pending_orders_count} orders · {z.drivers_count} drivers
-                                                </p>
+                                                <p className="text-xs text-tride-text-muted">{z.demand_level} demand • Surge {z.surge_multiplier}x</p>
                                             </div>
-                                            <span
-                                                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                                    z.heat_level === 'high'
-                                                        ? 'bg-red-500 text-white'
-                                                        : z.heat_level === 'medium'
-                                                            ? 'bg-orange-500 text-white'
-                                                            : 'bg-emerald-500 text-white'
-                                                }`}
-                                            >
-                                                {z.heat_level}
-                                            </span>
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${Number(z.surge_multiplier) > 1.5 ? 'bg-red-500 text-white' : 'bg-tride-hover text-tride-text'}`}>{z.surge_multiplier}x</span>
                                         </div>
-                                        <p className="text-xs font-medium mt-1 text-orange-400">
-                                            Radius: {z.radius_meters}m · Surge {z.surge_multiplier}x · Score {z.heat_score}
-                                        </p>
+                                        <p className="text-xs font-medium mt-1 text-orange-400">Radius: {z.radius_meters}m</p>
                                     </div>
                                 ))}
                             </div>

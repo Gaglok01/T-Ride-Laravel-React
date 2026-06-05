@@ -154,9 +154,6 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/surge-rules/{id}', [PricingController::class, 'deleteSurgeRule']);
 
         // Dispatch Management
-        Route::get('/dispatch/zones', [DispatchController::class, 'getZones']);
-        Route::get('/dispatch/commission-settings', [DispatchController::class, 'getCommissionSettings']);
-        Route::post('/dispatch/commission-settings', [DispatchController::class, 'updateCommissionSettings']);
         Route::get('/dispatch/settings', [DispatchController::class, 'getSettings']);
         Route::post('/dispatch/settings', [DispatchController::class, 'updateSettings']);
         Route::post('/dispatch/emergency-stop', [DispatchController::class, 'emergencyStop']);
@@ -164,11 +161,6 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/dispatch/pending-orders', [DispatchController::class, 'getPendingOrders']);
         Route::get('/dispatch/available-drivers', [DispatchController::class, 'getAvailableDrivers']);
         Route::get('/dispatch/active-orders', [DispatchController::class, 'getActiveOrders']);
-        Route::post('/dispatch/auto-assign', [DispatchController::class, 'autoAssign']);
-        Route::post('/dispatch/attempts/{attempt}/reject', [DispatchController::class, 'markAttemptRejected']);
-        Route::post('/dispatch/attempts/{attempt}/timeout', [DispatchController::class, 'markAttemptTimeout']);
-        Route::post('/dispatch/attempts/{attempt}/accept', [DispatchController::class, 'markAttemptAccepted']);
-
         Route::post('/dispatch/assign-driver', [DispatchController::class, 'assignDriver']);
         Route::post('/dispatch/manual-booking', [DispatchController::class, 'createManualBooking']);
         Route::get('/dispatch/manual-bookings', [DispatchController::class, 'getManualBookings']);

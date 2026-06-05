@@ -154,9 +154,6 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/surge-rules/{id}', [PricingController::class, 'deleteSurgeRule']);
 
         // Dispatch Management
-        Route::get('/dispatch/zones', [DispatchController::class, 'getZones']);
-        Route::get('/dispatch/commission-settings', [DispatchController::class, 'getCommissionSettings']);
-        Route::post('/dispatch/commission-settings', [DispatchController::class, 'updateCommissionSettings']);
         Route::get('/dispatch/settings', [DispatchController::class, 'getSettings']);
         Route::post('/dispatch/settings', [DispatchController::class, 'updateSettings']);
         Route::post('/dispatch/emergency-stop', [DispatchController::class, 'emergencyStop']);

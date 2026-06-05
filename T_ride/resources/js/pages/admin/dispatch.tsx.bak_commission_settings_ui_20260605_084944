@@ -89,8 +89,6 @@ export default function DispatchPage() {
     const [driverSearch, setDriverSearch] = useState("")
     const [dispatchSettings, setDispatchSettings] = useState<any | null>(null)
     const [savingSettings, setSavingSettings] = useState(false)
-    const [commissionSettings, setCommissionSettings] = useState<any[]>([])
-    const [savingCommissions, setSavingCommissions] = useState(false)
 
     const { isLoaded } = useGoogleMaps()
 
@@ -143,11 +141,10 @@ export default function DispatchPage() {
                 axios.get('/admin/dispatch/active-orders'),
                 axios.get('/admin/dispatch/available-drivers'),
                 axios.get('/admin/dispatch/settings'),
-                axios.get('/admin/dispatch/zones'),
-                axios.get('/admin/dispatch/commission-settings')
+                axios.get('/admin/dispatch/zones')
             ])
 
-            const [statsRes, ordersRes, activeRes, driversRes, settingsRes, zonesRes, commissionRes] = results
+            const [statsRes, ordersRes, activeRes, driversRes, settingsRes, zonesRes] = results
 
             if (statsRes.status === 'fulfilled' && statsRes.value.data.status) {
                 setStats(statsRes.value.data.data)
@@ -174,10 +171,6 @@ export default function DispatchPage() {
 
             if (zonesRes?.status === 'fulfilled' && zonesRes.value.data.status) {
                 setDispatchZones(zonesRes.value.data.data)
-            }
-
-            if (commissionRes?.status === 'fulfilled' && commissionRes.value.data.status) {
-                setCommissionSettings(commissionRes.value.data.data)
             }
         } catch (error) {
             console.error("Failed to fetch dispatch data:", error)
@@ -262,31 +255,6 @@ export default function DispatchPage() {
             window.alert('Failed to save dispatch settings.')
         } finally {
             setSavingSettings(false)
-        }
-    }
-
-    const updateCommissionSetting = (serviceType: string, value: number) => {
-        setCommissionSettings((prev: any[]) =>
-            prev.map((item: any) =>
-                item.service_type === serviceType
-                    ? { ...item, commission_percent: value }
-                    : item
-            )
-        )
-    }
-
-    const saveCommissionSettings = async () => {
-        setSavingCommissions(true)
-        try {
-            const res = await axios.post('/admin/dispatch/commission-settings', {
-                commissions: commissionSettings,
-            })
-            if (res.data?.status) setCommissionSettings(res.data.data)
-        } catch (error) {
-            console.error('Failed to save commission settings:', error)
-            window.alert('Failed to save commission settings.')
-        } finally {
-            setSavingCommissions(false)
         }
     }
 
@@ -1001,35 +969,6 @@ export default function DispatchPage() {
                                 </div>
                             </div>
                         )}
-                        <div className="bg-tride-card border border-tride-border rounded-3xl p-6 mt-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-tride-text">Platform Commission Settings</h3>
-                                    <p className="text-sm text-tride-text-muted">Controls T-Ride share and driver payout.</p>
-                                </div>
-                                <Button size="sm" onClick={saveCommissionSettings} disabled={savingCommissions || commissionSettings.length === 0}>
-                                    {savingCommissions ? 'Saving...' : 'Save Commission'}
-                                </Button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {commissionSettings.map((item: any) => (
-                                    <div key={item.service_type} className="p-4 border border-tride-border rounded-xl">
-                                        <label className="text-sm font-medium text-tride-text capitalize">
-                                            {item.service_type} Commission %
-                                        </label>
-                                        <Input
-                                            type="number"
-                                            value={item.commission_percent ?? ''}
-                                            onChange={(e) => updateCommissionSetting(item.service_type, Number(e.target.value))}
-                                        />
-                                        <p className="text-xs text-tride-text-muted mt-2">
-                                            Driver gets {100 - Number(item.commission_percent || 0)}%
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 )}
 

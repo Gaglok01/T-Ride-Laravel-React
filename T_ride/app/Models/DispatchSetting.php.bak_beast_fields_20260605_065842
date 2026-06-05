@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class DispatchSetting extends Model
+{
+    protected $fillable = [
+        'auto_dispatch_enabled',
+        'max_search_radius_miles',
+        'accept_timeout_seconds',
+        'driver_batch_size',
+        'stale_order_minutes',
+        'distance_weight',
+        'rating_weight',
+        'vehicle_match_weight',
+        'acceptance_rate_weight',
+        'surge_enabled',
+        'surge_multiplier',
+        'emergency_stop',
+    ];
+
+    protected $casts = [
+        'auto_dispatch_enabled' => 'boolean',
+        'surge_enabled' => 'boolean',
+        'emergency_stop' => 'boolean',
+        'max_search_radius_miles' => 'float',
+        'surge_multiplier' => 'float',
+    ];
+
+    public static function current(): self
+    {
+        return static::firstOrCreate(['id' => 1], [
+            'auto_dispatch_enabled' => true,
+            'max_search_radius_miles' => 10,
+            'accept_timeout_seconds' => 30,
+            'driver_batch_size' => 3,
+            'stale_order_minutes' => 5,
+            'distance_weight' => 40,
+            'rating_weight' => 20,
+            'vehicle_match_weight' => 25,
+            'acceptance_rate_weight' => 15,
+            'surge_enabled' => false,
+            'surge_multiplier' => 1.00,
+            'emergency_stop' => false,
+        ]);
+    }
+}

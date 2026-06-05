@@ -10,9 +10,6 @@ use App\Models\Order;
 use App\Models\Ride;
 use App\Models\DeliveryOrder;
 use App\Models\DispatchSetting;
-use App\Models\DispatchZone;
-use App\Models\PlatformCommissionSetting;
-use App\Models\DispatchAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -77,131 +74,6 @@ class DispatchController extends Controller
         ]);
     }
 
-
-
-    public function getZones()
-    {
-        $zones = DispatchZone::where('is_active', true)
-            ->orderBy('name')
-            ->get()
-            ->map(function ($zone) {
-                $drivers = Driver::with('user')
-                    ->whereIn('status', ['active', 'Active'])
-                    ->where('is_online', 1)
-                    ->where('account_status', 'approved')
-                    ->get()
-                    ->filter(function ($driver) use ($zone) {
-                        $lat = $driver->current_lat ?? $driver->latitude ?? $driver->lat ?? $driver->user?->lat ?? null;
-                        $lng = $driver->current_lng ?? $driver->longitude ?? $driver->lng ?? $driver->user?->lng ?? null;
-
-                        if ($lat === null || $lng === null) {
-                            return false;
-                        }
-
-                        $meters = $this->dispatchMilesBetween(
-                            (float) $lat,
-                            (float) $lng,
-                            (float) $zone->center_lat,
-                            (float) $zone->center_lng
-                        ) * 1609.34;
-
-                        return $meters <= (float) $zone->radius_meters;
-                    })
-                    ->count();
-
-                $rides = Ride::where('status', 'searching')
-                    ->whereNull('driver_id')
-                    ->whereNotNull('pickup_lat')
-                    ->whereNotNull('pickup_lng')
-                    ->get()
-                    ->filter(function ($ride) use ($zone) {
-                        $meters = $this->dispatchMilesBetween(
-                            (float) $ride->pickup_lat,
-                            (float) $ride->pickup_lng,
-                            (float) $zone->center_lat,
-                            (float) $zone->center_lng
-                        ) * 1609.34;
-
-                        return $meters <= (float) $zone->radius_meters;
-                    })
-                    ->count();
-
-                $heatScore = $drivers > 0 ? round($rides / $drivers, 2) : ($rides > 0 ? $rides : 0);
-
-                if ($rides >= 3 && ($drivers === 0 || $heatScore >= 2)) {
-                    $heatLevel = 'high';
-                } elseif ($rides >= 1 && ($drivers === 0 || $heatScore >= 1)) {
-                    $heatLevel = 'medium';
-                } else {
-                    $heatLevel = 'low';
-                }
-
-                return [
-                    'id' => $zone->id,
-                    'name' => $zone->name,
-                    'type' => $zone->type,
-                    'center_lat' => (float) $zone->center_lat,
-                    'center_lng' => (float) $zone->center_lng,
-                    'radius_meters' => (int) $zone->radius_meters,
-                    'surge_multiplier' => (float) $zone->surge_multiplier,
-                    'is_active' => (bool) $zone->is_active,
-                    'drivers_count' => $drivers,
-                    'pending_orders_count' => $rides,
-                    'heat_score' => $heatScore,
-                    'heat_level' => $heatLevel,
-                ];
-            });
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Dispatch zones fetched successfully',
-            'data' => $zones,
-        ]);
-    }
-
-
-
-    public function getCommissionSettings()
-    {
-        foreach (['ride' => 20, 'courier' => 20, 'delivery' => 15] as $service => $percent) {
-            PlatformCommissionSetting::firstOrCreate(
-                ['service_type' => $service],
-                ['commission_percent' => $percent, 'is_active' => true]
-            );
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Commission settings fetched successfully',
-            'data' => PlatformCommissionSetting::orderBy('service_type')->get(),
-        ]);
-    }
-
-    public function updateCommissionSettings(Request $request)
-    {
-        $data = $request->validate([
-            'commissions' => 'required|array',
-            'commissions.*.service_type' => 'required|in:ride,courier,delivery',
-            'commissions.*.commission_percent' => 'required|numeric|min:0|max:50',
-            'commissions.*.is_active' => 'nullable|boolean',
-        ]);
-
-        foreach ($data['commissions'] as $item) {
-            PlatformCommissionSetting::updateOrCreate(
-                ['service_type' => $item['service_type']],
-                [
-                    'commission_percent' => $item['commission_percent'],
-                    'is_active' => $item['is_active'] ?? true,
-                ]
-            );
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Commission settings updated successfully',
-            'data' => PlatformCommissionSetting::orderBy('service_type')->get(),
-        ]);
-    }
 
     /**
      * Get dispatch dashboard stats
@@ -757,18 +629,6 @@ class DispatchController extends Controller
                 continue;
             }
 
-            $attemptCount = DispatchAttempt::where('order_type', $order['source_type'])
-                ->where('order_id', $order['source_id'])
-                ->count();
-
-            DispatchAttempt::create([
-                'order_type' => $order['source_type'],
-                'order_id' => $order['source_id'],
-                'driver_id' => $best['id'],
-                'attempt_number' => $attemptCount + 1,
-                'status' => 'pending',
-            ]);
-
             $assignRequest = new Request([
                 'order_type' => $order['source_type'],
                 'order_id' => $order['source_id'],
@@ -814,9 +674,8 @@ class DispatchController extends Controller
 
         $maxRadius = max(1, (float) $settings->max_search_radius_miles);
         $orderType = strtolower((string) ($order['type'] ?? ''));
-        $dispatchMode = $settings->dispatch_mode ?: 'balanced';
 
-        $candidates = [];
+        $best = null;
 
         foreach ($drivers as $driver) {
             $driver = (array) $driver;
@@ -834,27 +693,6 @@ class DispatchController extends Controller
                 continue;
             }
 
-            $attemptsForThisDriver = DispatchAttempt::where('order_type', $order['source_type'] ?? $order['type'] ?? 'ride')
-                ->where('order_id', $order['source_id'] ?? $order['id'] ?? 0)
-                ->where('driver_id', $driver['id'])
-                ->count();
-
-            if ($attemptsForThisDriver >= (int) $settings->max_retry_attempts) {
-                continue;
-            }
-
-            $cooldownActive = DispatchAttempt::where('order_type', $order['source_type'] ?? $order['type'] ?? 'ride')
-                ->where('order_id', $order['source_id'] ?? $order['id'] ?? 0)
-                ->where('driver_id', $driver['id'])
-                ->whereIn('status', ['rejected', 'timeout'])
-                ->whereNotNull('cooldown_until')
-                ->where('cooldown_until', '>', now())
-                ->exists();
-
-            if ($cooldownActive) {
-                continue;
-            }
-
             $rating = min(5, (float) ($driver['rating'] ?? 0));
             $serviceType = strtolower((string) ($driver['service_type'] ?? ''));
             $vehicleType = strtolower((string) ($driver['vehicle_type'] ?? ''));
@@ -864,36 +702,21 @@ class DispatchController extends Controller
             $vehicleScore = ($serviceType === $orderType || $vehicleType === $orderType) ? 100 : 50;
             $acceptanceScore = (float) ($driver['acceptance_rate'] ?? 80);
 
-            $balancedScore =
+            $score =
                 ($distanceScore * (int) $settings->distance_weight) +
                 ($ratingScore * (int) $settings->rating_weight) +
                 ($vehicleScore * (int) $settings->vehicle_match_weight) +
                 ($acceptanceScore * (int) $settings->acceptance_rate_weight);
 
-            if ($dispatchMode === 'nearest') {
-                $score = 100000 - ($distanceMiles * 1000);
-            } elseif ($dispatchMode === 'rating_priority') {
-                $score = ($ratingScore * 1000) + $distanceScore + $vehicleScore;
-            } else {
-                $score = $balancedScore;
-            }
-
             $driver['distance_miles'] = $distanceMiles;
             $driver['dispatch_score'] = $score;
-            $driver['dispatch_mode'] = $dispatchMode;
 
-            $candidates[] = $driver;
+            if (!$best || $driver['dispatch_score'] > $best['dispatch_score']) {
+                $best = $driver;
+            }
         }
 
-        if (empty($candidates)) {
-            return null;
-        }
-
-        usort($candidates, function ($a, $b) {
-            return $b['dispatch_score'] <=> $a['dispatch_score'];
-        });
-
-        return $candidates[0];
+        return $best;
     }
 
     private function dispatchMilesBetween($lat1, $lng1, $lat2, $lng2): float
@@ -910,58 +733,6 @@ class DispatchController extends Controller
             sin($dLng / 2);
 
         return $earthRadiusMiles * 2 * atan2(sqrt($a), sqrt(1 - $a));
-    }
-
-
-
-    public function markAttemptRejected($attemptId)
-    {
-        $settings = DispatchSetting::current();
-        $attempt = DispatchAttempt::findOrFail($attemptId);
-
-        $attempt->update([
-            'status' => 'rejected',
-            'cooldown_until' => now()->addSeconds((int) $settings->driver_reject_cooldown_seconds),
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Dispatch attempt marked rejected.',
-            'data' => $attempt->fresh(),
-        ]);
-    }
-
-    public function markAttemptTimeout($attemptId)
-    {
-        $settings = DispatchSetting::current();
-        $attempt = DispatchAttempt::findOrFail($attemptId);
-
-        $attempt->update([
-            'status' => 'timeout',
-            'cooldown_until' => now()->addSeconds((int) $settings->driver_reject_cooldown_seconds),
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Dispatch attempt marked timeout.',
-            'data' => $attempt->fresh(),
-        ]);
-    }
-
-    public function markAttemptAccepted($attemptId)
-    {
-        $attempt = DispatchAttempt::findOrFail($attemptId);
-
-        $attempt->update([
-            'status' => 'accepted',
-            'cooldown_until' => null,
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Dispatch attempt marked accepted.',
-            'data' => $attempt->fresh(),
-        ]);
     }
 
 

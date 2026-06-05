@@ -299,32 +299,6 @@ class AppRideController extends Controller
         ]);
     }
 
-
-    private function findDispatchSurgeZone(float $lat, float $lng): ?DispatchZone
-    {
-        $zones = DispatchZone::where('is_active', true)->get();
-        $matched = null;
-
-        foreach ($zones as $zone) {
-            $distanceKm = $this->calculateDistance(
-                $lat,
-                $lng,
-                (float) $zone->center_lat,
-                (float) $zone->center_lng
-            );
-
-            $meters = $distanceKm * 1000;
-
-            if ($meters <= (float) $zone->radius_meters) {
-                if (!$matched || (float) $zone->surge_multiplier > (float) $matched->surge_multiplier) {
-                    $matched = $zone;
-                }
-            }
-        }
-
-        return $matched;
-    }
-
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
         $earth_radius = 6371;

@@ -511,7 +511,7 @@ class AppDriverController extends Controller
                 $ride->distance_miles = round($tripDistanceMiles, 1);
                 $ride->pickup_distance_miles = $pickupDistanceMiles === null ? null : round($pickupDistanceMiles, 1);
                 $ride->duration_minutes = max(3, round($tripDistanceMiles * 2));
-                $ride->estimated_fare = round((float) $ride->fare * (PlatformCommissionSetting::driverSharePercentFor('ride') / 100), 2);
+                $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
 
                 return $ride;
             })
@@ -686,7 +686,7 @@ class AppDriverController extends Controller
 
         $ride->distance_miles = round($distanceMiles, 1);
         $ride->duration_minutes = max(3, round($distanceMiles * 2));
-        $ride->estimated_fare = round((float) $ride->fare * (PlatformCommissionSetting::driverSharePercentFor('ride') / 100), 2);
+        $ride->estimated_fare = round((float) $ride->fare * 0.8, 2);
 
         return response()->json([
             'status' => true,
