@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\DispatchController;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ride;
@@ -32,14 +34,18 @@ class AppRideController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
 
-        $distance = $this->calculateDistance(
+        $distanceKm = $this->calculateDistance(
             $request->pickup_lat,
             $request->pickup_lng,
             $request->dropoff_lat,
             $request->dropoff_lng
         );
 
-        $zone = PricingZone::with('vehicleMultipliers')->first();
+        // USA pricing uses miles. Other countries can keep kilometers later.
+        $distance = $distanceKm * 0.621371;
+        $distanceUnit = 'miles';
+
+        $zone = PricingZone::with('vehicleMultipliers')->where('status', 'active')->latest()->first();
 
         $dispatchSettings = DispatchSetting::current();
         $surgeZone = $this->findDispatchSurgeZone((float) $request->pickup_lat, (float) $request->pickup_lng);
@@ -58,6 +64,7 @@ class AppRideController extends Controller
             $multiplierObj = $zone->vehicleMultipliers->where('vehicle_type', $type->type_name)->first();
             $multiplier = $multiplierObj ? $multiplierObj->multiplier : 1;
 
+            // For USA, per_km is treated as per-mile until DB is renamed to per_distance.
             $fare = $zone->base_fare + ($distance * $zone->per_km);
             $fare = $fare * $multiplier;
             $fare = $fare * $surgeMultiplier;
@@ -72,6 +79,7 @@ class AppRideController extends Controller
                 'image' => $type->photo ? asset('storage/' . $type->photo) : null,
                 'fare' => round($fare, 2),
                 'distance' => round($distance, 2),
+                'distance_unit' => $distanceUnit,
                 'eta' => rand(2, 10) . ' mins',
                 'surge_multiplier' => round($surgeMultiplier, 2),
                 'surge_enabled' => (bool) $dispatchSettings->surge_enabled,
@@ -201,30 +209,11 @@ class AppRideController extends Controller
         }
 
         try {
-            $drivers = Driver::where('is_online', 1)
-                ->with('user')
-                ->get();
-
-            foreach ($drivers as $driver) {
-                $token = optional($driver->user)->fcm_token;
-
-                if (!$token) {
-                    continue;
-                }
-
-                app(FcmNotificationService::class)->sendToToken(
-                    $token,
-                    'New T-Ride request',
-                    'A rider is requesting a trip near you.',
-                    [
-                        'type' => 'ride_request',
-                        'ride_id' => (string) $ride->id,
-                        'status' => 'searching',
-                    ]
-                );
-            }
+            app(DispatchController::class)->autoAssign(
+                new Request(['dry_run' => false])
+            );
         } catch (\Throwable $e) {
-            \Log::error('FCM ride request notification failed', [
+            \Log::error('Auto dispatch after ride request failed', [
                 'ride_id' => $ride->id,
                 'error' => $e->getMessage(),
             ]);

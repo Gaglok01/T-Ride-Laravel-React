@@ -87,6 +87,7 @@ Route::prefix('api/app')->group(function () {
             Route::post('toggle-online', [AppDriverController::class, 'toggleOnline']);
             Route::get('dashboard', [AppDriverController::class, 'getDashboard']);
             Route::get('ride-requests', [AppDriverController::class, 'getRideRequests']);
+            Route::get('dispatch-settings', [AppDriverController::class, 'getDispatchSettings']);
             Route::post('ride/{id}/respond', [AppDriverController::class, 'respondToRide']);
             Route::post('ride/{id}/status', [AppDriverController::class, 'updateRideStatus']);
 

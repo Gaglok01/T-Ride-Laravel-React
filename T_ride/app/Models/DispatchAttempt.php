@@ -21,6 +21,12 @@ class DispatchAttempt extends Model
         'attempt_number' => 'integer',
     ];
 
+
+    public function ride(): BelongsTo
+    {
+        return $this->belongsTo(Ride::class, 'order_id');
+    }
+
     public function driver(): BelongsTo
     {
         return $this->belongsTo(Driver::class);

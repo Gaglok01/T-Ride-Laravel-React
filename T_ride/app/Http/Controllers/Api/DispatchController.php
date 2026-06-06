@@ -695,6 +695,16 @@ class DispatchController extends Controller
     {
         $settings = DispatchSetting::current();
 
+        // Expire pending dispatch offers before creating/retrying offers.
+        $timeoutSeconds = max(5, (int) ($settings->accept_timeout_seconds ?? 30));
+        DispatchAttempt::where('status', 'pending')
+            ->where('created_at', '<=', now()->subSeconds($timeoutSeconds))
+            ->update([
+                'status' => 'timeout',
+                'cooldown_until' => now()->addSeconds((int) ($settings->driver_reject_cooldown_seconds ?? 300)),
+                'updated_at' => now(),
+            ]);
+
         if (!$settings->auto_dispatch_enabled || $settings->emergency_stop) {
             return response()->json([
                 'status' => false,
@@ -713,7 +723,7 @@ class DispatchController extends Controller
 
         $orders = collect($pendingResponse['data'] ?? [])
             ->filter(function ($order) use ($settings) {
-                return (int) ($order['wait_minutes'] ?? 0) >= (int) $settings->stale_order_minutes;
+                return (int) ($order['wait_minutes'] ?? 0) <= (int) $settings->stale_order_minutes;
             })
             ->take(max(1, (int) $settings->driver_batch_size))
             ->values();
@@ -757,6 +767,28 @@ class DispatchController extends Controller
                 continue;
             }
 
+            $existingPendingAttempt = DispatchAttempt::where('order_type', $order['source_type'])
+                ->where('order_id', $order['source_id'])
+                ->where('status', 'pending')
+                ->first();
+
+            if ($existingPendingAttempt) {
+                $results[] = [
+                    'order_id' => $order['order_id'] ?? null,
+                    'source_type' => $order['source_type'] ?? null,
+                    'source_id' => $order['source_id'] ?? null,
+                    'assigned' => false,
+                    'offer_created' => false,
+                    'existing_attempt_id' => $existingPendingAttempt->id,
+                    'best_driver_id' => $best['id'],
+                    'best_driver_name' => $best['name'] ?? 'Driver',
+                    'distance_miles' => round($best['distance_miles'], 2),
+                    'score' => round($best['dispatch_score'], 2),
+                    'message' => 'Pending dispatch offer already exists for this driver.',
+                ];
+                continue;
+            }
+
             $attemptCount = DispatchAttempt::where('order_type', $order['source_type'])
                 ->where('order_id', $order['source_id'])
                 ->count();
@@ -769,25 +801,20 @@ class DispatchController extends Controller
                 'status' => 'pending',
             ]);
 
-            $assignRequest = new Request([
-                'order_type' => $order['source_type'],
-                'order_id' => $order['source_id'],
-                'driver_id' => $best['id'],
-            ]);
-
-            $assignResponse = $this->assignDriver($assignRequest);
-            $assignData = $assignResponse->getData(true);
-
+            // Beast dispatch: do NOT assign the ride to the driver yet.
+            // We only create a pending offer. The ride becomes accepted/assigned
+            // only when the driver accepts in AppDriverController::respondToRide().
             $results[] = [
                 'order_id' => $order['order_id'] ?? null,
                 'source_type' => $order['source_type'] ?? null,
                 'source_id' => $order['source_id'] ?? null,
-                'assigned' => (bool) ($assignData['status'] ?? false),
+                'assigned' => false,
+                'offer_created' => true,
                 'best_driver_id' => $best['id'],
                 'best_driver_name' => $best['name'] ?? 'Driver',
                 'distance_miles' => round($best['distance_miles'], 2),
                 'score' => round($best['dispatch_score'], 2),
-                'message' => $assignData['message'] ?? null,
+                'message' => 'Dispatch offer created. Waiting for driver acceptance.',
             ];
         }
 
@@ -840,6 +867,20 @@ class DispatchController extends Controller
                 ->count();
 
             if ($attemptsForThisDriver >= (int) $settings->max_retry_attempts) {
+                continue;
+            }
+
+            // Do not send another offer to a driver who already has a pending offer
+            // for an order that is still active/searching.
+            $driverHasPendingActiveRideOffer = DispatchAttempt::where('driver_id', $driver['id'])
+                ->where('order_type', 'ride')
+                ->where('status', 'pending')
+                ->whereHas('ride', function ($q) {
+                    $q->whereIn('status', ['searching', 'accepted', 'arrived', 'started', 'in_progress']);
+                })
+                ->exists();
+
+            if ($driverHasPendingActiveRideOffer) {
                 continue;
             }
 

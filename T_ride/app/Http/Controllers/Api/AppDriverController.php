@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Ride;
 use App\Services\FirestoreRideSyncService;
 use App\Models\Driver;
+use App\Models\DispatchAttempt;
+use App\Models\DispatchSetting;
+use App\Models\PlatformCommissionSetting;
 use App\Models\ServiceZone;
 use App\Models\DocumentQueueItem;
 use App\Models\User;
@@ -460,6 +463,27 @@ class AppDriverController extends Controller
         ]);
     }
 
+
+    public function getDispatchSettings()
+    {
+        $settings = DispatchSetting::firstOrCreate(['id' => 1]);
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'accept_timeout_seconds' => (int) $settings->accept_timeout_seconds,
+                'max_retry_attempts' => (int) $settings->max_retry_attempts,
+                'driver_reject_cooldown_seconds' => (int) $settings->driver_reject_cooldown_seconds,
+                'dispatch_mode' => $settings->dispatch_mode,
+                'driver_batch_size' => (int) $settings->driver_batch_size,
+                'surge_enabled' => (bool) $settings->surge_enabled,
+                'surge_multiplier' => (float) $settings->surge_multiplier,
+                'auto_dispatch_enabled' => (bool) $settings->auto_dispatch_enabled,
+                'emergency_stop' => (bool) $settings->emergency_stop,
+            ],
+        ]);
+    }
+
     /**
      * Get New Ride Requests (Finding rides)
      */
@@ -476,8 +500,14 @@ class AppDriverController extends Controller
         $driverLng = $driverUser->lng ?? null;
         $maxPickupMiles = 25;
 
-        $requests = Ride::where(function ($q) use ($driver) {
-                $q->where('status', 'searching')
+        $pendingAttemptRideIds = DispatchAttempt::where('order_type', 'ride')
+            ->where('driver_id', $driver->id)
+            ->where('status', 'pending')
+            ->pluck('order_id')
+            ->toArray();
+
+        $requests = Ride::where(function ($q) use ($driver, $pendingAttemptRideIds) {
+                $q->whereIn('id', $pendingAttemptRideIds)
                   ->orWhere(function ($x) use ($driver) {
                       $x->where('status', 'assigned')
                         ->where('driver_id', $driver->id);
@@ -487,6 +517,7 @@ class AppDriverController extends Controller
                 $q->where('vehicle_type_id', $driver->type_id)
                   ->orWhereNull('vehicle_type_id');
             })
+            ->whereIn('status', ['searching', 'assigned'])
             ->with(['rider'])
             ->latest()
             ->get()
@@ -512,6 +543,15 @@ class AppDriverController extends Controller
                 $ride->pickup_distance_miles = $pickupDistanceMiles === null ? null : round($pickupDistanceMiles, 1);
                 $ride->duration_minutes = max(3, round($tripDistanceMiles * 2));
                 $ride->estimated_fare = round((float) $ride->fare * (PlatformCommissionSetting::driverSharePercentFor('ride') / 100), 2);
+
+                $attempt = DispatchAttempt::where('order_type', 'ride')
+                    ->where('order_id', $ride->id)
+                    ->where('driver_id', $ride->driver_id ?: optional(Driver::where('user_id', Auth::id())->first())->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->first();
+
+                $ride->dispatch_attempt_id = $attempt?->id;
 
                 return $ride;
             })
@@ -562,14 +602,28 @@ class AppDriverController extends Controller
             ], 403);
         }
 
+        $attempt = DispatchAttempt::where('order_type', 'ride')
+            ->where('order_id', $ride->id)
+            ->where('driver_id', $driver->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
         if ($request->action === 'accept') {
             $ride->update([
                 'driver_id' => $driver->id,
                 'status' => 'accepted'
             ]);
 
+            if ($attempt) {
+                $attempt->update([
+                    'status' => 'accepted',
+                    'responded_at' => now(),
+                ]);
+            }
+
             try {
-                app(FirestoreRideSyncService::class)->sync($ride, 'accepted');
+                app(FirestoreRideSyncService::class)->sync($ride->fresh(), 'accepted');
             } catch (\Throwable $e) {
                 \Log::error('Firestore accepted sync failed', ['ride_id' => $ride->id, 'error' => $e->getMessage()]);
             }
@@ -578,6 +632,13 @@ class AppDriverController extends Controller
                 'status' => true,
                 'message' => 'Ride accepted successfully',
                 'data' => $ride->fresh(['rider', 'driver.user', 'vehicleType'])
+            ]);
+        }
+
+        if ($attempt) {
+            $attempt->update([
+                'status' => 'rejected',
+                'responded_at' => now(),
             ]);
         }
 
