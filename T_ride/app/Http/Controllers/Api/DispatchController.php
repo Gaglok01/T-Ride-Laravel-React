@@ -793,13 +793,52 @@ class DispatchController extends Controller
                 ->where('order_id', $order['source_id'])
                 ->count();
 
-            DispatchAttempt::create([
+            $attempt = DispatchAttempt::create([
                 'order_type' => $order['source_type'],
                 'order_id' => $order['source_id'],
                 'driver_id' => $best['id'],
                 'attempt_number' => $attemptCount + 1,
                 'status' => 'pending',
             ]);
+
+            try {
+                $driverModel = Driver::with('user')->find($best['id']);
+                $token = optional(optional($driverModel)->user)->fcm_token;
+
+                if ($token) {
+                    \Log::info('Beast dispatch FCM sending', [
+                        'attempt_id' => $attempt->id,
+                        'order_type' => $order['source_type'],
+                        'order_id' => $order['source_id'],
+                        'driver_id' => $best['id'],
+                    ]);
+
+                    app(\App\Services\FcmNotificationService::class)->sendToToken(
+                        $token,
+                        'New ride request',
+                        'You have a new dispatch request.',
+                        [
+                            'type' => 'ride_request',
+                            'attempt_id' => (string) $attempt->id,
+                            'order_type' => (string) $order['source_type'],
+                            'order_id' => (string) $order['source_id'],
+                            'ride_id' => (string) $order['source_id'],
+                            'status' => 'pending',
+                        ]
+                    );
+                } else {
+                    \Log::warning('Beast dispatch FCM skipped: no token', [
+                        'driver_id' => $best['id'],
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Beast dispatch FCM failed', [
+                    'driver_id' => $best['id'],
+                    'order_type' => $order['source_type'],
+                    'order_id' => $order['source_id'],
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             // Beast dispatch: do NOT assign the ride to the driver yet.
             // We only create a pending offer. The ride becomes accepted/assigned

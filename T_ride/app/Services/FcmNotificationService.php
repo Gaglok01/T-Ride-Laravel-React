@@ -45,8 +45,8 @@ class FcmNotificationService
                     'android' => [
                         'priority' => 'HIGH',
                         'notification' => [
-                            'sound' => 'default',
-                            'channel_id' => 'ride_requests',
+                            'sound' => 'tride_dispatch',
+                            'channel_id' => 'tride_dispatch_requests_v6',
                         ],
                     ],
                 ],

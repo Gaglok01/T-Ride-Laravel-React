@@ -674,7 +674,7 @@ export default function DispatchPage() {
                                                         {order.type}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-4 text-tride-text">John Doe</td>
+                                                <td className="px-4 py-4 text-tride-text">{order.customer_name || order.rider_name || "Customer"}</td>
                                                 <td className="px-4 py-4 text-tride-text-muted text-xs truncate max-w-[150px]" title={order.pickup}>
                                                     {order.pickup}
                                                 </td>
