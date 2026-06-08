@@ -245,10 +245,10 @@ export default function PricingPage() {
 
 function RidePricingTab({ zones, onEdit, onRefresh }: { zones: PricingZone[], onEdit: (zone: PricingZone) => void, onRefresh: () => void }) {
     const defaultMultipliers = [
-        { vehicle_type: "Economy", multiplier: 1.0 },
-        { vehicle_type: "Comfort", multiplier: 1.3 },
-        { vehicle_type: "Premium", multiplier: 1.8 },
-        { vehicle_type: "SUV", multiplier: 1.5 },
+        { vehicle_type: "T-Go", multiplier: 1.0 },
+        { vehicle_type: "T-Comfort", multiplier: 1.3 },
+        { vehicle_type: "T-Elite", multiplier: 1.8 },
+        { vehicle_type: "T-XL", multiplier: 1.5 },
     ]
 
     return (
@@ -518,10 +518,10 @@ function PricingZoneModal({ isOpen, onClose, initialData, onSave }: { isOpen: bo
     const [perMinute, setPerMinute] = useState("")
     const [minFare, setMinFare] = useState("")
     const [multipliers, setMultipliers] = useState<VehicleMultiplier[]>([
-        { vehicle_type: "Economy", multiplier: 1.0 },
-        { vehicle_type: "Comfort", multiplier: 1.3 },
-        { vehicle_type: "Premium", multiplier: 1.8 },
-        { vehicle_type: "SUV", multiplier: 1.5 },
+        { vehicle_type: "T-Go", multiplier: 1.0 },
+        { vehicle_type: "T-Comfort", multiplier: 1.3 },
+        { vehicle_type: "T-Elite", multiplier: 1.8 },
+        { vehicle_type: "T-XL", multiplier: 1.5 },
     ])
 
     useEffect(() => {
@@ -544,10 +544,10 @@ function PricingZoneModal({ isOpen, onClose, initialData, onSave }: { isOpen: bo
                 setPerMinute("")
                 setMinFare("")
                 setMultipliers([
-                    { vehicle_type: "Economy", multiplier: 1.0 },
-                    { vehicle_type: "Comfort", multiplier: 1.3 },
-                    { vehicle_type: "Premium", multiplier: 1.8 },
-                    { vehicle_type: "SUV", multiplier: 1.5 },
+                    { vehicle_type: "T-Go", multiplier: 1.0 },
+                    { vehicle_type: "T-Comfort", multiplier: 1.3 },
+                    { vehicle_type: "T-Elite", multiplier: 1.8 },
+                    { vehicle_type: "T-XL", multiplier: 1.5 },
                 ])
             }
             setError("")
