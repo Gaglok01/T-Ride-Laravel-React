@@ -454,3 +454,102 @@ Route::post('/app/driver/ride/{id}/accept', function (\Illuminate\Http\Request $
 
 
 Route::get('/public/driver/heat-map', [App\Http\Controllers\Api\AppDriverController::class, 'getHeatMap']);
+
+
+
+Route::get('/admin/courier-orders', function (\Illuminate\Http\Request $request) {
+    $query = \App\Models\Ride::query()
+        ->where('service_type', 'courier');
+
+    if ($request->filled('status') && $request->status !== 'All Orders') {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->filled('package_type') && $request->package_type !== 'All Package Types') {
+        $query->where('package_size', $request->package_type);
+    }
+
+    if ($request->filled('order_id')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('ride_custom_id', 'like', '%' . $request->order_id . '%')
+              ->orWhere('id', $request->order_id);
+        });
+    }
+
+    $orders = $query->latest()->paginate(10);
+
+    $orders->getCollection()->transform(function ($order) {
+        return [
+            'id' => $order->id,
+            'order_id' => $order->ride_custom_id ?? $order->order_id ?? ('DEL-' . $order->id),
+            'sender' => $order->sender ?? $order->customer_name ?? $order->rider_name ?? 'N/A',
+            'recipient' => $order->recipient ?? $order->receiver_name ?? 'N/A',
+            'receiver_name' => $order->receiver_name,
+            'receiver_phone' => $order->receiver_phone,
+            'package_type' => $order->package_type ?? $order->package_size ?? 'N/A',
+            'package_size' => $order->package_size,
+            'package_weight' => $order->package_weight,
+            'courier' => $order->driver_name ?? $order->courier ?? 'N/A',
+            'fee' => $order->fare ?? $order->fee ?? 0,
+            'status' => $order->status,
+            'pickup_address' => $order->pickup_address,
+            'dropoff_address' => $order->dropoff_address,
+            'pickup_instructions' => $order->pickup_instructions,
+            'dropoff_instructions' => $order->dropoff_instructions,
+            'package_photo' => $order->package_photo,
+            'proof_of_delivery' => $order->proof_of_delivery,
+            'package_photo_url' => $order->package_photo ? url('storage/' . $order->package_photo) : null,
+            'proof_of_delivery_url' => $order->proof_of_delivery ? url('storage/' . $order->proof_of_delivery) : null,
+            'created_at' => optional($order->created_at)->format('Y-m-d H:i:s'),
+            'updated_at' => optional($order->updated_at)->format('Y-m-d H:i:s'),
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'data' => $orders,
+    ]);
+});
+
+Route::get('/admin/courier-orders/{id}', function ($id) {
+    $ride = \App\Models\Ride::with(['rider', 'driver'])
+        ->where('id', $id)
+        ->orWhere('ride_custom_id', $id)
+        ->first();
+
+    if (!$ride || $ride->service_type !== 'courier') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Courier order not found',
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'id' => $ride->id,
+            'order_id' => $ride->ride_custom_id ?? ('DEL-' . $ride->id),
+            'sender' => optional($ride->rider)->name ?? 'Customer',
+            'recipient' => $ride->receiver_name ?? 'Receiver',
+            'receiver_name' => $ride->receiver_name,
+            'receiver_phone' => $ride->receiver_phone,
+            'package_type' => $ride->package_size ?? 'Package',
+            'package_size' => $ride->package_size,
+            'package_weight' => $ride->package_weight,
+            'courier' => optional($ride->driver)->name ?? 'Assigned Driver',
+            'fee' => $ride->fare ?? $ride->estimated_fare ?? 0,
+            'status' => $ride->status,
+            'pickup_address' => $ride->pickup_address,
+            'dropoff_address' => $ride->dropoff_address,
+            'pickup_instructions' => $ride->pickup_instructions,
+            'dropoff_instructions' => $ride->dropoff_instructions,
+            'package_photo' => $ride->package_photo,
+            'proof_of_delivery' => $ride->proof_of_delivery,
+            'package_photo_url' => $ride->package_photo ? asset('storage/' . $ride->package_photo) : null,
+            'proof_of_delivery_url' => $ride->proof_of_delivery ? asset('storage/' . $ride->proof_of_delivery) : null,
+            'created_at' => optional($ride->created_at)->toDateTimeString(),
+            'updated_at' => optional($ride->updated_at)->toDateTimeString(),
+        ],
+    ]);
+});
+

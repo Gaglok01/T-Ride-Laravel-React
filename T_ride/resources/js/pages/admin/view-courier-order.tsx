@@ -10,11 +10,24 @@ interface CourierOrderData {
     order_id: string
     sender: string
     recipient: string
+    receiver_name?: string
+    receiver_phone?: string
     package_type: string
+    package_size?: string
+    package_weight?: string
     courier: string
-    fee: number
+    fee: number | string
     status: string
+    pickup_address?: string
+    dropoff_address?: string
+    pickup_instructions?: string
+    dropoff_instructions?: string
+    package_photo?: string
+    proof_of_delivery?: string
+    package_photo_url?: string
+    proof_of_delivery_url?: string
     created_at: string
+    updated_at?: string
 }
 
 export default function ViewCourierOrder({ id }: { id: number }) {
@@ -24,8 +37,7 @@ export default function ViewCourierOrder({ id }: { id: number }) {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                // Adjust endpoint if needed, assuming /api/admin/orders/{id} serves this
-                const res = await axios.get(`/admin/orders/${id}`)
+                const res = await axios.get(`/admin/courier-orders/${id}`)
                 if (res.data.success) {
                     setOrder(res.data.data)
                 }
@@ -142,11 +154,27 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                         </h2>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InfoCard icon={<Package size={18} />} label="Package Type" value={order.package_type} />
-                            <InfoCard icon={<Truck size={18} />} label="Courier Service" value={order.courier} />
-                            <InfoCard icon={<DollarSign size={18} />} label="Delivery Fee" value={`$${Number(order.fee).toFixed(2)}`} highlight />
-                            <InfoCard icon={<Clock size={18} />} label="Last Updated" value={new Date(order.created_at).toLocaleString()} />
+                            <InfoCard icon={<Package size={18} />} label="Package Type" value={order.package_type || "N/A"} />
+                            <InfoCard icon={<Package size={18} />} label="Package Size" value={order.package_size || "N/A"} />
+                            <InfoCard icon={<Package size={18} />} label="Package Weight" value={order.package_weight ? `${order.package_weight} lbs` : "N/A"} />
+                            <InfoCard icon={<Truck size={18} />} label="Courier Service" value={order.courier || "N/A"} />
+                            <InfoCard icon={<DollarSign size={18} />} label="Delivery Fee" value={`$${Number(order.fee || 0).toFixed(2)}`} highlight />
+                            <InfoCard icon={<Clock size={18} />} label="Last Updated" value={new Date(order.updated_at || order.created_at).toLocaleString()} />
                         </div>
+                    </div>
+
+                    {/* Delivery Proof Photos */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <PhotoCard
+                            title="Pickup Photo"
+                            imageUrl={order.package_photo_url}
+                            emptyText="No pickup photo uploaded"
+                        />
+                        <PhotoCard
+                            title="Delivery Photo"
+                            imageUrl={order.proof_of_delivery_url}
+                            emptyText="No delivery photo uploaded"
+                        />
                     </div>
                 </div>
 
@@ -157,8 +185,8 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                         title="Sender From" 
                         icon={<MapPin size={18} className="text-blue-400" />}
                         iconBg="bg-blue-500/10"
-                        name={order.sender}
-                        detail="Address details hidden"
+                        name={order.sender || "N/A"}
+                        detail={order.pickup_address || "Address not available"}
                     />
 
                     {/* Recipient */}
@@ -166,9 +194,53 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                         title="Recipient To" 
                         icon={<MapPin size={18} className="text-green-400" />}
                         iconBg="bg-green-500/10"
-                        name={order.recipient}
-                        detail="Address details hidden"
+                        name={order.receiver_name || order.recipient || "N/A"}
+                        detail={order.dropoff_address || "Address not available"}
                     />
+
+                    {/* Receiver Information */}
+                    <div className="bg-tride-card border border-white/5 rounded-3xl p-6">
+                        <h3 className="text-tride-text text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <User size={18} className="text-tride-yellow" />
+                            Receiver Information
+                        </h3>
+                        <div className="space-y-3 text-sm">
+                            <div>
+                                <p className="text-tride-text/40 uppercase text-xs font-bold">Name</p>
+                                <p className="font-bold">{order.receiver_name || order.recipient || "N/A"}</p>
+                            </div>
+                            <div>
+                                <p className="text-tride-text/40 uppercase text-xs font-bold">Phone</p>
+                                <p className="font-bold">{order.receiver_phone || "N/A"}</p>
+                            </div>
+                            <div>
+                                <p className="text-tride-text/40 uppercase text-xs font-bold">Dropoff Instructions</p>
+                                <p className="font-medium text-tride-text/80">{order.dropoff_instructions || "N/A"}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Package Information */}
+                    <div className="bg-tride-card border border-white/5 rounded-3xl p-6">
+                        <h3 className="text-tride-text text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <Package size={18} className="text-tride-yellow" />
+                            Package Information
+                        </h3>
+                        <div className="space-y-3 text-sm">
+                            <div>
+                                <p className="text-tride-text/40 uppercase text-xs font-bold">Size</p>
+                                <p className="font-bold capitalize">{order.package_size || order.package_type || "N/A"}</p>
+                            </div>
+                            <div>
+                                <p className="text-tride-text/40 uppercase text-xs font-bold">Weight</p>
+                                <p className="font-bold">{order.package_weight ? `${order.package_weight} lbs` : "N/A"}</p>
+                            </div>
+                            <div>
+                                <p className="text-tride-text/40 uppercase text-xs font-bold">Pickup Instructions</p>
+                                <p className="font-medium text-tride-text/80">{order.pickup_instructions || "N/A"}</p>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Courier Summary */}
                     <div className="bg-tride-yellow/10 border border-tride-yellow/20 rounded-3xl p-6">
@@ -179,6 +251,31 @@ export default function ViewCourierOrder({ id }: { id: number }) {
                 </div>
             </div>
         </AdminLayout>
+    )
+}
+
+function PhotoCard({ title, imageUrl, emptyText }: any) {
+    return (
+        <div className="bg-tride-card border border-tride-border rounded-3xl p-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Package size={20} className="text-tride-yellow" />
+                {title}
+            </h2>
+
+            {imageUrl ? (
+                <a href={imageUrl} target="_blank" rel="noreferrer">
+                    <img
+                        src={imageUrl}
+                        alt={title}
+                        className="w-full rounded-2xl border border-white/10 object-cover max-h-96"
+                    />
+                </a>
+            ) : (
+                <div className="h-48 rounded-2xl border border-white/10 bg-tride-hover flex items-center justify-center text-tride-text/50 text-sm">
+                    {emptyText}
+                </div>
+            )}
+        </div>
     )
 }
 

@@ -46,7 +46,7 @@ class FcmNotificationService
                         'priority' => 'HIGH',
                         'notification' => [
                             'sound' => 'tride_dispatch',
-                            'channel_id' => 'tride_dispatch_requests_v7',
+                            'channel_id' => 'tride_dispatch_requests_v6',
                         ],
                     ],
                 ],

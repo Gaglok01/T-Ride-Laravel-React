@@ -71,7 +71,8 @@ export default function CourierOrdersPage() {
                 params.order_id = appliedFilters.order_id
             }
             
-            const response = await axios.get('/admin/orders', { params })
+            const response = await axios.get('/admin/courier-orders', { params })
+            console.log("COURIER ORDERS RESPONSE", response.data)
             if (response.data.success) {
                 setOrders(response.data.data.data)
                 setPagination({

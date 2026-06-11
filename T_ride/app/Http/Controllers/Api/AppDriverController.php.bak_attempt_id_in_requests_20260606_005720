@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Ride;
 use App\Services\FirestoreRideSyncService;
 use App\Models\Driver;
-use App\Models\DispatchAttempt;
-use App\Models\DispatchSetting;
 use App\Models\PlatformCommissionSetting;
 use App\Models\ServiceZone;
 use App\Models\DocumentQueueItem;
@@ -463,27 +461,6 @@ class AppDriverController extends Controller
         ]);
     }
 
-
-    public function getDispatchSettings()
-    {
-        $settings = DispatchSetting::firstOrCreate(['id' => 1]);
-
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'accept_timeout_seconds' => (int) $settings->accept_timeout_seconds,
-                'max_retry_attempts' => (int) $settings->max_retry_attempts,
-                'driver_reject_cooldown_seconds' => (int) $settings->driver_reject_cooldown_seconds,
-                'dispatch_mode' => $settings->dispatch_mode,
-                'driver_batch_size' => (int) $settings->driver_batch_size,
-                'surge_enabled' => (bool) $settings->surge_enabled,
-                'surge_multiplier' => (float) $settings->surge_multiplier,
-                'auto_dispatch_enabled' => (bool) $settings->auto_dispatch_enabled,
-                'emergency_stop' => (bool) $settings->emergency_stop,
-            ],
-        ]);
-    }
-
     /**
      * Get New Ride Requests (Finding rides)
      */
@@ -500,32 +477,21 @@ class AppDriverController extends Controller
         $driverLng = $driverUser->lng ?? null;
         $maxPickupMiles = 25;
 
-        $pendingAttemptIds = DispatchAttempt::whereIn('order_type', ['ride', 'courier'])
-            ->where('driver_id', $driver->id)
-            ->where('status', 'pending')
-            ->pluck('order_id')
-            ->toArray();
-
-        $requests = Ride::where(function ($q) use ($driver, $pendingAttemptIds) {
-                $q->whereIn('id', $pendingAttemptIds)
+        $requests = Ride::where(function ($q) use ($driver) {
+                $q->where('status', 'searching')
                   ->orWhere(function ($x) use ($driver) {
                       $x->where('status', 'assigned')
                         ->where('driver_id', $driver->id);
                   });
             })
-            ->where(function ($q) use ($driver, $pendingAttemptIds) {
-                $q->whereIn('id', $pendingAttemptIds)
-                  ->orWhere('vehicle_type_id', $driver->type_id)
+            ->where(function ($q) use ($driver) {
+                $q->where('vehicle_type_id', $driver->type_id)
                   ->orWhereNull('vehicle_type_id');
             })
-            ->whereIn('status', ['searching', 'assigned'])
             ->with(['rider'])
             ->latest()
             ->get()
             ->map(function ($ride) use ($driverLat, $driverLng) {
-                $ride->service_type = $ride->service_type ?: 'ride';
-                $ride->order_type = $ride->service_type;
-
                 $tripDistanceMiles = $this->calculateDistance(
                     $ride->pickup_lat,
                     $ride->pickup_lng,
@@ -546,17 +512,7 @@ class AppDriverController extends Controller
                 $ride->distance_miles = round($tripDistanceMiles, 1);
                 $ride->pickup_distance_miles = $pickupDistanceMiles === null ? null : round($pickupDistanceMiles, 1);
                 $ride->duration_minutes = max(3, round($tripDistanceMiles * 2));
-                $serviceType = $ride->service_type ?: 'ride';
-                $ride->estimated_fare = round((float) $ride->fare * (PlatformCommissionSetting::driverSharePercentFor($serviceType) / 100), 2);
-
-                $attempt = DispatchAttempt::where('order_type', $serviceType)
-                    ->where('order_id', $ride->id)
-                    ->where('driver_id', $ride->driver_id ?: optional(Driver::where('user_id', Auth::id())->first())->id)
-                    ->where('status', 'pending')
-                    ->latest()
-                    ->first();
-
-                $ride->dispatch_attempt_id = $attempt?->id;
+                $ride->estimated_fare = round((float) $ride->fare * (PlatformCommissionSetting::driverSharePercentFor('ride') / 100), 2);
 
                 return $ride;
             })
@@ -607,28 +563,14 @@ class AppDriverController extends Controller
             ], 403);
         }
 
-        $attempt = DispatchAttempt::where('order_type', 'ride')
-            ->where('order_id', $ride->id)
-            ->where('driver_id', $driver->id)
-            ->where('status', 'pending')
-            ->latest()
-            ->first();
-
         if ($request->action === 'accept') {
             $ride->update([
                 'driver_id' => $driver->id,
                 'status' => 'accepted'
             ]);
 
-            if ($attempt) {
-                $attempt->update([
-                    'status' => 'accepted',
-                    'responded_at' => now(),
-                ]);
-            }
-
             try {
-                app(FirestoreRideSyncService::class)->sync($ride->fresh(), 'accepted');
+                app(FirestoreRideSyncService::class)->sync($ride, 'accepted');
             } catch (\Throwable $e) {
                 \Log::error('Firestore accepted sync failed', ['ride_id' => $ride->id, 'error' => $e->getMessage()]);
             }
@@ -637,13 +579,6 @@ class AppDriverController extends Controller
                 'status' => true,
                 'message' => 'Ride accepted successfully',
                 'data' => $ride->fresh(['rider', 'driver.user', 'vehicleType'])
-            ]);
-        }
-
-        if ($attempt) {
-            $attempt->update([
-                'status' => 'rejected',
-                'responded_at' => now(),
             ]);
         }
 
@@ -656,76 +591,6 @@ class AppDriverController extends Controller
     /**
      * Update Ride Status (arrived, in_progress, completed)
      */
-
-    public function uploadCourierProof(Request $request, $id)
-    {
-        $request->validate([
-            'type' => 'required|in:pickup,delivery',
-            'photo' => 'required|image|max:5120',
-        ]);
-
-        $authId = auth()->id();
-
-        $driverId = $authId;
-        if (auth()->user()) {
-            $driver = \App\Models\Driver::where('user_id', $authId)->first();
-            if ($driver) {
-                $driverId = $driver->id;
-            }
-        }
-
-        \Log::info('COURIER PROOF DEBUG', [
-            'ride_id' => $id,
-            'auth_id' => $authId,
-            'driver_id_used' => $driverId,
-            'type' => $request->type,
-        ]);
-
-        $ride = \App\Models\Ride::where('id', $id)
-            ->where('driver_id', $driverId)
-            ->where('service_type', 'courier')
-            ->first();
-
-        if (!$ride) {
-            $existing = \App\Models\Ride::find($id);
-
-            \Log::warning('COURIER PROOF NOT FOUND', [
-                'ride_id' => $id,
-                'auth_id' => $authId,
-                'driver_id_used' => $driverId,
-                'existing_driver_id' => $existing ? $existing->driver_id : null,
-                'existing_service_type' => $existing ? $existing->service_type : null,
-                'existing_status' => $existing ? $existing->status : null,
-            ]);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Courier job not found',
-            ], 404);
-        }
-
-        $folder = $request->type === 'pickup'
-            ? 'courier_pickup_proofs'
-            : 'courier_delivery_proofs';
-
-        $path = $request->file('photo')->store($folder, 'public');
-
-        if ($request->type === 'pickup') {
-            $ride->package_photo = $path;
-        } else {
-            $ride->proof_of_delivery = $path;
-        }
-
-        $ride->save();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Courier proof uploaded',
-            'data' => $ride,
-            'photo_url' => asset('storage/' . $path),
-        ]);
-    }
-
     public function updateRideStatus(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [

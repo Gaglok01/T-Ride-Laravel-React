@@ -218,26 +218,6 @@ class AppCourierController extends Controller
             'payment_status' => 'pending',
         ]);
 
-        try {
-            app(\App\Services\FirestoreRideSyncService::class)->sync($ride, 'searching');
-        } catch (\Throwable $e) {
-            \Log::error('Firestore courier searching sync failed', [
-                'ride_id' => $ride->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        try {
-            app(\App\Http\Controllers\Api\DispatchController::class)->autoAssign(
-                new Request(['dry_run' => false])
-            );
-        } catch (\Throwable $e) {
-            \Log::error('Auto dispatch after courier request failed', [
-                'ride_id' => $ride->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Courier request created successfully',

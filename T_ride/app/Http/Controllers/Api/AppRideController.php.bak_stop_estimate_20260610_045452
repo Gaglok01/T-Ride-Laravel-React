@@ -26,8 +26,6 @@ class AppRideController extends Controller
         $validator = Validator::make($request->all(), [
             'pickup_lat' => 'required|numeric',
             'pickup_lng' => 'required|numeric',
-            'stop_lat' => 'nullable|numeric',
-            'stop_lng' => 'nullable|numeric',
             'dropoff_lat' => 'required|numeric',
             'dropoff_lng' => 'required|numeric',
         ]);
@@ -36,26 +34,12 @@ class AppRideController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
 
-        if ($request->filled('stop_lat') && $request->filled('stop_lng')) {
-            $distanceKm = $this->calculateDistance(
-                $request->pickup_lat,
-                $request->pickup_lng,
-                $request->stop_lat,
-                $request->stop_lng
-            ) + $this->calculateDistance(
-                $request->stop_lat,
-                $request->stop_lng,
-                $request->dropoff_lat,
-                $request->dropoff_lng
-            );
-        } else {
-            $distanceKm = $this->calculateDistance(
-                $request->pickup_lat,
-                $request->pickup_lng,
-                $request->dropoff_lat,
-                $request->dropoff_lng
-            );
-        }
+        $distanceKm = $this->calculateDistance(
+            $request->pickup_lat,
+            $request->pickup_lng,
+            $request->dropoff_lat,
+            $request->dropoff_lng
+        );
 
         // USA pricing uses miles. Other countries can keep kilometers later.
         $distance = $distanceKm * 0.621371;

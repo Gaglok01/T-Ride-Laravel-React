@@ -45,15 +45,6 @@ class FirestoreRideSyncService
                 'latitude' => (float) $ride->pickup_lat,
                 'longitude' => (float) $ride->pickup_lng,
             ],
-            'stop' => $ride->stop_lat && $ride->stop_lng ? [
-                'address' => $ride->stop_address,
-                'latitude' => (float) $ride->stop_lat,
-                'longitude' => (float) $ride->stop_lng,
-            ] : null,
-            'stop_address' => $ride->stop_address,
-            'stop_lat' => $ride->stop_lat ? (float) $ride->stop_lat : null,
-            'stop_lng' => $ride->stop_lng ? (float) $ride->stop_lng : null,
-
             'dropoff' => [
                 'address' => $ride->dropoff_address,
                 'latitude' => (float) $ride->dropoff_lat,
