@@ -11,8 +11,6 @@ use App\Models\DispatchAttempt;
 use App\Models\DispatchSetting;
 use App\Models\PlatformCommissionSetting;
 use App\Models\WalletTransaction;
-use App\Models\DriverChallenge;
-use App\Models\DriverChallengeParticipant;
 use App\Models\ServiceZone;
 use App\Models\DocumentQueueItem;
 use App\Models\User;
@@ -21,7 +19,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Services\DocumentParserService;
-use App\Services\FaceDetectionService;
 
 class AppDriverController extends Controller
 {
@@ -101,61 +98,12 @@ class AppDriverController extends Controller
 
         foreach ($fileFields as $field) {
             if ($request->hasFile($field)) {
-                $existingQueueItem = DocumentQueueItem::where('driver_id', $driver->id)
-                    ->where('document_type', $field)
-                    ->latest()
-                    ->first();
-
-                if ($existingQueueItem && in_array($existingQueueItem->status, [
-                    'pending',
-                    'pending_review',
-                    'manual_review',
-                    'approved',
-                    'verified',
-                ])) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => ucfirst(str_replace('_', ' ', $field)) . ' has already been submitted and cannot be changed from the app.',
-                        'document_type' => $field,
-                        'document_status' => $existingQueueItem->status,
-                    ], 409);
-                }
-
                 $path = $request->file($field)->store('driver_docs', 'public');
 
                 if ($field === 'image') {
                     $driver->image = $path;
                 } else {
                     $docs[$field] = $path;
-                }
-
-                // Auto parse uploaded documents and decide review status.
-                $parser = new DocumentParserService();
-
-                $ocrText = '';
-                $parsed = [];
-                $autoStatus = 'pending_review';
-                $rejectionReason = null;
-
-                if ($field === 'image') {
-                    $face = (new FaceDetectionService())->analyzeProfilePhoto($path);
-                    $autoStatus = $face['status'] ?? 'pending_review';
-                    $rejectionReason = $face['reason'] ?? null;
-                    $parsed = [
-                        '_face_detection' => $face,
-                    ];
-                } else {
-                    $ocrText = $parser->extractTextFromStoragePath($path);
-                    $parsed = $parser->parseText($ocrText);
-
-                    if (!empty($parsed['_document_rejected'])) {
-                        $autoStatus = 'rejected';
-                        $rejectionReason = $parsed['_rejection_reason'] ?? 'Invalid document';
-                    } elseif (!empty($parsed)) {
-                        $autoStatus = 'approved';
-                    } else {
-                        $autoStatus = 'pending_review';
-                    }
                 }
 
                 DocumentQueueItem::updateOrCreate(
@@ -166,21 +114,27 @@ class AppDriverController extends Controller
                     [
                         'file_path' => $path,
                         'city' => $driver->city ?? null,
-                        'status' => $autoStatus,
-                        'rejection_reason' => $rejectionReason,
+                        'status' => 'pending',
+                        'rejection_reason' => null,
                     ]
                 );
 
-                if (!empty($parsed) && empty($parsed['_document_rejected'])) {
+                // Auto parse uploaded documents
+                $parser = new DocumentParserService();
+
+                $ocrText = $parser->extractTextFromStoragePath($path);
+
+                $parsed = $parser->parseText($ocrText);
+
+                if (!empty($parsed)) {
                     $driver->forceFill($parsed);
 
                     $existingParsed = $driver->parsed_documents ?? [];
-                    $existingParsed[$field] = array_merge($parsed, [
-                        '_ocr_status' => $autoStatus,
-                        '_ocr_text_sample' => substr($ocrText, 0, 500),
-                    ]);
+
+                    $existingParsed[$field] = $parsed;
 
                     $driver->parsed_documents = $existingParsed;
+
                     $driver->save();
                 }
             }
@@ -292,26 +246,6 @@ class AppDriverController extends Controller
                     'documents_approved' => $requiredDocsApproved,
                     'background_check_approved' => $backgroundCheckApproved,
                     'admin_override' => (bool) $driver->admin_override,
-
-                    // T-Ride earning category eligibility
-                    // Courier/Delivery unlock after vehicle registration + insurance are valid.
-                    'can_courier' => isset($documentStatuses['vehicle_registration'], $documentStatuses['insurance'])
-                        && in_array($documentStatuses['vehicle_registration'], ['approved', 'verified'])
-                        && in_array($documentStatuses['insurance'], ['approved', 'verified']),
-                    'can_delivery' => isset($documentStatuses['vehicle_registration'], $documentStatuses['insurance'])
-                        && in_array($documentStatuses['vehicle_registration'], ['approved', 'verified'])
-                        && in_array($documentStatuses['insurance'], ['approved', 'verified']),
-
-                    // Ride/T-Go unlock only after full verification.
-                    'can_t_go' => $requiredDocsApproved && $backgroundCheckApproved,
-
-                    // V1 conservative defaults. Later OCR/admin rules will upgrade these.
-                    'can_pooling' => false,
-                    'can_t_xl' => false,
-                    'can_t_comfort' => false,
-                    'can_medical_courier' => false,
-                    'can_medical_transport' => false,
-                    'can_premium' => false,
                 ],
             ], 422);
         }
@@ -519,26 +453,6 @@ class AppDriverController extends Controller
                     'documents_approved' => $requiredDocsApproved,
                     'background_check_approved' => $backgroundCheckApproved,
                     'admin_override' => (bool) $driver->admin_override,
-
-                    // T-Ride earning category eligibility
-                    // Courier/Delivery unlock after vehicle registration + insurance are valid.
-                    'can_courier' => isset($documentStatuses['vehicle_registration'], $documentStatuses['insurance'])
-                        && in_array($documentStatuses['vehicle_registration'], ['approved', 'verified'])
-                        && in_array($documentStatuses['insurance'], ['approved', 'verified']),
-                    'can_delivery' => isset($documentStatuses['vehicle_registration'], $documentStatuses['insurance'])
-                        && in_array($documentStatuses['vehicle_registration'], ['approved', 'verified'])
-                        && in_array($documentStatuses['insurance'], ['approved', 'verified']),
-
-                    // Ride/T-Go unlock only after full verification.
-                    'can_t_go' => $requiredDocsApproved && $backgroundCheckApproved,
-
-                    // V1 conservative defaults. Later OCR/admin rules will upgrade these.
-                    'can_pooling' => false,
-                    'can_t_xl' => false,
-                    'can_t_comfort' => false,
-                    'can_medical_courier' => false,
-                    'can_medical_transport' => false,
-                    'can_premium' => false,
                 ],
 
                 'earnings' => [
@@ -870,9 +784,6 @@ class AppDriverController extends Controller
 
         if ($next === 'completed') {
             $freshRide = $ride->fresh();
-
-            $this->updateDriverChallengeProgress($driver, $freshRide);
-
             $driverUser = $driver->user;
 
             if ($driverUser) {
@@ -1006,71 +917,6 @@ class AppDriverController extends Controller
             'message' => 'Preferences updated successfully',
             'data' => $driver
         ]);
-    }
-
-
-    private function updateDriverChallengeProgress($driver, $ride): void
-    {
-        if (!$driver || !$ride) {
-            return;
-        }
-
-        $now = now();
-        $serviceType = $ride->service_type ?: 'ride';
-
-        $challenges = DriverChallenge::where('status', 'active')
-            ->where('challenge_type', 'rides')
-            ->where(function ($q) use ($now) {
-                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
-            })
-            ->where(function ($q) use ($now) {
-                $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
-            })
-            ->where(function ($q) use ($serviceType) {
-                $q->where('service_type', 'all')
-                  ->orWhere('service_type', $serviceType);
-            })
-            ->where(function ($q) use ($driver) {
-                $q->whereNull('type_id')
-                  ->orWhere('type_id', $driver->type_id);
-            })
-            ->get();
-
-        foreach ($challenges as $challenge) {
-            $participant = DriverChallengeParticipant::where('driver_id', $driver->id)
-                ->where('challenge_id', $challenge->id)
-                ->whereNull('claimed_at')
-                ->first();
-
-            if (!$participant) {
-                continue;
-            }
-
-            if ($participant->joined_at && $ride->completed_at && $ride->completed_at < $participant->joined_at) {
-                continue;
-            }
-
-            if ($participant->completed_at) {
-                continue;
-            }
-
-            $participant->current_progress = ((int) $participant->current_progress) + 1;
-
-            if ((int) $participant->current_progress >= (int) $challenge->target_value) {
-                $participant->completed_at = now();
-            }
-
-            $participant->save();
-
-            \Log::info('T-RIDE CHALLENGE PROGRESS UPDATED', [
-                'driver_id' => $driver->id,
-                'ride_id' => $ride->id,
-                'challenge_id' => $challenge->id,
-                'progress' => $participant->current_progress,
-                'target' => $challenge->target_value,
-                'completed_at' => $participant->completed_at,
-            ]);
-        }
     }
 
 

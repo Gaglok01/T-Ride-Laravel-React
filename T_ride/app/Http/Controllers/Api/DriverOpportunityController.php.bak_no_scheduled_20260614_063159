@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\DriverPromotion;
+use App\Models\DriverChallenge;
+use App\Models\Ride;
+use Illuminate\Support\Facades\Auth;
+
+class DriverOpportunityController extends Controller
+{
+    public function index()
+    {
+        $now = now();
+
+        $promotions = DriverPromotion::where('status', 'active')
+            ->where(function ($q) use ($now) {
+                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+            })
+            ->orderBy('ends_at')
+            ->limit(10)
+            ->get();
+
+        $challenges = DriverChallenge::where('status', 'active')
+            ->where(function ($q) use ($now) {
+                $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+            })
+            ->orderBy('ends_at')
+            ->limit(10)
+            ->get();
+
+        $scheduledRides = Ride::whereNotNull('scheduled_at')
+            ->where('scheduled_at', '>=', $now)
+            ->whereIn('status', ['requested', 'pending', 'accepted'])
+            ->orderBy('scheduled_at')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'promotions_count' => $promotions->count(),
+                'challenges_count' => $challenges->count(),
+                'scheduled_count' => $scheduledRides->count(),
+                'promotions' => $promotions,
+                'challenges' => $challenges,
+                'scheduled_rides' => $scheduledRides,
+            ],
+        ]);
+    }
+}

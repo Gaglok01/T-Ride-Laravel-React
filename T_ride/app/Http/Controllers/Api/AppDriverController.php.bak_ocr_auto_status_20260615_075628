@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Services\DocumentParserService;
-use App\Services\FaceDetectionService;
 
 class AppDriverController extends Controller
 {
@@ -129,35 +128,6 @@ class AppDriverController extends Controller
                     $docs[$field] = $path;
                 }
 
-                // Auto parse uploaded documents and decide review status.
-                $parser = new DocumentParserService();
-
-                $ocrText = '';
-                $parsed = [];
-                $autoStatus = 'pending_review';
-                $rejectionReason = null;
-
-                if ($field === 'image') {
-                    $face = (new FaceDetectionService())->analyzeProfilePhoto($path);
-                    $autoStatus = $face['status'] ?? 'pending_review';
-                    $rejectionReason = $face['reason'] ?? null;
-                    $parsed = [
-                        '_face_detection' => $face,
-                    ];
-                } else {
-                    $ocrText = $parser->extractTextFromStoragePath($path);
-                    $parsed = $parser->parseText($ocrText);
-
-                    if (!empty($parsed['_document_rejected'])) {
-                        $autoStatus = 'rejected';
-                        $rejectionReason = $parsed['_rejection_reason'] ?? 'Invalid document';
-                    } elseif (!empty($parsed)) {
-                        $autoStatus = 'approved';
-                    } else {
-                        $autoStatus = 'pending_review';
-                    }
-                }
-
                 DocumentQueueItem::updateOrCreate(
                     [
                         'driver_id' => $driver->id,
@@ -166,21 +136,27 @@ class AppDriverController extends Controller
                     [
                         'file_path' => $path,
                         'city' => $driver->city ?? null,
-                        'status' => $autoStatus,
-                        'rejection_reason' => $rejectionReason,
+                        'status' => 'pending',
+                        'rejection_reason' => null,
                     ]
                 );
 
-                if (!empty($parsed) && empty($parsed['_document_rejected'])) {
+                // Auto parse uploaded documents
+                $parser = new DocumentParserService();
+
+                $ocrText = $parser->extractTextFromStoragePath($path);
+
+                $parsed = $parser->parseText($ocrText);
+
+                if (!empty($parsed)) {
                     $driver->forceFill($parsed);
 
                     $existingParsed = $driver->parsed_documents ?? [];
-                    $existingParsed[$field] = array_merge($parsed, [
-                        '_ocr_status' => $autoStatus,
-                        '_ocr_text_sample' => substr($ocrText, 0, 500),
-                    ]);
+
+                    $existingParsed[$field] = $parsed;
 
                     $driver->parsed_documents = $existingParsed;
+
                     $driver->save();
                 }
             }

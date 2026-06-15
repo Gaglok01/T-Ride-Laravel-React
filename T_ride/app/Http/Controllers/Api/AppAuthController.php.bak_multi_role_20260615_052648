@@ -91,6 +91,13 @@ class AppAuthController extends Controller
             $column = 'whatsapp_number';
         }
 
+        if (User::where($column, $identifier)->exists()) {
+            return response()->json([
+                'status' => false,
+                'message' => ucfirst($method) . ' already registered'
+            ], 409);
+        }
+
         $otp = rand(1000, 9999);
 
         Otp::updateOrCreate(
@@ -187,6 +194,13 @@ class AppAuthController extends Controller
             ], 422);
         }
 
+        if (User::where($column, $otp->identifier)->exists()) {
+            return response()->json([
+                'status' => false,
+                'message' => ucfirst($otp->method) . ' already registered'
+            ], 409);
+        }
+
         try {
             $user = \Illuminate\Support\Facades\DB::transaction(function () use ($request, $otp, $column) {
                 $data = [
@@ -207,42 +221,12 @@ class AppAuthController extends Controller
                     $data['photo'] = $photoName;
                 }
 
-                $user = User::where($column, $otp->identifier)->first();
-
-                if ($user) {
-                    $updateData = [
-                        'name' => $request->name ?: $user->name,
-                        'language_id' => $request->language_id ?: $user->language_id,
-                        'address' => $user->address ?: $request->address,
-                        'city' => $user->city ?: $request->city,
-                        'region' => $user->region ?: $request->region,
-                        'status' => $user->status ?: 'active',
-                    ];
-
-                    $updateData['password'] = Hash::make($request->password);
-
-                    if (isset($data['photo'])) {
-                        $updateData['photo'] = $data['photo'];
-                    }
-
-                    $user->update(array_filter($updateData, fn($v) => !is_null($v)));
-                } else {
-                    $user = User::create($data);
-                }
-
+                $user = User::create($data);
                 $roleName = strtolower($request->role);
-                $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'api']);
-                if (!$user->hasRole($roleName)) {
-                    $user->assignRole($role);
-                }
+$role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'api']);
+$user->assignRole($role);
 
                 if (strtolower($request->role) === 'driver') {
-                    $existingDriver = \App\Models\Driver::where('user_id', $user->id)->first();
-
-                    if ($existingDriver) {
-                        throw new \Exception('Driver profile already exists for this account.');
-                    }
-
                     \App\Models\Driver::create([
                         'user_id' => $user->id,
                         'driver_id' => 'DRV-' . $user->id,
@@ -281,14 +265,10 @@ class AppAuthController extends Controller
                 'message' => $e->getMessage()
             ]);
 
-            $message = $e->getMessage() === 'Driver profile already exists for this account.'
-                ? $e->getMessage()
-                : 'Registration failed. Please try again.';
-
             return response()->json([
                 'status' => false,
-                'message' => $message
-            ], $e->getMessage() === 'Driver profile already exists for this account.' ? 409 : 500);
+                'message' => 'Registration failed. Please try again.'
+            ], 500);
         }
     }
 

@@ -1,0 +1,108 @@
+import { useEffect, useState } from "react"
+import { AdminLayout } from "@/layouts/admin-layout"
+import axios from "@/lib/axios"
+import { Button } from "@/components/ui/button"
+import { Plus, RefreshCw, Trophy, Zap } from "lucide-react"
+
+export default function DriverOpportunitiesPage() {
+  const [promotions, setPromotions] = useState<any[]>([])
+  const [challenges, setChallenges] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const [promoRes, challengeRes] = await Promise.all([
+        axios.get("/admin/driver-promotions"),
+        axios.get("/admin/driver-challenges"),
+      ])
+      setPromotions(promoRes.data?.data?.data || [])
+      setChallenges(challengeRes.data?.data?.data || [])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  return (
+    <AdminLayout
+      title="Driver Opportunities"
+      description="Manage driver promotions, bonuses, and challenges"
+      actions={
+        <Button onClick={fetchData} variant="secondary">
+          <RefreshCw size={18} className="mr-2" />
+          Refresh
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section className="bg-tride-card border border-tride-border rounded-2xl p-6">
+          <h2 className="text-xl font-bold text-tride-text flex items-center gap-2 mb-1">
+            <Zap className="text-yellow-500" /> Driver Promotions
+          </h2>
+          <p className="text-sm text-tride-text-muted mb-5">
+            Bonuses like Weekend Rush or Airport Boost.
+          </p>
+
+          {loading ? <p>Loading...</p> : promotions.length === 0 ? (
+            <p className="text-tride-text-muted">No driver promotions yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {promotions.map((item) => (
+                <div key={item.id} className="border border-tride-border rounded-xl p-4">
+                  <div className="flex justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-tride-text">{item.title}</h3>
+                      <p className="text-sm text-tride-text-muted">{item.description}</p>
+                    </div>
+                    <span className="font-bold text-green-500">
+                      ${Number(item.reward_amount || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-tride-text-muted mt-2">
+                    Target: {item.target_rides} rides · Status: {item.status}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="bg-tride-card border border-tride-border rounded-2xl p-6">
+          <h2 className="text-xl font-bold text-tride-text flex items-center gap-2 mb-1">
+            <Trophy className="text-orange-500" /> Driver Challenges
+          </h2>
+          <p className="text-sm text-tride-text-muted mb-5">
+            Goals like Early Bird, Courier Beast, or Weekly Warrior.
+          </p>
+
+          {loading ? <p>Loading...</p> : challenges.length === 0 ? (
+            <p className="text-tride-text-muted">No driver challenges yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {challenges.map((item) => (
+                <div key={item.id} className="border border-tride-border rounded-xl p-4">
+                  <div className="flex justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-tride-text">{item.title}</h3>
+                      <p className="text-sm text-tride-text-muted">{item.description}</p>
+                    </div>
+                    <span className="font-bold text-green-500">
+                      ${Number(item.reward_amount || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-tride-text-muted mt-2">
+                    Target: {item.target_value} {item.challenge_type} · Status: {item.status}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </AdminLayout>
+  )
+}

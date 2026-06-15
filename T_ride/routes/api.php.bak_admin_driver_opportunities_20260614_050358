@@ -14,9 +14,6 @@ use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\RideController;
 use App\Http\Controllers\Api\PromotionController;
 use App\Http\Controllers\Api\DriverOpportunityController;
-use App\Http\Controllers\Api\AdminDriverChallengeController;
-use App\Http\Controllers\Api\AdminChallengeProgressController;
-use App\Http\Controllers\Api\AdminDriverPromotionController;
 use App\Http\Controllers\Api\DeliveryOrderController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PaymentGatewayController;
@@ -35,9 +32,7 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->prefix('app/driver')->group(function () {
-    Route::get('/opportunities', [DriverOpportunityController::class, 'index']);
-    Route::post('/challenges/{id}/join', [DriverOpportunityController::class, 'joinChallenge']);
-    Route::post('/challenges/{id}/claim', [DriverOpportunityController::class, 'claimChallenge']);
+        Route::get('/opportunities', [DriverOpportunityController::class, 'index']);
     Route::post('/preferences', [AppDriverController::class, 'updatePreferences']);
 });
 
@@ -117,19 +112,6 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/rent-payments', [RentController::class, 'payments']);
         Route::get('/contracts', [RentController::class, 'allContracts']);
         Route::get('/maintenance', [RentController::class, 'maintenanceIndex']);
-
-
-        Route::get('/driver-promotions', [AdminDriverPromotionController::class, 'index']);
-        Route::post('/driver-promotions', [AdminDriverPromotionController::class, 'store']);
-        Route::put('/driver-promotions/{id}', [AdminDriverPromotionController::class, 'update']);
-        Route::delete('/driver-promotions/{id}', [AdminDriverPromotionController::class, 'destroy']);
-
-        Route::get('/driver-challenges', [AdminDriverChallengeController::class, 'index']);
-        Route::get('/driver-challenges/{id}/progress', [AdminChallengeProgressController::class, 'show']);
-        Route::post('/driver-challenges', [AdminDriverChallengeController::class, 'store']);
-        Route::put('/driver-challenges/{id}', [AdminDriverChallengeController::class, 'update']);
-        Route::delete('/driver-challenges/{id}', [AdminDriverChallengeController::class, 'destroy']);
-
 
         // Promotion Management
         Route::get('/promotions/stats', [PromotionController::class, 'getStats']);

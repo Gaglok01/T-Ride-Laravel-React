@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\DriverChallenge;
+use Illuminate\Http\Request;
+
+class AdminDriverChallengeController extends Controller
+{
+    public function index()
+    {
+        return response()->json([
+            'status' => true,
+            'data' => DriverChallenge::latest()->paginate(20),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'reward_amount' => 'required|numeric|min:0',
+            'challenge_type' => 'nullable|string',
+            'target_value' => 'required|integer|min:0',
+            'starts_at' => 'nullable|date',
+            'ends_at' => 'nullable|date',
+            'status' => 'nullable|in:active,paused,expired',
+        ]);
+
+        $challenge = DriverChallenge::create($data);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Driver challenge created successfully',
+            'data' => $challenge,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $challenge = DriverChallenge::findOrFail($id);
+
+        $data = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'reward_amount' => 'sometimes|numeric|min:0',
+            'challenge_type' => 'nullable|string',
+            'target_value' => 'sometimes|integer|min:0',
+            'starts_at' => 'nullable|date',
+            'ends_at' => 'nullable|date',
+            'status' => 'nullable|in:active,paused,expired',
+        ]);
+
+        $challenge->update($data);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Driver challenge updated successfully',
+            'data' => $challenge->refresh(),
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        DriverChallenge::findOrFail($id)->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Driver challenge deleted successfully',
+        ]);
+    }
+}

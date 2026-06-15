@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Services\DocumentParserService;
-use App\Services\FaceDetectionService;
 
 class AppDriverController extends Controller
 {
@@ -138,12 +137,8 @@ class AppDriverController extends Controller
                 $rejectionReason = null;
 
                 if ($field === 'image') {
-                    $face = (new FaceDetectionService())->analyzeProfilePhoto($path);
-                    $autoStatus = $face['status'] ?? 'pending_review';
-                    $rejectionReason = $face['reason'] ?? null;
-                    $parsed = [
-                        '_face_detection' => $face,
-                    ];
+                    // Until real face detection is connected, do not auto-approve profile photos.
+                    $autoStatus = 'pending_review';
                 } else {
                     $ocrText = $parser->extractTextFromStoragePath($path);
                     $parsed = $parser->parseText($ocrText);

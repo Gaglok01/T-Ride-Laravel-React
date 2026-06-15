@@ -237,3 +237,7 @@ Route::get('/cache-clear', function () {
 });
 
 require __DIR__.'/settings.php';
+
+Route::get('/admin/driver-opportunities', function () {
+    return Inertia::render('admin/driver-opportunities');
+})->name('admin.driver-opportunities');

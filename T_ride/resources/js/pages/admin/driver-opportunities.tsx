@@ -1,0 +1,484 @@
+import { useEffect, useState } from "react"
+import { AdminLayout } from "@/layouts/admin-layout"
+import axios from "@/lib/axios"
+import { Button } from "@/components/ui/button"
+import { Edit, Eye, Plus, RefreshCw, Trash2, Trophy, Zap } from "lucide-react"
+
+type Mode = "promotion" | "challenge"
+
+const emptyForm = {
+  title: "",
+  description: "",
+  reward_amount: "",
+  target_rides: "",
+  target_value: "",
+  service_type: "all",
+  type_id: "",
+  challenge_type: "rides",
+  starts_at: "",
+  ends_at: "",
+  status: "active",
+}
+
+export default function DriverOpportunitiesPage() {
+  const [promotions, setPromotions] = useState<any[]>([])
+  const [challenges, setChallenges] = useState<any[]>([])
+  const [vehicleTypes, setVehicleTypes] = useState<any[]>([
+    { id: 3, type_name: "T-Go", service_type: "ride" },
+    { id: 4, type_name: "Delivery", service_type: "delivery" },
+    { id: 5, type_name: "Courier", service_type: "courier" },
+    { id: 6, type_name: "khan courier", service_type: "courier" },
+    { id: 7, type_name: "T-Elite", service_type: "ride" },
+    { id: 8, type_name: "T-XL", service_type: "ride" },
+    { id: 9, type_name: "T-Comfort", service_type: "ride" },
+  ])
+  const [loading, setLoading] = useState(true)
+  const [modalMode, setModalMode] = useState<Mode | null>(null)
+  const [editing, setEditing] = useState<any | null>(null)
+  const [form, setForm] = useState<any>(emptyForm)
+  const [progressModal, setProgressModal] = useState<any | null>(null)
+  const [progressLoading, setProgressLoading] = useState(false)
+
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const [promoRes, challengeRes] = await Promise.all([
+        axios.get("/admin/driver-promotions"),
+        axios.get("/admin/driver-challenges"),
+      ])
+
+      setPromotions(promoRes.data?.data?.data || [])
+      setChallenges(challengeRes.data?.data?.data || [])
+
+      try {
+        const typeRes = await axios.get("/admin/types")
+        const raw = typeRes.data?.data?.data || typeRes.data?.data || []
+        setVehicleTypes(Array.isArray(raw) ? raw : [])
+      } catch (e) {
+        console.warn("Vehicle types failed", e)
+        // keep fallback vehicle types
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const openCreate = (mode: Mode) => {
+    setModalMode(mode)
+    setEditing(null)
+    setForm(emptyForm)
+  }
+
+  const openEdit = (mode: Mode, item: any) => {
+    setModalMode(mode)
+    setEditing(item)
+    setForm({
+      ...emptyForm,
+      ...item,
+      reward_amount: item.reward_amount ?? "",
+      target_rides: item.target_rides ?? "",
+      target_value: item.target_value ?? "",
+      service_type: item.service_type ?? "all",
+      type_id: item.type_id ?? "",
+      starts_at: item.starts_at ? String(item.starts_at).slice(0, 16) : "",
+      ends_at: item.ends_at ? String(item.ends_at).slice(0, 16) : "",
+    })
+  }
+
+  const closeModal = () => {
+    setModalMode(null)
+    setEditing(null)
+    setForm(emptyForm)
+  }
+
+  const save = async () => {
+    if (!modalMode) return
+
+    const isPromo = modalMode === "promotion"
+    const endpoint = isPromo ? "/admin/driver-promotions" : "/admin/driver-challenges"
+
+    const payload: any = {
+      title: form.title,
+      description: form.description,
+      reward_amount: Number(form.reward_amount || 0),
+      starts_at: form.starts_at || null,
+      ends_at: form.ends_at || null,
+      status: form.status || "active",
+    }
+
+    if (isPromo) {
+      payload.target_rides = Number(form.target_rides || 0)
+      payload.service_type = form.service_type || "all"
+    } else {
+      payload.target_value = Number(form.target_value || 0)
+      payload.challenge_type = form.challenge_type || "rides"
+      payload.service_type = form.service_type || "all"
+      payload.type_id = form.type_id || null
+    }
+
+    if (editing) {
+      await axios.put(`${endpoint}/${editing.id}`, payload)
+    } else {
+      await axios.post(endpoint, payload)
+    }
+
+    closeModal()
+    fetchData()
+  }
+
+  const remove = async (mode: Mode, item: any) => {
+    if (!confirm(`Delete "${item.title}"?`)) return
+    const endpoint = mode === "promotion" ? "/admin/driver-promotions" : "/admin/driver-challenges"
+    await axios.delete(`${endpoint}/${item.id}`)
+    fetchData()
+  }
+
+  const toggleStatus = async (mode: Mode, item: any) => {
+    const endpoint = mode === "promotion" ? "/admin/driver-promotions" : "/admin/driver-challenges"
+    const nextStatus = item.status === "active" ? "paused" : "active"
+    await axios.put(`${endpoint}/${item.id}`, { status: nextStatus })
+    fetchData()
+  }
+
+
+  const openProgress = async (item: any) => {
+    setProgressLoading(true)
+    setProgressModal({ challenge: item, stats: null, participants_data: [] })
+
+    try {
+      const res = await axios.get(`/admin/driver-challenges/${item.id}/progress`)
+      setProgressModal(res.data)
+    } catch (e) {
+      console.error("Unable to load challenge progress", e)
+      setProgressModal({
+        challenge: item,
+        stats: { participants: 0, completed: 0, claimed: 0 },
+        participants_data: [],
+        error: "Unable to load progress",
+      })
+    } finally {
+      setProgressLoading(false)
+    }
+  }
+
+  return (
+    <AdminLayout
+      title="Driver Opportunities"
+      description="Manage driver promotions, bonuses, and challenges"
+      actions={
+        <Button onClick={fetchData} variant="secondary">
+          <RefreshCw size={18} className="mr-2" />
+          Refresh
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <OpportunitySection
+          title="Driver Promotions"
+          subtitle="Bonuses like Weekend Rush or Airport Boost."
+          icon={<Zap className="text-yellow-500" />}
+          items={promotions}
+          loading={loading}
+          mode="promotion"
+         
+          onCreate={() => openCreate("promotion")}
+          onEdit={(item: any) => openEdit("promotion", item)}
+          onDelete={(item: any) => remove("promotion", item)}
+          onToggle={(item: any) => toggleStatus("promotion", item)}
+        />
+
+        <OpportunitySection
+          title="Driver Challenges"
+          subtitle="Goals like Early Bird, Courier Beast, or Weekly Warrior."
+          icon={<Trophy className="text-orange-500" />}
+          items={challenges}
+          loading={loading}
+          mode="challenge"
+         
+          onCreate={() => openCreate("challenge")}
+          onEdit={(item: any) => openEdit("challenge", item)}
+          onDelete={(item: any) => remove("challenge", item)}
+          onToggle={(item: any) => toggleStatus("challenge", item)}
+          onProgress={(item: any) => openProgress(item)}
+        />
+      </div>
+
+
+      {progressModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-tride-card border border-tride-border rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 pb-3 border-b border-tride-border flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold">
+                  Challenge Progress
+                </h2>
+                <p className="text-sm text-tride-text-muted">
+                  {progressModal.challenge?.title || progressModal.challenge?.id}
+                </p>
+              </div>
+              <Button variant="secondary" onClick={() => setProgressModal(null)}>Close</Button>
+            </div>
+
+            <div className="p-6 overflow-y-auto">
+              {progressLoading ? (
+                <p>Loading progress...</p>
+              ) : progressModal.error ? (
+                <p className="text-red-500">{progressModal.error}</p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-3 mb-5">
+                    <div className="border border-tride-border rounded-xl p-4">
+                      <p className="text-xs text-tride-text-muted">Participants</p>
+                      <p className="text-2xl font-bold">{progressModal.stats?.participants || 0}</p>
+                    </div>
+                    <div className="border border-tride-border rounded-xl p-4">
+                      <p className="text-xs text-tride-text-muted">Completed</p>
+                      <p className="text-2xl font-bold">{progressModal.stats?.completed || 0}</p>
+                    </div>
+                    <div className="border border-tride-border rounded-xl p-4">
+                      <p className="text-xs text-tride-text-muted">Claimed</p>
+                      <p className="text-2xl font-bold">{progressModal.stats?.claimed || 0}</p>
+                    </div>
+                  </div>
+
+                  {(progressModal.participants_data || []).length === 0 ? (
+                    <p className="text-tride-text-muted">No drivers have joined this challenge yet.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(progressModal.participants_data || []).map((p: any) => (
+                        <div key={p.id} className="border border-tride-border rounded-xl p-4 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="font-bold text-tride-text">{p.name || `Driver ${p.driver_id}`}</p>
+                            <p className="text-xs text-tride-text-muted">
+                              Joined: {p.joined_at || "--"}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">
+                              Progress: {p.current_progress || 0}
+                            </p>
+                            <p className="text-xs text-tride-text-muted">
+                              {p.claimed_at ? "Claimed" : p.completed_at ? "Completed" : "In Progress"}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalMode && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-tride-card border border-tride-border rounded-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 pb-3 border-b border-tride-border">
+              <h2 className="text-xl font-bold">
+                {editing ? "Edit" : "New"} {modalMode === "promotion" ? "Promotion" : "Challenge"}
+              </h2>
+            </div>
+
+            <div className="p-6 grid grid-cols-1 gap-3 overflow-y-auto">
+              <Input label="Title" value={form.title} onChange={(v: string) => setForm({ ...form, title: v })} />
+              <Input label="Description" value={form.description} onChange={(v: string) => setForm({ ...form, description: v })} />
+              <Input label="Reward Amount" type="number" value={form.reward_amount} onChange={(v: string) => setForm({ ...form, reward_amount: v })} />
+
+              {modalMode === "promotion" ? (
+                <>
+                  <Input label="Target Rides" type="number" value={form.target_rides} onChange={(v: string) => setForm({ ...form, target_rides: v })} />
+                  <ServiceTypeSelect value={form.service_type} onChange={(v: string) => setForm({ ...form, service_type: v })} />
+                </>
+              ) : (
+                <>
+                  <Input label="Target Value" type="number" value={form.target_value} onChange={(v: string) => setForm({ ...form, target_value: v })} />
+                  <Input label="Challenge Type" value={form.challenge_type} onChange={(v: string) => setForm({ ...form, challenge_type: v })} />
+                  <ServiceTypeSelect value={form.service_type} onChange={(v: string) => setForm({ ...form, service_type: v })} />
+                  <VehicleTypeSelect value={form.type_id} onChange={(v: string) => setForm({ ...form, type_id: v })} />
+                </>
+              )}
+
+              <Input label="Starts At" type="datetime-local" value={form.starts_at} onChange={(v: string) => setForm({ ...form, starts_at: v })} />
+              <Input label="Ends At" type="datetime-local" value={form.ends_at} onChange={(v: string) => setForm({ ...form, ends_at: v })} />
+
+              <select
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                className="bg-tride-dark border border-tride-border rounded-xl px-4 py-3 text-tride-text"
+              >
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 pt-3 border-t border-tride-border bg-tride-card">
+              <Button variant="secondary" onClick={closeModal}>Cancel</Button>
+              <Button onClick={save}>{editing ? "Save Changes" : "Create"}</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AdminLayout>
+  )
+}
+
+function OpportunitySection({ title, subtitle, icon, items, loading, mode, vehicleTypes, onCreate, onEdit, onDelete, onToggle, onProgress }: any) {
+  return (
+    <section className="bg-tride-card border border-tride-border rounded-2xl p-6">
+      <div className="flex items-start justify-between gap-3 mb-5">
+        <div>
+          <h2 className="text-xl font-bold text-tride-text flex items-center gap-2 mb-1">
+            {icon} {title}
+          </h2>
+          <p className="text-sm text-tride-text-muted">{subtitle}</p>
+        </div>
+        <Button size="sm" onClick={onCreate}>
+          <Plus size={16} className="mr-2" />
+          New
+        </Button>
+      </div>
+
+      {loading ? <p>Loading...</p> : items.length === 0 ? (
+        <p className="text-tride-text-muted">No items yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {items.map((item: any) => (
+            <div key={item.id} className="border border-tride-border rounded-xl p-4">
+              <div className="flex justify-between gap-3">
+                <div>
+                  <h3 className="font-bold text-tride-text">{item.title}</h3>
+                  <p className="text-sm text-tride-text-muted">{item.description}</p>
+                </div>
+                <span className="font-bold text-green-500">
+                  ${Number(item.reward_amount || 0).toFixed(2)}
+                </span>
+              </div>
+
+              <p className="text-xs text-tride-text-muted mt-2">
+                {mode === "promotion"
+                  ? `Target: ${item.target_rides} rides`
+                  : `Target: ${item.target_value} ${item.challenge_type}`}
+                {" | "}
+                Status: {item.status}
+                {" | "}
+                Applies To: {serviceTypeLabel(item.service_type || "all")}
+                {mode === "challenge" && (
+                  <>
+                    {" | "}
+                    Vehicle: {vehicleTypeLabel(item.type_id, vehicleTypes)}
+                  </>
+                )}
+              </p>
+
+              <div className="flex flex-wrap gap-2 mt-4">
+                {mode === "challenge" && (
+                  <Button size="sm" variant="secondary" onClick={() => onProgress(item)}>
+                    <Eye size={14} className="mr-1" /> View Progress
+                  </Button>
+                )}
+                <Button size="sm" variant="secondary" onClick={() => onEdit(item)}>
+                  <Edit size={14} className="mr-1" /> Edit
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => onToggle(item)}>
+                  {item.status === "active" ? "Pause" : "Activate"}
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => onDelete(item)}>
+                  <Trash2 size={14} className="mr-1" /> Delete
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function serviceTypeLabel(value: string) {
+  switch (value) {
+    case "ride":
+      return "Ride Drivers"
+    case "courier":
+      return "Courier Drivers"
+    case "delivery":
+      return "Delivery Drivers"
+    case "all":
+    default:
+      return "All Drivers"
+  }
+}
+
+function vehicleTypeLabel(typeId: any, vehicleTypes: any[]) {
+  if (!typeId) return "All Vehicle Types"
+  const found = (vehicleTypes || []).find((t: any) => String(t.id) === String(typeId))
+  return found?.type_name || `Type ${typeId}`
+}
+
+function ServiceTypeSelect({ value, onChange }: any) {
+  return (
+    <label className="space-y-1">
+      <span className="text-xs font-bold text-tride-text-muted">Applies To</span>
+      <select
+        value={value || "all"}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-tride-dark border border-tride-border rounded-xl px-4 py-3 text-tride-text"
+      >
+        <option value="all">All Drivers</option>
+        <option value="ride">Ride Drivers</option>
+        <option value="courier">Courier Drivers</option>
+        <option value="delivery">Delivery Drivers</option>
+      </select>
+    </label>
+  )
+}
+
+function VehicleTypeSelect({ value, onChange }: any) {
+  const types = [
+    { id: 3, type_name: "T-Go", service_type: "ride" },
+    { id: 7, type_name: "T-Elite", service_type: "ride" },
+    { id: 8, type_name: "T-XL", service_type: "ride" },
+    { id: 9, type_name: "T-Comfort", service_type: "ride" },
+    { id: 4, type_name: "Delivery", service_type: "delivery" },
+    { id: 5, type_name: "Courier", service_type: "courier" },
+    { id: 6, type_name: "khan courier", service_type: "courier" },
+  ]
+
+  return (
+    <label className="space-y-1">
+      <span className="text-xs font-bold text-tride-text-muted">Vehicle Type</span>
+      <select
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-tride-dark border border-tride-border rounded-xl px-4 py-3 text-tride-text"
+      >
+        <option value="">All Vehicle Types</option>
+        {types.map((type: any) => (
+          <option key={type.id} value={type.id}>
+            {type.type_name} ({type.service_type})
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
+function Input({ label, value, onChange, type = "text" }: any) {
+  return (
+    <label className="space-y-1">
+      <span className="text-xs font-bold text-tride-text-muted">{label}</span>
+      <input
+        type={type}
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-tride-dark border border-tride-border rounded-xl px-4 py-3 text-tride-text"
+      />
+    </label>
+  )
+}
